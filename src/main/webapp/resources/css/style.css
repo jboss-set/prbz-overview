@@ -1,0 +1,59 @@
+@CHARSET "UTF-8";
+
+h2 {
+	font-size: 20px;
+	text-align: center;
+}
+
+.even-row {
+	background-color: #FCFFFE;
+}
+
+.odd-row {
+	background-color: #ECF3FE;
+}
+
+.active-row {
+	background-color: #FFEBDA !important;
+	cursor: pointer;
+}
+
+.each-row {
+	font-size: 20pt;
+	text-align: center;
+	color: red;
+}
+
+.last {
+	width: 250px;
+}
+
+#wrapper {
+   height: 100%;
+   position: relative;
+}
+
+#header {
+   height: 100px;
+   text-align: center;
+}
+
+#content {
+  width: 100%;
+}
+
+/*************************************************
+rich:dataScroller
+*************************************************/
+.pagination-center {
+	text-align: center;
+	display: block;
+}
+
+.text-center {
+	text-align: center;
+}
+
+/*************************************************
+rich:dataTable columns
+*************************************************/

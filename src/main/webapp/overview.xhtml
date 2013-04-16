@@ -1,0 +1,147 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<ui:composition template="/templates/template.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:a4j="http://richfaces.org/a4j"
+	xmlns:rich="http://richfaces.org/rich">
+
+	<ui:define name="title">RichFaces PullRequest Bugzilla Overview</ui:define>
+
+	<ui:define name="body">
+		<h:outputStylesheet library="css" name="style.css" />
+
+		<div id="wrapper">
+
+			<div id="header">
+				<h:form prependId="false">
+					<h2>
+						<h:outputText value="Pull Request Bugzilla Overview Page" />
+					</h2>
+					<h:outputLabel value="(Last update time :" />
+					<h:outputText value="#{dataTableScrollerBean.lastUpdateTime})" />
+					<h:commandButton value=" update "
+						action="#{dataTableScrollerBean.refresh}" />
+				</h:form>
+			</div>
+
+			<div id="content">
+				<h:form prependId="false">
+					<rich:dataTable value="#{dataTableScrollerBean.dataList}"
+						var="data" id="table" rows="20" rowClasses="odd-row, even-row"
+						styleClass="stable">
+						<!-- pull request id and current state -->
+						<rich:column>
+							<f:facet name="header">
+								<h:outputText value="Pull Request #" />
+							</f:facet>
+							<h:outputLink
+								value="https://github.com/jbossas/jboss-eap/pull/#{data.pullRequest.number}">
+								<h:outputText value="#{data.pullRequest.number}" />
+							</h:outputLink>
+						</rich:column>
+						<rich:column>
+							<f:facet name="header">
+								<h:outputText value="Pull Request State" />
+							</f:facet>
+							<h:outputText value="#{data.pullRequest.state}" />
+						</rich:column>
+
+						<!-- lightning build result -->
+						<rich:column>
+							<f:facet name="header">
+								<h:outputText value="Lightning build result" />
+							</f:facet>
+							<h:outputText value="#{data.buildResult}" />
+						</rich:column>
+
+						<!-- upstream pull request id if provided -->
+						<rich:column>
+							<f:facet name="header">
+								<h:outputText value="Upstream Pull Request #" />
+							</f:facet>
+							<ui:param name="upstreamid"
+								value="#{data.pullRequestUpStream != null ? data.pullRequestUpStream.number : 'N/A'}" />
+							<h:outputLink
+								value="https://github.com/jbossas/jboss-as/pull/#{upstreamid}"
+								disabled="#{data.pullRequestUpStream != null ? 'false' : 'true'}">
+								<h:outputText value="#{upstreamid}" />
+							</h:outputLink>
+						</rich:column>
+
+						<!-- bugzilla data information -->
+						<rich:column>
+							<f:facet name="header">
+								<h:outputText value="Bugzilla Bug #" />
+							</f:facet>
+							<ui:param name="bugid"
+								value="#{data.bug != null ? data.bug.id  : 'N/A'}" />
+							<h:outputLink
+								value="https://bugzilla.redhat.com/show_bug.cgi?id=#{bugid}"
+								disabled="#{data.bug != null ? 'false'  : 'true'}">
+								<h:outputText value="#{bugid}" />
+							</h:outputLink>
+						</rich:column>
+						<rich:column style="width: 10px;">
+							<f:facet name="header">
+								<h:outputText value="Bugzilla Bug Summary" />
+							</f:facet>
+							<h:outputText
+								value="#{data.bug != null ? data.bug.summary  : 'N/A'}"
+								align="center" />
+						</rich:column>
+						<rich:column>
+							<f:facet name="header">
+								<h:outputText value="Bugzilla Bug Status" />
+							</f:facet>
+							<h:outputText
+								value="#{data.bug != null ? data.bug.status  : 'N/A'}" />
+						</rich:column>
+						<rich:column>
+							<f:facet name="header">
+								<h:outputText value="Bugzilla Bug Flags" />
+							</f:facet>
+							<rich:list value="#{data.bug.flags}" var="flag" id="flags"
+								rendered="#{data.bug != null}">
+								<h:outputText
+									value="#{flag.name} = #{flag.status != null ? flag.status : 'unset'}" />
+							</rich:list>
+							<h:outputText value="N/A" rendered="#{data.bug == null}" />
+						</rich:column>
+
+						<!--  the overall state -->
+						<rich:column>
+							<f:facet name="header">
+								<h:outputText value="Overall state" />
+							</f:facet>
+							<h:outputText value="#{data.overallState}" escape="false" />
+						</rich:column>
+						<rich:column>
+							<f:facet name="header">
+								<h:outputText value="Mergeable" />
+							</f:facet>
+							<h:outputText value="#{data.mergeable}" />
+						</rich:column>
+					</rich:dataTable>
+					<rich:dataScroller for="table" maxPages="5">
+						<f:facet name="first">
+							<h:outputText value="First" />
+						</f:facet>
+						<f:facet name="last">
+							<h:outputText value="Last" />
+						</f:facet>
+					</rich:dataScroller>
+				</h:form>
+			</div>
+		</div>
+
+		<rich:jQuery selector=".stable tr:odd" query="addClass('odd-row')" />
+		<rich:jQuery selector=".stable tr:even" query="addClass('even-row')" />
+		<rich:jQuery selector=".stable tr" event="mouseover"
+			query="jQuery(this).addClass('active-row')" />
+		<rich:jQuery selector=".stable tr" event="mouseout"
+			query="jQuery(this).removeClass('active-row')" />
+	</ui:define>
+</ui:composition>
