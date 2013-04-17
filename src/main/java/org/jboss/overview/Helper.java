@@ -62,6 +62,8 @@ public class Helper {
             "Build (\\d+) outcome was (SUCCESS|FAILURE|ABORTED) using a merge of ([a-z0-9]+) on branch (.+):",
             Pattern.CASE_INSENSITIVE);
 
+    public static String EAP_TARGET_VERSION;
+
     private static final String BUGZILLA_BASE = "https://bugzilla.redhat.com/xmlrpc.cgi";
     private static String BUGZILLA_LOGIN;
     private static String BUGZILLA_PASSWORD;
@@ -86,6 +88,8 @@ public class Helper {
 
             BUGZILLA_LOGIN = Util.require(props, "bugzilla.login");
             BUGZILLA_PASSWORD = Util.require(props, "bugzilla.password");
+
+            EAP_TARGET_VERSION = Util.require(props, "eap.target.version");
 
             // initialize github client and services
             gitHubClient = new GitHubClient();

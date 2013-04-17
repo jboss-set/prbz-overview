@@ -29,7 +29,9 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.inject.Model;
 import javax.inject.Inject;
 
@@ -43,41 +45,43 @@ public class DataTableScrollerBean implements Serializable {
 
     private static final long serialVersionUID = 8201807342793317060L;
     public static final String CACHE_NAME = "cache";
-    public static final String PULL_REQUEST_NUMBERS_KEY = "pullrequestnumbers";
     private static final Logger LOGGER = Logger.getLogger(DataTableScrollerBean.class);
     private final static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss E");
+    private static BasicCache<String, OverviewData> cache;
 
     @Inject
     private CacheContainerProvider provider;
-    private BasicCache<String, OverviewData> cache;
     private List<OverviewData> dataList = null;
     private String lastUpdateTime = dateFormat.format(new Date());
 
     public DataTableScrollerBean() {
     }
 
-//    @PostConstruct
-//    public void postContruct() {
-//        if (dataList == null)
-//            initDataList();
-//
-//    }
+    @PostConstruct
+    public void postContruct() {
+        if (cache == null) {
+            LOGGER.info("starting populate data...");
+            cache = provider.getCacheContainer().getCache(CACHE_NAME);
+            List<String> pullRequestNumbers = new ArrayList<String>();
 
-//    private void initDataList() {
-//        LOGGER.info("initialize Pull Request and Bugzilla data list");
-//        synchronized (this) {
-//            try {
-//                dataList = Helper.getOverviewData();
-//            } catch (IOException e) {
-//                LOGGER.error("Failed to initialize Pull Request and Bugzilla data list", e);
-//            }
-//        }
-//    }
+            try {
+                List<OverviewData> dataList = Helper.getOverviewData();
+                for (OverviewData overviewData : dataList) {
+                    String key = String.valueOf(overviewData.getPullRequest().getNumber());
+                    cache.putIfAbsent(key, overviewData, -1, TimeUnit.SECONDS);
+                    pullRequestNumbers.add(key);
+                }
+            } catch (Exception e) {
+                LOGGER.warn("An exception occured while populating the database!");
+            }
+
+            LOGGER.info("Successfully imported data!");
+        }
+    }
 
     public List<OverviewData> getDataList() {
         // retrieve a cache
         cache = provider.getCacheContainer().getCache(CACHE_NAME);
-        LOGGER.info("cache size : " + cache.size());
         dataList = new ArrayList<OverviewData>(cache.values());
         return dataList;
     }

@@ -28,12 +28,16 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 
 import org.eclipse.egit.github.core.PullRequest;
+import org.jboss.logging.Logger;
 import org.jboss.overview.BuildResult;
+import org.jboss.overview.Helper;
 
 import com.redhat.engineering.bugzilla.Bug;
 import com.redhat.engineering.bugzilla.Flag;
 
 public class OverviewData implements Serializable {
+
+    private static Logger LOGGER = Logger.getLogger(OverviewData.class);
 
     private static final long serialVersionUID = -2423691441325004516L;
     private PullRequest pullRequest;
@@ -95,49 +99,80 @@ public class OverviewData implements Serializable {
         overallState = new StringBuffer();
 
         // do we have a positive build result of lightning ?
-        overallState.append((buildResult.equals(BuildResult.SUCCESS)) ? " + lightning build result is : " + buildResult
-                + "<br><br>" : " - lightning build result is : " + buildResult + "<br><br>");
+        overallState.append((buildResult.equals(BuildResult.SUCCESS)) ? " + Lightning build result is : " + buildResult
+                + "<br><br>" : " - Lightning build result is : " + buildResult + "<br><br>");
         // do we have a resolved upstream issue ?
-        overallState.append((pullRequestUpStream != null) ? " + have a upstream pull request : "
-                + pullRequestUpStream.getNumber() + "<br><br>" : " - upstream pull request might needed! <br><br>");
+        overallState.append((pullRequestUpStream != null) ? " + Upstream pull request is provided : "
+                + pullRequestUpStream.getNumber() + "<br><br>" : " - Upstream pull request might needed! <br><br>");
         // does the BZ have qa_ack and pm_ack set to + ?
         if (bug != null) {
             List<Flag> flags = bug.getFlags();
-            for (Flag flag : flags) {
-                if (flag.getName().equals("pm_ack")) {
-                    switch (flag.getStatus().charAt(0)) {
-                        case '+':
-                            overallState.append(" + pm_ack is + <br><br>");
-                            break;
-                        case '-':
-                            overallState.append(" - pm_ack is - <br><br>");
-                            break;
-                        case '?':
-                            overallState.append(" - pm_ack is ? <br><br>");
-                            break;
-                        default:
-                            overallState.append(" - pm_ack is unset <br><br>");
-                            break;
+            if (flags.size() > 0) {
+                for (Flag flag : flags) {
+                    if (flag.getName().equals(Helper.EAP_TARGET_VERSION)) {
+                        if (flag.getStatus() == null) {
+                            overallState.append(" - " + Helper.EAP_TARGET_VERSION + " is unset <br><br>");
+                            continue;
+                        }
+
+                        switch (flag.getStatus().charAt(0)) {
+                            case '+':
+                                overallState.append(" + " + Helper.EAP_TARGET_VERSION + " is + <br><br>");
+                                break;
+                            case '-':
+                                overallState.append(" - " + Helper.EAP_TARGET_VERSION + " is - <br><br>");
+                                break;
+                            case '?':
+                                overallState.append(" - " + Helper.EAP_TARGET_VERSION + " is ? <br><br>");
+                                break;
+                            default:
+                                break;
+                        }
                     }
-                }
-                if (flag.getName().equals("qa_ack")) {
-                    switch (flag.getStatus().charAt(0)) {
-                        case '+':
-                            overallState.append(" + qa_ack is + <br><br>");
-                            break;
-                        case '-':
-                            overallState.append(" - qa_ack is - <br><br>");
-                            break;
-                        case '?':
-                            overallState.append(" - qa_ack is ? <br><br>");
-                            break;
-                        default:
+
+                    if (flag.getName().equals("pm_ack")) {
+                        if (flag.getStatus() == null) {
+                            overallState.append(" - pm_ack is unset <br><br>");
+                            continue;
+                        }
+
+                        switch (flag.getStatus().charAt(0)) {
+                            case '+':
+                                overallState.append(" + pm_ack is + <br><br>");
+                                break;
+                            case '-':
+                                overallState.append(" - pm_ack is - <br><br>");
+                                break;
+                            case '?':
+                                overallState.append(" - pm_ack is ? <br><br>");
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    if (flag.getName().equals("qa_ack")) {
+                        if (flag.getStatus() == null) {
                             overallState.append(" - qa_ack is unset <br><br>");
-                            break;
+                            continue;
+                        }
+                        switch (flag.getStatus().charAt(0)) {
+                            case '+':
+                                overallState.append(" + qa_ack is + <br><br>");
+                                break;
+                            case '-':
+                                overallState.append(" - qa_ack is - <br><br>");
+                                break;
+                            case '?':
+                                overallState.append(" - qa_ack is ? <br><br>");
+                                break;
+                            default:
+                                break;
+                        }
                     }
                 }
             }
-        }
+        } else
+            overallState.append(" - Bugzilla issue might needed! <br><br>");
         return overallState;
     }
 
@@ -145,14 +180,32 @@ public class OverviewData implements Serializable {
         this.overallState = overallState;
     }
 
+    /**
+     * If lightning build result is SUCCESS, upstream pull request is provided and bugzilla bug is provided For bugziila,
+     * eap.target.version, pm_ack and qa_ack flags must be positive Then pull request is mergeable
+     *
+     * @return
+     */
     public String getMergeable() {
-        if (buildResult.equals(BuildResult.SUCCESS) && pullRequestUpStream != null) {
-            if (bug != null) {
-                List<Flag> flags = bug.getFlags();
-                for (Flag flag : flags) {
-                    if (flag.getName().equals("pm_ack") && !flag.getStatus().endsWith("+"))
+        if (buildResult.equals(BuildResult.SUCCESS) && pullRequestUpStream != null && bug != null) {
+            List<Flag> flags = bug.getFlags();
+            for (Flag flag : flags) {
+                if (flag.getName().equals(Helper.EAP_TARGET_VERSION)) {
+                    if (flag.getStatus() == null)
                         return mergeable;
-                    if (flag.getName().equals("qa_ack") && !flag.getStatus().endsWith("+"))
+                    else if (!flag.getStatus().contains("+"))
+                        return mergeable;
+                }
+                if (flag.getName().equals("pm_ack")) {
+                    if (flag.getStatus() == null)
+                        return mergeable;
+                    else if (!flag.getStatus().contains("+"))
+                        return mergeable;
+                }
+                if (flag.getName().equals("qa_ack")) {
+                    if (flag.getStatus() == null)
+                        return mergeable;
+                    else if (!flag.getStatus().contains("+"))
                         return mergeable;
                 }
             }
