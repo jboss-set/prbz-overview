@@ -26,12 +26,12 @@
 					<h5>
 						<a4j:commandButton id="ajaxbutton"
 							title="Click to update latest pull request "
-							action="#{dataTableScrollerBean.refresh}" render="table"
+							action="#{dataTableScrollerBean.refresh}" render="table,status"
 							image="resources/images/update-icon.png" />
 
 					</h5>
 					<h5>
-						<a4j:status>
+						<a4j:status id="status">
 							<f:facet name="start">
 								<h:graphicImage value="resources/images/loading.gif"
 									alt="loading..." />
