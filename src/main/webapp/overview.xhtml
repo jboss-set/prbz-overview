@@ -47,6 +47,7 @@
 					<div id="table">
 						<rich:dataTable value="#{dataTableScrollerBean.dataList}"
 							var="data" id="table" rows="20" rowClasses="odd-row, even-row"
+							columnClasses="center-column,center-column,center-column,center-column,center-column,center-column,center-column,none,center-column"
 							styleClass="stable">
 							<!-- pull request id and current state -->
 							<rich:column>
@@ -78,29 +79,42 @@
 								<f:facet name="header">
 									<h:outputText value="Upstream Pull Request" />
 								</f:facet>
-								<ui:param name="upstreamid"
-									value="#{data.pullRequestUpStream != null ? data.pullRequestUpStream.number : 'N/A'}" />
-								<h:outputLink
-									value="https://github.com/jbossas/jboss-as/pull/#{upstreamid}"
-									disabled="#{data.pullRequestUpStream != null ? 'false' : 'true'}">
-									<h:outputText value="#{upstreamid}" />
-								</h:outputLink>
+								<h:outputText value="N/A"
+									rendered="#{data.pullRequestUpStreams.size() == 0}" />
+								<a4j:repeat value="#{data.pullRequestUpStreams}"
+									var="upstreampullrequest" id="upstreampullrequest"
+									rendered="#{data.pullRequestUpStreams.size() != 0}"
+									rowKeyVar="i">
+									<h:outputText value="&lt;br /&gt;&lt;br /&gt;"
+										rendered="#{i>0}" escape="false" />
+									<h:outputLink
+										value="https://github.com/jbossas/jboss-as/pull/#{upstreampullrequest.number}">
+										<h:outputText value="#{upstreampullrequest.number}" />
+									</h:outputLink>
+
+								</a4j:repeat>
 							</rich:column>
 
 							<!-- bugzilla data information -->
+							<ui:param name="bugs"
+								value="#{data.bugs.size() != 0 ? data.bugs : null}" />
 							<rich:column>
 								<f:facet name="header">
 									<h:outputText value="Bugzilla Bug" />
 								</f:facet>
-								<ui:param name="bugid"
-									value="#{data.bug != null ? data.bug.id  : 'N/A'}" />
-								<h:outputLink
-									value="https://bugzilla.redhat.com/show_bug.cgi?id=#{bugid}"
-									disabled="#{data.bug != null ? 'false'  : 'true'}">
-									<h:outputText value="#{bugid}" />
-								</h:outputLink>
+								<h:outputText value="N/A" rendered="#{bugs == null}" />
+								<a4j:repeat value="#{bugs}" var="bugid" id="bugid"
+									rendered="#{bugs != null}" rowKeyVar="i">
+									<h:outputText value="&lt;br /&gt;&lt;br /&gt;"
+										rendered="#{i>0}" escape="false" />
+									<h:outputLink
+										value="https://bugzilla.redhat.com/show_bug.cgi?id=#{bugid.id}">
+										<h:outputText value="bz#{bugid.id}" />
+									</h:outputLink>
+								</a4j:repeat>
 							</rich:column>
-							<rich:column style="width: 10px;">
+							<!--
+							<rich:column>
 								<f:facet name="header">
 									<h:outputText value="Bugzilla Bug Summary" />
 								</f:facet>
@@ -108,38 +122,53 @@
 									value="#{data.bug != null ? data.bug.summary  : 'N/A'}"
 									align="center" />
 							</rich:column>
+							-->
 							<rich:column>
 								<f:facet name="header">
 									<h:outputText value="Bugzilla Bug Status" />
 								</f:facet>
-								<h:outputText
-									value="#{data.bug != null ? data.bug.status  : 'N/A'}" />
+								<h:outputText value="N/A" rendered="#{bugs == null}" />
+								<a4j:repeat value="#{bugs}" var="bugstatus" id="bugstatus"
+									rendered="#{bugs != null}" rowKeyVar="i">
+									<h:outputText value="&lt;br /&gt;&lt;br /&gt;"
+										rendered="#{i>0}" escape="false" />
+									<h:outputText value="#{bugstatus.status}" />
+								</a4j:repeat>
 							</rich:column>
 							<rich:column>
 								<f:facet name="header">
 									<h:outputText value="Bugzilla Bug Flags" />
 								</f:facet>
-								<rich:list value="#{data.bug.flags}" var="flag" id="flags"
-									rendered="#{data.bug != null}">
-									<h:outputText
-										value="#{flag.name} = #{flag.status != null ? flag.status : 'unset'}" />
-								</rich:list>
-								<h:outputText value="N/A" rendered="#{data.bug == null}" />
+								<h:outputText value="N/A" rendered="#{bugs == null}" />
+								<a4j:repeat value="#{bugs}" var="bugflags" id="bugflags"
+									rendered="#{bugs != null}" rowKeyVar="i">
+									<h:outputText value="&lt;br /&gt;" rendered="#{i>0}"
+										escape="false" />
+									<rich:list value="#{bugflags.flags}" var="flag" id="flag"
+										rendered="#{bugflags.flags.size() != 0}"
+										style="text-align: left">
+										<h:outputText value="#{flag.name} = #{flag.status}" />
+									</rich:list>
+								</a4j:repeat>
 							</rich:column>
-
-							<!--  the overall state -->
 							<rich:column>
 								<f:facet name="header">
-									<h:outputText value="Overall State" />
+									<h:outputText value="Summary" />
 								</f:facet>
-								<h:outputText value="#{data.overallState}" escape="false" />
+								<rich:list value="#{data.overallState}" var="overallstate"
+									id="orverallstate">
+									<h:outputText value="#{overallstate}" />
+								</rich:list>
 							</rich:column>
+
 							<rich:column>
 								<f:facet name="header">
 									<h:outputText value="Mergeable" />
 								</f:facet>
-								<h:outputText value="#{data.mergeable}" />
+								<h:outputText
+									value="#{data.mergeable ? 'Mergeable' : 'Not Mergeable'}" />
 							</rich:column>
+
 						</rich:dataTable>
 					</div>
 					<div id="pagination-center">

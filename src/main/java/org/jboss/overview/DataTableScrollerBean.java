@@ -22,6 +22,7 @@
 
 package org.jboss.overview;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -58,21 +59,19 @@ public class DataTableScrollerBean implements Serializable {
     }
 
     @PostConstruct
-    public void postContruct() {
+    public void postContruct() throws Exception {
         if (cache == null) {
             LOGGER.info("starting populate data...");
             cache = provider.getCacheContainer().getCache(CACHE_NAME);
-            List<String> pullRequestNumbers = new ArrayList<String>();
 
             try {
-                List<OverviewData> dataList = Helper.getOverviewData();
+                List<OverviewData> dataList = Aider.getOverviewData();
                 for (OverviewData overviewData : dataList) {
                     String key = String.valueOf(overviewData.getPullRequest().getNumber());
                     cache.putIfAbsent(key, overviewData, -1, TimeUnit.SECONDS);
-                    pullRequestNumbers.add(key);
                 }
             } catch (Exception e) {
-                LOGGER.warn("An exception occured while populating the database!");
+                LOGGER.error("An exception occured while populating the database!");
             }
 
             LOGGER.info("Successfully imported data!");
@@ -100,13 +99,15 @@ public class DataTableScrollerBean implements Serializable {
 
     /**
      * Synchronize with latest pull request on github.
+     * @throws IOException
      */
-    public void refresh() {
+    public void refresh() throws IOException {
         cache = provider.getCacheContainer().getCache(CACHE_NAME);
 
         Set<String> keys = cache.keySet();
 
-        List<PullRequest> pullRequests = Helper.getPullRequests();
+        List<PullRequest> pullRequests = Aider.helper.getPullRequestService().getPullRequests(Aider.helper.getRepositoryEAP(),
+                "open");
 
         HashSet<String> ids = new HashSet<String>();
         for (PullRequest pullRequest : pullRequests)
@@ -114,7 +115,7 @@ public class DataTableScrollerBean implements Serializable {
 
         // for all pull requests don't exist anymore, remove from cache.
         for (String key : keys) {
-            if (!ids.contains(key)){
+            if (!ids.contains(key)) {
                 cache.remove(key);
             }
         }
@@ -122,12 +123,12 @@ public class DataTableScrollerBean implements Serializable {
         // for all new pull requests, add into cache.
         for (PullRequest pullRequest : pullRequests) {
             if (!keys.contains(String.valueOf(pullRequest.getNumber()))) {
-                OverviewData overviewData = Helper.getOverviewData(pullRequest);
+                OverviewData overviewData = Aider.getOverviewData(pullRequest);
                 cache.put(String.valueOf(pullRequest.getNumber()), overviewData);
             }
         }
 
-        //set the last update time
+        // set the last update time
         lastUpdateTime = dateFormat.format(new Date());
     }
 }

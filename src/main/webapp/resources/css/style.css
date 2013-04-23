@@ -15,6 +15,10 @@ h5 {
 	background-color: #ECF3FE;
 }
 
+.center-column {
+	text-align: center;
+}
+
 .active-row {
 	background-color: #FFEBDA !important;
 	cursor: pointer;
