@@ -65,13 +65,14 @@ public class DataTableScrollerBean implements Serializable {
             cache = provider.getCacheContainer().getCache(CACHE_NAME);
 
             try {
-                List<OverviewData> dataList = Aider.getOverviewData();
+                List<OverviewData> dataList = SingletonAider.getOverviewData();
                 for (OverviewData overviewData : dataList) {
                     String key = String.valueOf(overviewData.getPullRequest().getNumber());
                     cache.putIfAbsent(key, overviewData, -1, TimeUnit.SECONDS);
                 }
             } catch (Exception e) {
                 LOGGER.error("An exception occured while populating the database!");
+                e.printStackTrace(System.err);
             }
 
             LOGGER.info("Successfully imported data!");
@@ -106,7 +107,7 @@ public class DataTableScrollerBean implements Serializable {
 
         Set<String> keys = cache.keySet();
 
-        List<PullRequest> pullRequests = Aider.helper.getPullRequestService().getPullRequests(Aider.helper.getRepositoryEAP(),
+        List<PullRequest> pullRequests = SingletonAider.helper.getPullRequestService().getPullRequests(SingletonAider.helper.getRepository(),
                 "open");
 
         HashSet<String> ids = new HashSet<String>();
@@ -123,7 +124,7 @@ public class DataTableScrollerBean implements Serializable {
         // for all new pull requests, add into cache.
         for (PullRequest pullRequest : pullRequests) {
             if (!keys.contains(String.valueOf(pullRequest.getNumber()))) {
-                OverviewData overviewData = Aider.getOverviewData(pullRequest);
+                OverviewData overviewData = SingletonAider.getOverviewData(pullRequest);
                 cache.put(String.valueOf(pullRequest.getNumber()), overviewData);
             }
         }

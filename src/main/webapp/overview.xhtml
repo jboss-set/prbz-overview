@@ -25,7 +25,7 @@
 				<h:form prependId="false">
 					<h5>
 						<a4j:commandButton id="ajaxbutton"
-							title="Click to update latest pull request "
+							title="Click to update latest pull request"
 							action="#{dataTableScrollerBean.refresh}" render="table,status"
 							image="resources/images/update-icon.png" />
 
@@ -38,52 +38,50 @@
 							</f:facet>
 							<f:facet name="stop">
 								<h:outputText
-									value="Last update time : #{dataTableScrollerBean.lastUpdateTime})" />
+									value="Last update time : #{dataTableScrollerBean.lastUpdateTime}" />
 							</f:facet>
 						</a4j:status>
-
-
 					</h5>
 					<div id="table">
 						<rich:dataTable value="#{dataTableScrollerBean.dataList}"
-							var="data" id="table" rows="20" rowClasses="odd-row, even-row"
+							var="dataVar" id="data" rows="20" rowClasses="odd-row, even-row"
 							columnClasses="center-column,center-column,center-column,center-column,center-column,center-column,center-column,none,center-column"
 							styleClass="stable">
 							<!-- pull request id and current state -->
-							<rich:column>
+							<rich:column id="pullrequestcol">
 								<f:facet name="header">
 									<h:outputText value="Pull Request" />
 								</f:facet>
 								<h:outputLink
-									value="https://github.com/jbossas/jboss-eap/pull/#{data.pullRequest.number}">
-									<h:outputText value="#{data.pullRequest.number}" />
+									value="https://github.com/jbossas/jboss-eap/pull/#{dataVar.pullRequest.number}">
+									<h:outputText value="#{dataVar.pullRequest.number}" />
 								</h:outputLink>
 							</rich:column>
-							<rich:column>
+							<rich:column id="statecol">
 								<f:facet name="header">
 									<h:outputText value="State" />
 								</f:facet>
-								<h:outputText value="#{data.pullRequest.state}" />
+								<h:outputText value="#{dataVar.pullRequest.state}" />
 							</rich:column>
 
 							<!-- lightning build result -->
-							<rich:column>
+							<rich:column id="buildresultcol">
 								<f:facet name="header">
 									<h:outputText value="Lightning Build Result" />
 								</f:facet>
-								<h:outputText value="#{data.buildResult}" />
+								<h:outputText value="#{dataVar.buildResult}" />
 							</rich:column>
 
 							<!-- upstream pull request id if provided -->
-							<rich:column>
+							<rich:column id="upstreamcol">
 								<f:facet name="header">
 									<h:outputText value="Upstream Pull Request" />
 								</f:facet>
 								<h:outputText value="N/A"
-									rendered="#{data.pullRequestUpStreams.size() == 0}" />
-								<a4j:repeat value="#{data.pullRequestUpStreams}"
+									rendered="#{dataVar.pullRequestUpStreams.size() == 0}" />
+								<a4j:repeat value="#{dataVar.pullRequestUpStreams}"
 									var="upstreampullrequest" id="upstreampullrequest"
-									rendered="#{data.pullRequestUpStreams.size() != 0}"
+									rendered="#{dataVar.pullRequestUpStreams.size() != 0}"
 									rowKeyVar="i">
 									<h:outputText value="&lt;br /&gt;&lt;br /&gt;"
 										rendered="#{i>0}" escape="false" />
@@ -97,8 +95,8 @@
 
 							<!-- bugzilla data information -->
 							<ui:param name="bugs"
-								value="#{data.bugs.size() != 0 ? data.bugs : null}" />
-							<rich:column>
+								value="#{dataVar.bugs.size() != 0 ? dataVar.bugs : null}" />
+							<rich:column id="bugscol">
 								<f:facet name="header">
 									<h:outputText value="Bugzilla Bug" />
 								</f:facet>
@@ -119,11 +117,11 @@
 									<h:outputText value="Bugzilla Bug Summary" />
 								</f:facet>
 								<h:outputText
-									value="#{data.bug != null ? data.bug.summary  : 'N/A'}"
+									value="#{dataVar.bug != null ? dataVar.bug.summary  : 'N/A'}"
 									align="center" />
 							</rich:column>
 							-->
-							<rich:column>
+							<rich:column id="statuscol">
 								<f:facet name="header">
 									<h:outputText value="Bugzilla Bug Status" />
 								</f:facet>
@@ -135,7 +133,7 @@
 									<h:outputText value="#{bugstatus.status}" />
 								</a4j:repeat>
 							</rich:column>
-							<rich:column>
+							<rich:column id="flagscol">
 								<f:facet name="header">
 									<h:outputText value="Bugzilla Bug Flags" />
 								</f:facet>
@@ -151,28 +149,26 @@
 									</rich:list>
 								</a4j:repeat>
 							</rich:column>
-							<rich:column>
+							<rich:column id="summarycol">
 								<f:facet name="header">
 									<h:outputText value="Summary" />
 								</f:facet>
-								<rich:list value="#{data.overallState}" var="overallstate"
+								<rich:list value="#{dataVar.overallState}" var="overallstate"
 									id="orverallstate">
 									<h:outputText value="#{overallstate}" />
 								</rich:list>
 							</rich:column>
-
-							<rich:column>
+							<rich:column id="mergeablecol">
 								<f:facet name="header">
 									<h:outputText value="Mergeable" />
 								</f:facet>
 								<h:outputText
-									value="#{data.mergeable ? 'Mergeable' : 'Not Mergeable'}" />
+									value="#{dataVar.mergeable ? 'Mergeable' : 'Not Mergeable'}" />
 							</rich:column>
-
 						</rich:dataTable>
 					</div>
 					<div id="pagination-center">
-						<rich:dataScroller for="table" maxPages="5">
+						<rich:dataScroller for="data" maxPages="5">
 							<f:facet name="first">
 								<h:outputText value="First" />
 							</f:facet>

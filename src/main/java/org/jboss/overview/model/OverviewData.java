@@ -40,13 +40,13 @@ public class OverviewData implements Serializable {
     private BuildResult buildResult;
     private List<Bug> bugs; // bugzilla bug if provided
     private List<String> overallState;
-    private boolean mergeable = false;
+    private String mergeable = "Not Mergeable";
 
     public OverviewData(PullRequest pullRequest) {
-        this(pullRequest, null, null, null, null, false);
+        this(pullRequest, null, null, null, null, null);
     }
 
-    public OverviewData(PullRequest pullRequest, BuildResult buildResult, List<PullRequest> pullRequestUpStreams, List<Bug> bugs, List<String> overallState, boolean mergeable) {
+    public OverviewData(PullRequest pullRequest, BuildResult buildResult, List<PullRequest> pullRequestUpStreams, List<Bug> bugs, List<String> overallState, String mergeable) {
         this.pullRequest = pullRequest;
         this.buildResult = buildResult;
         this.pullRequestUpStreams = pullRequestUpStreams;
@@ -99,11 +99,11 @@ public class OverviewData implements Serializable {
         this.overallState = overallState;
     }
 
-    public boolean isMergeable() {
+    public String getMergeable() {
         return mergeable;
     }
 
-    public void setMergeable(boolean mergeable) {
+    public void setMergeable(String mergeable) {
         this.mergeable = mergeable;
     }
 }

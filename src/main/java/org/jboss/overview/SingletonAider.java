@@ -26,6 +26,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+
 import org.eclipse.egit.github.core.PullRequest;
 import org.jboss.logging.Logger;
 import org.jboss.overview.model.OverviewData;
@@ -33,19 +37,31 @@ import org.jboss.pull.shared.Bug;
 import org.jboss.pull.shared.BuildResult;
 import org.jboss.pull.shared.PullHelper;
 
-public class Aider {
+public class SingletonAider {
 
-    private static final Logger LOGGER = Logger.getLogger(Aider.class);
-
+    private static final Logger LOGGER = Logger.getLogger(SingletonAider.class);
+    private static final String PULL_REQUEST_STATE = "open";
     public static PullHelper helper;
 
     static {
         try {
-            helper = new PullHelper("processor.properties.file", "/home/wangchao/work/jbossas/pull/processor.properties");
+            Context initCtx = new InitialContext();
+            Context envCtx = (Context) initCtx.lookup("java:comp/env");
+            String properties = (String) envCtx.lookup("PROPERTY_FILE");
+            LOGGER.info("loading properties file from : " + properties);
+            helper = new PullHelper("processor.properties.file", properties);
         } catch (Exception e) {
             e.printStackTrace(System.err);
             System.exit(1);
         }
+    }
+
+    public SingletonAider() {
+    }
+
+    @PostConstruct
+    public void postConstruct() {
+
     }
 
     public static List<OverviewData> getOverviewData() {
@@ -55,9 +71,9 @@ public class Aider {
 
         List<PullRequest> pullRequests = new ArrayList<PullRequest>();
         try {
-            pullRequests = helper.getPullRequestService().getPullRequests(helper.getRepositoryEAP(), "open");
+            pullRequests = helper.getPullRequestService().getPullRequests(helper.getRepository(), PULL_REQUEST_STATE);
         } catch (IOException e) {
-            LOGGER.error("Can not retrieve pull requests on repository : " + helper.getRepositoryEAP());
+            LOGGER.error("Can not retrieve pull requests on repository : " + helper.getRepository());
             e.printStackTrace(System.err);
         }
 
@@ -66,14 +82,14 @@ public class Aider {
             BuildResult buildResult;
             List<Bug> bugs = new ArrayList<Bug>();
 
-            buildResult = Aider.helper.checkBuildResult(pullRequest);
+            buildResult = SingletonAider.helper.checkBuildResult(pullRequest);
 
             String body = pullRequest.getBody();
             List<Integer> upStreamIds = helper.checkUpStreamPullRequestId(body);
 
             for (Integer id : upStreamIds) {
                 try {
-                    upStreamPullRequests.add(helper.getPullRequestService().getPullRequest(helper.getRepositoryAS(), id));
+                    upStreamPullRequests.add(helper.getPullRequestService().getPullRequest(helper.getRepositoryUpstream(), id));
                 } catch (IOException e) {
                     LOGGER.error("Can not retrieve upstream pull request number : " + id);
                     e.printStackTrace(System.err);
@@ -82,11 +98,12 @@ public class Aider {
 
             bugs = helper.getBug(pullRequest);
 
-            boolean mergeable = helper.isMergeable(pullRequest);
+            String mergeable = helper.isMergeable(pullRequest) ? "Mergeable" : "Not Mergeable";
 
             List<String> overallState = makeOverallState(pullRequest);
 
-            OverviewData pullRequestData = new OverviewData(pullRequest, buildResult, upStreamPullRequests, bugs, overallState, mergeable);
+            OverviewData pullRequestData = new OverviewData(pullRequest, buildResult, upStreamPullRequests, bugs, overallState,
+                    mergeable);
             pullRequestsDatas.add(pullRequestData);
         }
         LOGGER.info("elapsed time of retrieve information : " + (System.currentTimeMillis() - startTime));
@@ -99,7 +116,7 @@ public class Aider {
         BuildResult buildResult;
         List<Bug> bugs = new ArrayList<Bug>();
 
-        buildResult = Aider.helper.checkBuildResult(pullRequest);
+        buildResult = SingletonAider.helper.checkBuildResult(pullRequest);
 
         String body = pullRequest.getBody();
 
@@ -107,7 +124,7 @@ public class Aider {
 
         for (Integer id : upStreamIds) {
             try {
-                upStreamPullRequests.add(helper.getPullRequestService().getPullRequest(helper.getRepositoryAS(), id));
+                upStreamPullRequests.add(helper.getPullRequestService().getPullRequest(helper.getRepositoryUpstream(), id));
             } catch (IOException e) {
                 LOGGER.error("Can not retrieve upstream pull request number : " + id);
                 e.printStackTrace(System.err);
@@ -116,7 +133,7 @@ public class Aider {
 
         bugs = helper.getBug(pullRequest);
 
-        boolean mergeable = helper.isMergeable(pullRequest);
+        String mergeable = helper.isMergeable(pullRequest) ? "Mergeable" : "Not Mergeable";
 
         List<String> overallState = makeOverallState(pullRequest);
 
