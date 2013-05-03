@@ -32,6 +32,10 @@ import org.eclipse.egit.github.core.PullRequest;
 import org.jboss.pull.shared.BuildResult;
 import org.jboss.pull.shared.Bug;
 
+/**
+ * @author wangchao
+ */
+
 public class OverviewData implements Serializable {
 
     private static final long serialVersionUID = -2423691441325004516L;

@@ -22,114 +22,124 @@
 
 package org.jboss.overview;
 
-import java.io.IOException;
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.inject.Model;
-import javax.inject.Inject;
+import javax.ejb.EJB;
+import javax.faces.bean.ManagedBean;
+import javax.faces.bean.SessionScoped;
 
-import org.eclipse.egit.github.core.PullRequest;
-import org.infinispan.api.BasicCache;
 import org.jboss.logging.Logger;
 import org.jboss.overview.model.OverviewData;
+import org.richfaces.component.SortOrder;
 
-@Model
+/**
+ * @author wangchao
+ */
+
+@ManagedBean
+@SessionScoped
 public class DataTableScrollerBean implements Serializable {
 
     private static final long serialVersionUID = 8201807342793317060L;
-    public static final String CACHE_NAME = "cache";
     private static final Logger LOGGER = Logger.getLogger(DataTableScrollerBean.class);
-    private final static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss E");
-    private static BasicCache<String, OverviewData> cache;
 
-    @Inject
-    private CacheContainerProvider provider;
     private List<OverviewData> dataList = null;
-    private String lastUpdateTime = dateFormat.format(new Date());
+
+    private SortOrder pullRequestOrder = SortOrder.ascending;
+    private SortOrder stateOrder = SortOrder.ascending;
+    private SortOrder buildResultOrder = SortOrder.ascending;
+    private SortOrder mergeableOrder = SortOrder.ascending;
+
+    @EJB
+    public SingletonAider aider;
 
     public DataTableScrollerBean() {
     }
 
     @PostConstruct
-    public void postContruct() throws Exception {
-        if (cache == null) {
-            LOGGER.info("starting populate data...");
-            cache = provider.getCacheContainer().getCache(CACHE_NAME);
-
-            try {
-                List<OverviewData> dataList = SingletonAider.getOverviewData();
-                for (OverviewData overviewData : dataList) {
-                    String key = String.valueOf(overviewData.getPullRequest().getNumber());
-                    cache.putIfAbsent(key, overviewData, -1, TimeUnit.SECONDS);
-                }
-            } catch (Exception e) {
-                LOGGER.error("An exception occured while populating the database!");
-                e.printStackTrace(System.err);
-            }
-
-            LOGGER.info("Successfully imported data!");
-        }
+    public void postContruct() {
     }
 
     public List<OverviewData> getDataList() {
         // retrieve a cache
-        cache = provider.getCacheContainer().getCache(CACHE_NAME);
-        dataList = new ArrayList<OverviewData>(cache.values());
+        dataList = new ArrayList<OverviewData>(aider.getCache().values());
+        Collections.sort(dataList, new Comparator<OverviewData>() {
+            public int compare(OverviewData o1, OverviewData o2) {
+                if (o1.getPullRequest().getNumber() > o2.getPullRequest().getNumber())
+                    return 1;
+                else
+                    return -1;
+            }
+        });
         return dataList;
     }
 
-    public void setDataList(List<OverviewData> dataList) {
-        this.dataList = dataList;
+    public SortOrder getPullRequestOrder() {
+        return pullRequestOrder;
     }
 
-    public String getLastUpdateTime() {
-        return lastUpdateTime;
+    public SortOrder getStateOrder() {
+        return stateOrder;
     }
 
-    public void setLastUpdateTime(String lastUpdateTime) {
-        this.lastUpdateTime = lastUpdateTime;
+    public SortOrder getBuildResultOrder() {
+        return buildResultOrder;
     }
 
-    /**
-     * Synchronize with latest pull request on github.
-     * @throws IOException
-     */
-    public void refresh() throws IOException {
-        cache = provider.getCacheContainer().getCache(CACHE_NAME);
+    public SortOrder getMergeableOrder() {
+        return mergeableOrder;
+    }
 
-        Set<String> keys = cache.keySet();
-
-        List<PullRequest> pullRequests = SingletonAider.helper.getPullRequestService().getPullRequests(SingletonAider.helper.getRepository(),
-                "open");
-
-        HashSet<String> ids = new HashSet<String>();
-        for (PullRequest pullRequest : pullRequests)
-            ids.add(String.valueOf(pullRequest.getNumber()));
-
-        // for all pull requests don't exist anymore, remove from cache.
-        for (String key : keys) {
-            if (!ids.contains(key)) {
-                cache.remove(key);
-            }
+    public void sortByPullRequest() {
+        stateOrder = SortOrder.unsorted;
+        buildResultOrder = SortOrder.unsorted;
+        mergeableOrder = SortOrder.unsorted;
+        LOGGER.info("sortByPullRequest..." + pullRequestOrder);
+        if (pullRequestOrder.equals(SortOrder.ascending)) {
+            pullRequestOrder = SortOrder.descending;
+        } else {
+            pullRequestOrder = SortOrder.ascending;
         }
+    }
 
-        // for all new pull requests, add into cache.
-        for (PullRequest pullRequest : pullRequests) {
-            if (!keys.contains(String.valueOf(pullRequest.getNumber()))) {
-                OverviewData overviewData = SingletonAider.getOverviewData(pullRequest);
-                cache.put(String.valueOf(pullRequest.getNumber()), overviewData);
-            }
+    public void sortByState() {
+        pullRequestOrder = SortOrder.unsorted;
+        buildResultOrder = SortOrder.unsorted;
+        mergeableOrder = SortOrder.unsorted;
+        LOGGER.info("sortByState..." + stateOrder);
+        if (stateOrder.equals(SortOrder.ascending)) {
+            stateOrder = SortOrder.descending;
+        } else {
+            stateOrder = SortOrder.ascending;
         }
+    }
 
-        // set the last update time
-        lastUpdateTime = dateFormat.format(new Date());
+    public void sortByBuildResult() {
+        pullRequestOrder = SortOrder.unsorted;
+        stateOrder = SortOrder.unsorted;
+        mergeableOrder = SortOrder.unsorted;
+        LOGGER.info("sortByBuildRequest..." + buildResultOrder);
+        if (buildResultOrder.equals(SortOrder.ascending)) {
+            buildResultOrder = SortOrder.descending;
+        } else {
+            buildResultOrder = SortOrder.ascending;
+        }
+    }
+
+    public void sortByMergeable() {
+        pullRequestOrder = SortOrder.unsorted;
+        stateOrder = SortOrder.unsorted;
+        buildResultOrder = SortOrder.unsorted;
+        LOGGER.info("sortByMergeable..." + mergeableOrder);
+        if (mergeableOrder.equals(SortOrder.ascending)) {
+            mergeableOrder = SortOrder.descending;
+        } else {
+            mergeableOrder = SortOrder.ascending;
+        }
     }
 }

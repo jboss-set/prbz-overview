@@ -23,51 +23,42 @@
 
 			<div id="content">
 				<h:form prependId="false">
-					<h5>
-						<a4j:commandButton id="ajaxbutton"
-							title="Click to update latest pull request"
-							action="#{dataTableScrollerBean.refresh}" render="table,status"
-							image="resources/images/update-icon.png" />
-
-					</h5>
-					<h5>
-						<a4j:status id="status">
-							<f:facet name="start">
-								<h:graphicImage value="resources/images/loading.gif"
-									alt="loading..." />
-							</f:facet>
-							<f:facet name="stop">
-								<h:outputText
-									value="Last update time : #{dataTableScrollerBean.lastUpdateTime}" />
-							</f:facet>
-						</a4j:status>
-					</h5>
 					<div id="table">
 						<rich:dataTable value="#{dataTableScrollerBean.dataList}"
 							var="dataVar" id="data" rows="20" rowClasses="odd-row, even-row"
 							columnClasses="center-column,center-column,center-column,center-column,center-column,center-column,center-column,none,center-column"
 							styleClass="stable">
 							<!-- pull request id and current state -->
-							<rich:column id="pullrequestcol">
+							<rich:column id="pullrequestcol"
+								sortBy="#{dataVar.pullRequest.number}"
+								sortOrder="#{dataTableScrollerBean.pullRequestOrder}">
 								<f:facet name="header">
-									<h:outputText value="Pull Request" />
+									<a4j:commandLink value="Pull Request"
+										title="Sort By Pull Request" render="data, status"
+										action="#{dataTableScrollerBean.sortByPullRequest()}" />
 								</f:facet>
 								<h:outputLink
 									value="https://github.com/jbossas/jboss-eap/pull/#{dataVar.pullRequest.number}">
 									<h:outputText value="#{dataVar.pullRequest.number}" />
 								</h:outputLink>
 							</rich:column>
-							<rich:column id="statecol">
+							<rich:column id="statecol" sortBy="#{dataVar.pullRequest.state}"
+								sortOrder="#{dataTableScrollerBean.stateOrder}">
 								<f:facet name="header">
-									<h:outputText value="State" />
+									<a4j:commandLink value="State"
+										title="Sort By Pull Request State" render="data, status"
+										action="#{dataTableScrollerBean.sortByState()}" />
 								</f:facet>
 								<h:outputText value="#{dataVar.pullRequest.state}" />
 							</rich:column>
 
 							<!-- lightning build result -->
-							<rich:column id="buildresultcol">
+							<rich:column id="buildresultcol" sortBy="#{dataVar.buildResult}"
+								sortOrder="#{dataTableScrollerBean.buildResultOrder}">
 								<f:facet name="header">
-									<h:outputText value="Lightning Build Result" />
+									<a4j:commandLink value="Lightning Build Result"
+										title="Sort By Lightning Build Result" render="data, status"
+										action="#{dataTableScrollerBean.sortByBuildResult()}" />
 								</f:facet>
 								<h:outputText value="#{dataVar.buildResult}" />
 							</rich:column>
@@ -158,12 +149,14 @@
 									<h:outputText value="#{overallstate}" />
 								</rich:list>
 							</rich:column>
-							<rich:column id="mergeablecol">
+							<rich:column id="mergeablecol" sortBy="#{dataVar.mergeable}"
+								sortOrder="#{dataTableScrollerBean.mergeableOrder}">
 								<f:facet name="header">
-									<h:outputText value="Mergeable" />
+									<a4j:commandLink value="Mergeable" title="Sort By Mergeable"
+										render="data, status"
+										action="#{dataTableScrollerBean.sortByMergeable()}" />
 								</f:facet>
-								<h:outputText
-									value="#{dataVar.mergeable ? 'Mergeable' : 'Not Mergeable'}" />
+								<h:outputText value="#{dataVar.mergeable}" />
 							</rich:column>
 						</rich:dataTable>
 					</div>
