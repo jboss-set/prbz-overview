@@ -45,8 +45,6 @@ import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.ejb.TimerService;
 import javax.inject.Inject;
-import javax.naming.Context;
-import javax.naming.InitialContext;
 
 import org.eclipse.egit.github.core.PullRequest;
 import org.infinispan.api.BasicCache;
@@ -88,11 +86,7 @@ public class SingletonAider {
     public void postConstruct() {
         // retrieve properties file defined in web.xml
         try {
-            Context initCtx = new InitialContext();
-            Context envCtx = (Context) initCtx.lookup("java:comp/env");
-            String properties = (String) envCtx.lookup("PROPERTY_FILE");
-            LOGGER.info("loading properties file from : " + properties);
-            helper = new PullHelper("processor.properties.file", properties);
+            helper = new PullHelper("properties.file.path", "./processor.properties");
         } catch (Exception e) {
             e.printStackTrace(System.err);
             System.exit(1);
@@ -110,7 +104,7 @@ public class SingletonAider {
         // timer to update cache values for an interval
         Timer t1 = new Timer();
         Task task = new Task();
-        t1.schedule(task, DELAY*60000, PERIOD*60000);
+        t1.schedule(task, DELAY * 60000, PERIOD * 60000);
     }
 
     @Lock(LockType.WRITE)

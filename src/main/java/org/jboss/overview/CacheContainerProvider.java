@@ -33,7 +33,6 @@ import org.infinispan.configuration.global.GlobalConfiguration;
 import org.infinispan.configuration.global.GlobalConfigurationBuilder;
 import org.infinispan.eviction.EvictionStrategy;
 import org.infinispan.manager.DefaultCacheManager;
-import org.infinispan.util.concurrent.IsolationLevel;
 import org.jboss.logging.Logger;
 
 /**
@@ -59,11 +58,9 @@ public class CacheContainerProvider {
                 .build();
             //Builds  the GlobalConfiguration object
             Configuration loc = new ConfigurationBuilder()
-                .jmxStatistics().enable() //Enable JMX statistics
                 .clustering().cacheMode(CacheMode.LOCAL) //Set Cache mode to LOCAL - Data is not replicated.
-                .locking().isolationLevel(IsolationLevel.REPEATABLE_READ) //Sets the isolation level of locking
                 .eviction().maxEntries(100).strategy(EvictionStrategy.LIRS) //Sets 100 as maximum number of entries in a cache instance and uses the LIRS strategy - an efficient low inter-reference recency set replacement policy to improve buffer cache performance
-                .loaders().passivation(false).addFileCacheStore().purgeOnStartup(true) //Disable passivation and adds a FileCacheStore that is Purged on Startup
+                .loaders().passivation(false) //Disable passivation and adds a FileCacheStore that is Purged on Startup
                 .build(); //Builds the Configuration object
             manager = new DefaultCacheManager(glob, loc, true);
             LOGGER.info("=== Using DefaultCacheManager (library mode) ===");
