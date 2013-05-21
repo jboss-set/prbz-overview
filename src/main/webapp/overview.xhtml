@@ -170,6 +170,11 @@
 							</f:facet>
 						</rich:dataScroller>
 					</div>
+					<div id="push-to-table">
+						<a4j:push address="pushAddress">
+							<a4j:ajax event="dataavailable" render="data" />
+						</a4j:push>
+					</div>
 				</h:form>
 			</div>
 		</div>

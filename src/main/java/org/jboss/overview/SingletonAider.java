@@ -53,6 +53,7 @@ import org.jboss.overview.model.OverviewData;
 import org.jboss.pull.shared.Bug;
 import org.jboss.pull.shared.BuildResult;
 import org.jboss.pull.shared.PullHelper;
+import org.richfaces.application.push.MessageException;
 
 /**
  * @author wangchao
@@ -148,8 +149,14 @@ public class SingletonAider {
             OverviewData pullRequestData = new OverviewData(pullRequest, buildResult, upStreamPullRequests, bugs, overallState,
                     mergeable);
             cache.put(pullRequest.getNumber(), pullRequestData, -1, TimeUnit.SECONDS);
+
+            try {
+                DataTableScrollerBean.push();
+            } catch (MessageException e) {
+                e.printStackTrace(System.err);
+            }
         }
-        LOGGER.info("Cache is initialized, cost time : " + (System.currentTimeMillis() - startTime));
+        LOGGER.info("Cache is initialized, cost time : " + (System.currentTimeMillis() - startTime) + "ms");
     }
 
     public OverviewData getOverviewData(PullRequest pullRequest) {
@@ -221,23 +228,41 @@ public class SingletonAider {
 
         // for all closed pull requests, remove from cache.
         for (Integer key : keys) {
-            if (!ids.contains(key))
+            if (!ids.contains(key)) {
                 cache.remove(key);
+                try {
+                    DataTableScrollerBean.push();
+                } catch (MessageException e) {
+                    e.printStackTrace(System.err);
+                }
+            }
         }
 
         // for all old pull request, update information
         keys = cache.keySet();
-        for (Integer key : keys)
+        for (Integer key : keys){
             cache.replace(key, cache.get(key), getOverviewData(pullRequestsMap.get(key)));
+            try {
+                DataTableScrollerBean.push();
+            } catch (MessageException e) {
+                e.printStackTrace(System.err);
+            }
+        }
 
         // for all new pull requests, add into cache.
-        for (Integer id : ids)
+        for (Integer id : ids){
             if (!keys.contains(id)) {
                 OverviewData overviewData = getOverviewData(pullRequestsMap.get(id));
                 cache.put(id, overviewData);
+                try {
+                    DataTableScrollerBean.push();
+                } catch (MessageException e) {
+                    e.printStackTrace(System.err);
+                }
             }
+        }
 
-        LOGGER.info("Cache is updated, cost time : ... " + (System.currentTimeMillis() - startTime));
+        LOGGER.info("Cache is updated, cost time : ... " + (System.currentTimeMillis() - startTime) + "ms");
     }
 
     public PullHelper getHelper() {

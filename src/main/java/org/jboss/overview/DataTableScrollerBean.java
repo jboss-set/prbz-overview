@@ -35,6 +35,9 @@ import javax.faces.bean.SessionScoped;
 
 import org.jboss.logging.Logger;
 import org.jboss.overview.model.OverviewData;
+import org.richfaces.application.push.MessageException;
+import org.richfaces.application.push.TopicKey;
+import org.richfaces.application.push.TopicsContext;
 import org.richfaces.component.SortOrder;
 
 /**
@@ -141,5 +144,11 @@ public class DataTableScrollerBean implements Serializable {
         } else {
             mergeableOrder = SortOrder.ascending;
         }
+    }
+
+    public static void push() throws MessageException {
+        TopicKey topicKey = new TopicKey("pushAddress");
+        TopicsContext topicsContext = TopicsContext.lookup();
+        topicsContext.publish(topicKey, "empty message");
     }
 }
