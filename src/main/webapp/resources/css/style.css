@@ -51,12 +51,3 @@ h5 {
 #button {
 	font-size: 14px;
 }
-
-/*************************************************
-rich:dataScroller
-*************************************************/
-#pagination-center {
-	text-align: center;
-	margin: auto;
-	display: block;
-}
