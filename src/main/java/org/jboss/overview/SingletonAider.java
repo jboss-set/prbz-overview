@@ -28,14 +28,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 import javax.ejb.AccessTimeout;
 import javax.ejb.ConcurrencyManagement;
 import javax.ejb.ConcurrencyManagementType;
@@ -43,7 +41,6 @@ import javax.ejb.Lock;
 import javax.ejb.LockType;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
-import javax.ejb.TimerService;
 import javax.inject.Inject;
 
 import org.eclipse.egit.github.core.PullRequest;
@@ -75,10 +72,8 @@ public class SingletonAider {
     private CacheContainerProvider provider;
     private BasicCache<Integer, OverviewData> cache;
 
-    @Resource
-    TimerService timerService;
-
     private ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(5);
 
     public SingletonAider() {
     }
@@ -102,10 +97,8 @@ public class SingletonAider {
             }
         });
 
-        // timer to update cache values for an interval
-        Timer t1 = new Timer();
-        Task task = new Task();
-        t1.schedule(task, DELAY * 60000, PERIOD * 60000);
+        // Scheduled task timer to update cache values
+        scheduler.scheduleAtFixedRate(new TaskThread(), DELAY, PERIOD, TimeUnit.MINUTES);
     }
 
     @Lock(LockType.WRITE)
@@ -275,9 +268,9 @@ public class SingletonAider {
         return cache;
     }
 
-    class Task extends TimerTask {
+    class TaskThread implements Runnable {
+        @Override
         public void run() {
-            LOGGER.info("TimerTask triggering...");
             updateCache();
         }
     }

@@ -160,7 +160,7 @@
 							</rich:column>
 						</rich:dataTable>
 
-						<rich:dataScroller for="data" maxPages="5">
+						<rich:dataScroller id="scroller" for="data" maxPages="5">
 							<f:facet name="first">
 								<h:outputText value="First" />
 							</f:facet>
@@ -171,7 +171,7 @@
 					</div>
 					<div id="push-to-table">
 						<a4j:push address="pushAddress">
-							<a4j:ajax event="dataavailable" render="data" />
+							<a4j:ajax event="dataavailable" render="data scroller" />
 						</a4j:push>
 					</div>
 				</h:form>
