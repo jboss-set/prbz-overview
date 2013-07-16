@@ -103,9 +103,6 @@ public class SingletonAider {
 
     @Lock(LockType.WRITE)
     public void initCache() {
-        LOGGER.info("Start to initialize cache...");
-        long startTime = System.currentTimeMillis();
-
         List<PullRequest> pullRequests = new ArrayList<PullRequest>();
         try {
             pullRequests = helper.getPullRequestService().getPullRequests(helper.getRepository(), PULL_REQUEST_STATE);
@@ -149,7 +146,6 @@ public class SingletonAider {
                 e.printStackTrace(System.err);
             }
         }
-        LOGGER.info("Cache is initialized, cost time : " + (System.currentTimeMillis() - startTime) + "ms");
     }
 
     public OverviewData getOverviewData(PullRequest pullRequest) {
@@ -198,9 +194,6 @@ public class SingletonAider {
 
     @Lock(LockType.WRITE)
     public void updateCache() {
-        LOGGER.info("updating cache...");
-        long startTime = System.currentTimeMillis();
-
         Set<Integer> keys = cache.keySet();
 
         List<PullRequest> pullRequests = new ArrayList<PullRequest>();
@@ -254,8 +247,6 @@ public class SingletonAider {
                 }
             }
         }
-
-        LOGGER.info("Cache is updated, cost time : ... " + (System.currentTimeMillis() - startTime) + "ms");
     }
 
     public PullHelper getHelper() {
