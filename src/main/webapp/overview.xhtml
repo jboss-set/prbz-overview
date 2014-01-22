@@ -35,7 +35,7 @@
 								<f:facet name="header">
 									<a4j:commandLink value="Pull Request"
 										title="Sort By Pull Request" render="data, status"
-										action="#{dataTableScrollerBean.sortByPullRequest()}" />
+										action="#{dataTableScrollerBean.sortByPullRequest}" />
 								</f:facet>
 								<h:outputLink
 									value="https://github.com/jbossas/jboss-eap/pull/#{dataVar.pullRequest.number}">
@@ -47,7 +47,7 @@
 								<f:facet name="header">
 									<a4j:commandLink value="State"
 										title="Sort By Pull Request State" render="data, status"
-										action="#{dataTableScrollerBean.sortByState()}" />
+										action="#{dataTableScrollerBean.sortByState}" />
 								</f:facet>
 								<h:outputText value="#{dataVar.pullRequest.state}" />
 							</rich:column>
@@ -58,7 +58,7 @@
 								<f:facet name="header">
 									<a4j:commandLink value="Lightning Build Result"
 										title="Sort By Lightning Build Result" render="data, status"
-										action="#{dataTableScrollerBean.sortByBuildResult()}" />
+										action="#{dataTableScrollerBean.sortByBuildResult}" />
 								</f:facet>
 								<h:outputText value="#{dataVar.buildResult}" />
 							</rich:column>
@@ -102,16 +102,6 @@
 									</h:outputLink>
 								</a4j:repeat>
 							</rich:column>
-							<!--
-							<rich:column>
-								<f:facet name="header">
-									<h:outputText value="Bugzilla Bug Summary" />
-								</f:facet>
-								<h:outputText
-									value="#{dataVar.bug != null ? dataVar.bug.summary  : 'N/A'}"
-									align="center" />
-							</rich:column>
-							-->
 							<rich:column id="statuscol">
 								<f:facet name="header">
 									<h:outputText value="Bugzilla Bug Status" />
@@ -154,7 +144,7 @@
 								<f:facet name="header">
 									<a4j:commandLink value="Mergeable" title="Sort By Mergeable"
 										render="data, status"
-										action="#{dataTableScrollerBean.sortByMergeable()}" />
+										action="#{dataTableScrollerBean.sortByMergeable}" />
 								</f:facet>
 								<h:outputText value="#{dataVar.mergeable}" />
 							</rich:column>
