@@ -42,7 +42,7 @@ h5 {
 	margin: auto;
 }
 
-#data {
+#table {
 	height: 100%;
 	width: 100%;
 	margin: auto;
@@ -50,4 +50,13 @@ h5 {
 
 #button {
 	font-size: 14px;
+}
+
+.mergeable {
+   background-color: #00FF00;
+}
+
+.notmergeable {
+	background-color: #FF0000;
+	text-align: center;
 }
