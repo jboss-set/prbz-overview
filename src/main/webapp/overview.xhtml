@@ -56,8 +56,7 @@
 										title="Sort By Pull Request" render="total, table"
 										action="#{dataTableScrollerBean.sortByPullRequest}" />
 								</f:facet>
-								<h:outputLink
-									value="https://github.com/jbossas/jboss-eap/pull/#{dataVar.pullRequest.number}">
+								<h:outputLink value="#{dataVar.pullRequest.htmlUrl}">
 									<h:outputText value="##{dataVar.pullRequest.number}" />
 								</h:outputLink>
 							</rich:column>
@@ -95,8 +94,7 @@
 									rowKeyVar="i">
 									<h:outputText value="&lt;br /&gt;&lt;br /&gt;"
 										rendered="#{i>0}" escape="false" />
-									<h:outputLink
-										value="https://github.com/wildfly/wildfly/pull/#{upstreampullrequest.number}">
+									<h:outputLink value="#{upstreampullrequest.htmlUrl}">
 										<h:outputText value="##{upstreampullrequest.number}" />
 									</h:outputLink>
 
