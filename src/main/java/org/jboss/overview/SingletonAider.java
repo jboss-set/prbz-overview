@@ -118,21 +118,17 @@ public class SingletonAider {
 
             buildResult = helper.checkBuildResult(pullRequest);
 
-            String body = pullRequest.getBody();
-            List<Integer> upStreamIds = helper.checkUpStreamPullRequestId(body);
-
-            for (Integer id : upStreamIds) {
-                try {
-                    upStreamPullRequests.add(helper.getPullRequestService().getPullRequest(helper.getRepositoryUpstream(), id));
-                } catch (IOException e) {
-                    LOGGER.error("Can not retrieve upstream pull request number : " + id);
-                    e.printStackTrace(System.err);
-                }
+            try {
+                upStreamPullRequests = (helper.getUpstreamPullRequest(pullRequest));
+            } catch (IOException e1) {
+                System.err.printf("Cannot get an upstream pull requests of the pull request %d: %s.\n",
+                        pullRequest.getNumber(), e1);
+                e1.printStackTrace(System.err);
             }
 
             bugs = helper.getBug(pullRequest);
 
-            String mergeable = helper.isMergeable(pullRequest) ? "Mergeable" : "Not Mergeable";
+            boolean mergeable = helper.isMergeable(pullRequest);
 
             List<String> overallState = makeOverallState(pullRequest);
 
@@ -155,22 +151,16 @@ public class SingletonAider {
 
         buildResult = helper.checkBuildResult(pullRequest);
 
-        String body = pullRequest.getBody();
-
-        List<Integer> upStreamIds = helper.checkUpStreamPullRequestId(body);
-
-        for (Integer id : upStreamIds) {
-            try {
-                upStreamPullRequests.add(helper.getPullRequestService().getPullRequest(helper.getRepositoryUpstream(), id));
-            } catch (IOException e) {
-                LOGGER.error("Can not retrieve upstream pull request number : " + id);
-                e.printStackTrace(System.err);
-            }
+        try {
+            upStreamPullRequests = (helper.getUpstreamPullRequest(pullRequest));
+        } catch (IOException e) {
+            System.err.printf("Cannot get an upstream pull requests of the pull request %d: %s.\n", pullRequest.getNumber(), e);
+            e.printStackTrace(System.err);
         }
 
         bugs = helper.getBug(pullRequest);
 
-        String mergeable = helper.isMergeable(pullRequest) ? "Mergeable" : "Not Mergeable";
+        boolean mergeable = helper.isMergeable(pullRequest);
 
         List<String> overallState = makeOverallState(pullRequest);
 
@@ -181,13 +171,17 @@ public class SingletonAider {
         List<String> overallState = new ArrayList<String>();
 
         // do we have a positive build result of lightning ?
-        overallState.add((helper.checkBuildResult(pullRequest).equals(BuildResult.SUCCESS)) ? " + Lightning build result is SUCCESS" : " - Lightning build result is : NOT SUCCESS");
+        // comment this out since we have some intermittent failures
+        // thus we can get a positive overall state even have build failure
+        // BuildResult buildResult = helper.checkBuildResult(pullRequest);
+        // overallState.add(buildResult.equals(BuildResult.SUCCESS) ? " + Lightning build result is " + buildResult :
+        // " - Lightning build result is : " + buildResult);
 
         // do we have a resolved upstream issue ?
-        overallState.add(helper.isMergeableByUpstream(pullRequest) ? " + Mergeable by upstream" : " - Not mergeable by upstream");
+        overallState.add(helper.isMergeableByUpstream(pullRequest) ? " + Upstream pull request is merged" : " - Upstream pull request is null or unmerged");
 
         // do we have a bugzilla issue ?
-        overallState.add(helper.isMergeableByBugzilla(pullRequest, null) ? " + Mergeable by bugzilla" : " - Not mergeable by bugzilla");
+        overallState.add(helper.isMergeableByBugzilla(pullRequest, null) ? " + Bugzilla has all required flags" : " - Bugzilla misses flags");
 
         return overallState;
     }
@@ -226,7 +220,7 @@ public class SingletonAider {
 
         // for all old pull request, update information
         keys = cache.keySet();
-        for (Integer key : keys){
+        for (Integer key : keys) {
             cache.replace(key, cache.get(key), getOverviewData(pullRequestsMap.get(key)));
             try {
                 DataTableScrollerBean.push();
@@ -236,7 +230,7 @@ public class SingletonAider {
         }
 
         // for all new pull requests, add into cache.
-        for (Integer id : ids){
+        for (Integer id : ids) {
             if (!keys.contains(id)) {
                 OverviewData overviewData = getOverviewData(pullRequestsMap.get(id));
                 cache.put(id, overviewData);

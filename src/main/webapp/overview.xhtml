@@ -6,7 +6,8 @@
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:ui="http://java.sun.com/jsf/facelets"
 	xmlns:a4j="http://richfaces.org/a4j"
-	xmlns:rich="http://richfaces.org/rich">
+	xmlns:rich="http://richfaces.org/rich"
+	xmlns:fn="http://java.sun.com/jsp/jstl/functions">
 
 	<ui:define name="body">
 		<h:outputStylesheet library="css" name="style.css" />
@@ -23,31 +24,47 @@
 
 			<div id="content">
 				<h:form prependId="false">
+					<h4>
+						<h:outputText id="total"
+							value="All Requests: #{fn:length(dataTableScrollerBean.dataList)}" />
+					</h4>
 					<div id="table">
 						<rich:dataTable value="#{dataTableScrollerBean.dataList}"
-							var="dataVar" id="data" rows="20" rowClasses="odd-row, even-row"
-							columnClasses="center-column,center-column,center-column,center-column,center-column,center-column,center-column,none,center-column"
+							var="dataVar" id="table" rows="20" rowClasses="odd-row, even-row"
+							columnClasses="center-column,center-column,center-column,center-column,center-column,center-column,center-column,center-column,left-column,center-column"
 							styleClass="stable">
+							<rich:column filterValue="#{dataTableScrollerBean.branchFilter}"
+								filterExpression="#{fn:containsIgnoreCase(dataVar.pullRequest.base.ref, dataTableScrollerBean.branchFilter)}">
+								<f:facet name="header">
+									<h:panelGroup>
+										<h:outputText value="Branch " />
+										<h:selectOneMenu value="#{dataTableScrollerBean.branchFilter}">
+											<f:selectItems value="#{dataTableScrollerBean.branchOptions}" />
+											<a4j:ajax render="table" execute="@this" event="change" />
+										</h:selectOneMenu>
+									</h:panelGroup>
+								</f:facet>
+								<h:outputText value="#{dataVar.pullRequest.base.ref}" />
+							</rich:column>
 							<!-- pull request id and current state -->
 							<rich:column id="pullrequestcol"
 								sortBy="#{dataVar.pullRequest.number}"
 								sortOrder="#{dataTableScrollerBean.pullRequestOrder}">
 								<f:facet name="header">
 									<a4j:commandLink value="Pull Request"
-										title="Sort By Pull Request" render="data, status"
-										action="#{dataTableScrollerBean.sortByPullRequest()}" />
+										title="Sort By Pull Request" render="table"
+										action="#{dataTableScrollerBean.sortByPullRequest}" />
 								</f:facet>
-								<h:outputLink
-									value="https://github.com/jbossas/jboss-eap/pull/#{dataVar.pullRequest.number}">
-									<h:outputText value="#{dataVar.pullRequest.number}" />
+								<h:outputLink value="#{dataVar.pullRequest.htmlUrl}">
+									<h:outputText value="##{dataVar.pullRequest.number}" />
 								</h:outputLink>
 							</rich:column>
 							<rich:column id="statecol" sortBy="#{dataVar.pullRequest.state}"
 								sortOrder="#{dataTableScrollerBean.stateOrder}">
 								<f:facet name="header">
 									<a4j:commandLink value="State"
-										title="Sort By Pull Request State" render="data, status"
-										action="#{dataTableScrollerBean.sortByState()}" />
+										title="Sort By Pull Request State" render="table"
+										action="#{dataTableScrollerBean.sortByState}" />
 								</f:facet>
 								<h:outputText value="#{dataVar.pullRequest.state}" />
 							</rich:column>
@@ -57,8 +74,8 @@
 								sortOrder="#{dataTableScrollerBean.buildResultOrder}">
 								<f:facet name="header">
 									<a4j:commandLink value="Lightning Build Result"
-										title="Sort By Lightning Build Result" render="data, status"
-										action="#{dataTableScrollerBean.sortByBuildResult()}" />
+										title="Sort By Lightning Build Result" render="table"
+										action="#{dataTableScrollerBean.sortByBuildResult}" />
 								</f:facet>
 								<h:outputText value="#{dataVar.buildResult}" />
 							</rich:column>
@@ -76,9 +93,8 @@
 									rowKeyVar="i">
 									<h:outputText value="&lt;br /&gt;&lt;br /&gt;"
 										rendered="#{i>0}" escape="false" />
-									<h:outputLink
-										value="https://github.com/wildfly/wildfly/pull/#{upstreampullrequest.number}">
-										<h:outputText value="#{upstreampullrequest.number}" />
+									<h:outputLink value="#{upstreampullrequest.htmlUrl}">
+										<h:outputText value="##{upstreampullrequest.number}" />
 									</h:outputLink>
 
 								</a4j:repeat>
@@ -102,16 +118,6 @@
 									</h:outputLink>
 								</a4j:repeat>
 							</rich:column>
-							<!--
-							<rich:column>
-								<f:facet name="header">
-									<h:outputText value="Bugzilla Bug Summary" />
-								</f:facet>
-								<h:outputText
-									value="#{dataVar.bug != null ? dataVar.bug.summary  : 'N/A'}"
-									align="center" />
-							</rich:column>
-							-->
 							<rich:column id="statuscol">
 								<f:facet name="header">
 									<h:outputText value="Bugzilla Bug Status" />
@@ -153,14 +159,15 @@
 								sortOrder="#{dataTableScrollerBean.mergeableOrder}">
 								<f:facet name="header">
 									<a4j:commandLink value="Mergeable" title="Sort By Mergeable"
-										render="data, status"
-										action="#{dataTableScrollerBean.sortByMergeable()}" />
+										render="table"
+										action="#{dataTableScrollerBean.sortByMergeable}" />
 								</f:facet>
-								<h:outputText value="#{dataVar.mergeable}" />
+								<h:outputText value="Yes" rendered="#{dataVar.mergeable == true}" class="mergeable"/>
+								<h:outputText value="No" rendered="#{dataVar.mergeable == false}" class="notmergeable"/>
 							</rich:column>
 						</rich:dataTable>
 
-						<rich:dataScroller id="scroller" for="data" maxPages="5">
+						<rich:dataScroller id="scroller" for="table" maxPages="5">
 							<f:facet name="first">
 								<h:outputText value="First" />
 							</f:facet>
@@ -171,7 +178,7 @@
 					</div>
 					<div id="push-to-table">
 						<a4j:push address="pushAddress">
-							<a4j:ajax event="dataavailable" render="data scroller" />
+							<a4j:ajax event="dataavailable" render="table scroller total" />
 						</a4j:push>
 					</div>
 				</h:form>

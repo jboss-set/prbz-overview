@@ -22,6 +22,7 @@
 
 package org.jboss.overview;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,7 +33,9 @@ import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
+import javax.faces.model.SelectItem;
 
+import org.eclipse.egit.github.core.RepositoryBranch;
 import org.jboss.logging.Logger;
 import org.jboss.overview.model.OverviewData;
 import org.richfaces.application.push.MessageException;
@@ -52,7 +55,11 @@ public class DataTableScrollerBean implements Serializable {
     private static final Logger LOGGER = Logger.getLogger(DataTableScrollerBean.class);
 
     private List<OverviewData> dataList = null;
+    private List<RepositoryBranch> branches = null;
 
+    public String branchFilter;
+
+    private SortOrder branchOrder = SortOrder.ascending;
     private SortOrder pullRequestOrder = SortOrder.ascending;
     private SortOrder stateOrder = SortOrder.ascending;
     private SortOrder buildResultOrder = SortOrder.ascending;
@@ -82,6 +89,38 @@ public class DataTableScrollerBean implements Serializable {
         return dataList;
     }
 
+    public List<RepositoryBranch> getBranches() {
+        try {
+            branches = aider.getHelper().getRepositoryService().getBranches(aider.getHelper().getRepository());
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return branches;
+    }
+
+    public List<SelectItem> getBranchOptions() {
+        List<SelectItem> branchOptions = new ArrayList<SelectItem>();
+        branchOptions.add(new SelectItem("", "All Branches"));
+
+        for (RepositoryBranch branch : getBranches()) {
+            branchOptions.add(new SelectItem(branch.getName()));
+        }
+        return branchOptions;
+    }
+
+    public String getBranchFilter() {
+        return branchFilter;
+    }
+
+    public void setBranchFilter(String branchFilter) {
+        this.branchFilter = branchFilter;
+    }
+
+    public SortOrder getBranchOrder() {
+        return branchOrder;
+    }
+
     public SortOrder getPullRequestOrder() {
         return pullRequestOrder;
     }
@@ -98,11 +137,25 @@ public class DataTableScrollerBean implements Serializable {
         return mergeableOrder;
     }
 
-    public void sortByPullRequest() {
+    public void sortByBranch() {
+        pullRequestOrder = SortOrder.unsorted;
         stateOrder = SortOrder.unsorted;
         buildResultOrder = SortOrder.unsorted;
         mergeableOrder = SortOrder.unsorted;
-        LOGGER.info("sortByPullRequest..." + pullRequestOrder);
+        LOGGER.debug("sortByBranch..." + branchOrder);
+        if (branchOrder.equals(SortOrder.ascending)) {
+            branchOrder = SortOrder.descending;
+        } else {
+            branchOrder = SortOrder.ascending;
+        }
+    }
+
+    public void sortByPullRequest() {
+        branchOrder = SortOrder.unsorted;
+        stateOrder = SortOrder.unsorted;
+        buildResultOrder = SortOrder.unsorted;
+        mergeableOrder = SortOrder.unsorted;
+        LOGGER.debug("sortByPullRequest..." + pullRequestOrder);
         if (pullRequestOrder.equals(SortOrder.ascending)) {
             pullRequestOrder = SortOrder.descending;
         } else {
@@ -111,10 +164,11 @@ public class DataTableScrollerBean implements Serializable {
     }
 
     public void sortByState() {
+        branchOrder = SortOrder.unsorted;
         pullRequestOrder = SortOrder.unsorted;
         buildResultOrder = SortOrder.unsorted;
         mergeableOrder = SortOrder.unsorted;
-        LOGGER.info("sortByState..." + stateOrder);
+        LOGGER.debug("sortByState..." + stateOrder);
         if (stateOrder.equals(SortOrder.ascending)) {
             stateOrder = SortOrder.descending;
         } else {
@@ -123,10 +177,11 @@ public class DataTableScrollerBean implements Serializable {
     }
 
     public void sortByBuildResult() {
+        branchOrder = SortOrder.unsorted;
         pullRequestOrder = SortOrder.unsorted;
         stateOrder = SortOrder.unsorted;
         mergeableOrder = SortOrder.unsorted;
-        LOGGER.info("sortByBuildRequest..." + buildResultOrder);
+        LOGGER.debug("sortByBuildRequest..." + buildResultOrder);
         if (buildResultOrder.equals(SortOrder.ascending)) {
             buildResultOrder = SortOrder.descending;
         } else {
@@ -135,10 +190,11 @@ public class DataTableScrollerBean implements Serializable {
     }
 
     public void sortByMergeable() {
+        branchOrder = SortOrder.unsorted;
         pullRequestOrder = SortOrder.unsorted;
         stateOrder = SortOrder.unsorted;
         buildResultOrder = SortOrder.unsorted;
-        LOGGER.info("sortByMergeable..." + mergeableOrder);
+        LOGGER.debug("sortByMergeable..." + mergeableOrder);
         if (mergeableOrder.equals(SortOrder.ascending)) {
             mergeableOrder = SortOrder.descending;
         } else {
