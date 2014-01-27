@@ -118,16 +118,12 @@ public class SingletonAider {
 
             buildResult = helper.checkBuildResult(pullRequest);
 
-            String body = pullRequest.getBody();
-            List<Integer> upStreamIds = helper.checkUpStreamPullRequestId(body);
-
-            for (Integer id : upStreamIds) {
-                try {
-                    upStreamPullRequests.add(helper.getPullRequestService().getPullRequest(helper.getRepositoryUpstream(), id));
-                } catch (IOException e) {
-                    LOGGER.error("Can not retrieve upstream pull request number : " + id);
-                    e.printStackTrace(System.err);
-                }
+            try {
+                upStreamPullRequests = (helper.getUpstreamPullRequest(pullRequest));
+            } catch (IOException e1) {
+                System.err.printf("Cannot get an upstream pull requests of the pull request %d: %s.\n",
+                        pullRequest.getNumber(), e1);
+                e1.printStackTrace(System.err);
             }
 
             bugs = helper.getBug(pullRequest);
@@ -155,17 +151,11 @@ public class SingletonAider {
 
         buildResult = helper.checkBuildResult(pullRequest);
 
-        String body = pullRequest.getBody();
-
-        List<Integer> upStreamIds = helper.checkUpStreamPullRequestId(body);
-
-        for (Integer id : upStreamIds) {
-            try {
-                upStreamPullRequests.add(helper.getPullRequestService().getPullRequest(helper.getRepositoryUpstream(), id));
-            } catch (IOException e) {
-                LOGGER.error("Can not retrieve upstream pull request number : " + id);
-                e.printStackTrace(System.err);
-            }
+        try {
+            upStreamPullRequests = (helper.getUpstreamPullRequest(pullRequest));
+        } catch (IOException e) {
+            System.err.printf("Cannot get an upstream pull requests of the pull request %d: %s.\n", pullRequest.getNumber(), e);
+            e.printStackTrace(System.err);
         }
 
         bugs = helper.getBug(pullRequest);
@@ -188,10 +178,10 @@ public class SingletonAider {
         // " - Lightning build result is : " + buildResult);
 
         // do we have a resolved upstream issue ?
-        overallState.add(helper.isMergeableByUpstream(pullRequest) ? " + Mergeable by upstream" : " - Not mergeable by upstream");
+        overallState.add(helper.isMergeableByUpstream(pullRequest) ? " + Upstream pull request is merged" : " - Upstream pull request is null or unmerged");
 
         // do we have a bugzilla issue ?
-        overallState.add(helper.isMergeableByBugzilla(pullRequest, null) ? " + Mergeable by bugzilla" : " - Not mergeable by bugzilla");
+        overallState.add(helper.isMergeableByBugzilla(pullRequest, null) ? " + Bugzilla has all required flags" : " - Bugzilla misses flags");
 
         return overallState;
     }

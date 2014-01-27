@@ -24,15 +24,14 @@
 
 			<div id="content">
 				<h:form prependId="false">
-					<div id="total">
-						<h4>
-							<h:outputText value="All Requests: #{dataTableScrollerBean.total}" />
-						</h4>
-					</div>
+					<h4>
+						<h:outputText id="total"
+							value="All Requests: #{fn:length(dataTableScrollerBean.dataList)}" />
+					</h4>
 					<div id="table">
 						<rich:dataTable value="#{dataTableScrollerBean.dataList}"
 							var="dataVar" id="table" rows="20" rowClasses="odd-row, even-row"
-							columnClasses="center-column,center-column,center-column,center-column,center-column,center-column,center-column,center-column,none,center-column"
+							columnClasses="center-column,center-column,center-column,center-column,center-column,center-column,center-column,center-column,left-column,center-column"
 							styleClass="stable">
 							<rich:column filterValue="#{dataTableScrollerBean.branchFilter}"
 								filterExpression="#{fn:containsIgnoreCase(dataVar.pullRequest.base.ref, dataTableScrollerBean.branchFilter)}">
@@ -53,7 +52,7 @@
 								sortOrder="#{dataTableScrollerBean.pullRequestOrder}">
 								<f:facet name="header">
 									<a4j:commandLink value="Pull Request"
-										title="Sort By Pull Request" render="total, table"
+										title="Sort By Pull Request" render="table"
 										action="#{dataTableScrollerBean.sortByPullRequest}" />
 								</f:facet>
 								<h:outputLink value="#{dataVar.pullRequest.htmlUrl}">
@@ -64,7 +63,7 @@
 								sortOrder="#{dataTableScrollerBean.stateOrder}">
 								<f:facet name="header">
 									<a4j:commandLink value="State"
-										title="Sort By Pull Request State" render="total, table"
+										title="Sort By Pull Request State" render="table"
 										action="#{dataTableScrollerBean.sortByState}" />
 								</f:facet>
 								<h:outputText value="#{dataVar.pullRequest.state}" />
@@ -75,7 +74,7 @@
 								sortOrder="#{dataTableScrollerBean.buildResultOrder}">
 								<f:facet name="header">
 									<a4j:commandLink value="Lightning Build Result"
-										title="Sort By Lightning Build Result" render="total, table"
+										title="Sort By Lightning Build Result" render="table"
 										action="#{dataTableScrollerBean.sortByBuildResult}" />
 								</f:facet>
 								<h:outputText value="#{dataVar.buildResult}" />
@@ -160,7 +159,7 @@
 								sortOrder="#{dataTableScrollerBean.mergeableOrder}">
 								<f:facet name="header">
 									<a4j:commandLink value="Mergeable" title="Sort By Mergeable"
-										render="total, table"
+										render="table"
 										action="#{dataTableScrollerBean.sortByMergeable}" />
 								</f:facet>
 								<h:outputText value="Yes" rendered="#{dataVar.mergeable == true}" class="mergeable"/>
@@ -179,7 +178,7 @@
 					</div>
 					<div id="push-to-table">
 						<a4j:push address="pushAddress">
-							<a4j:ajax event="dataavailable" render="table scroller" />
+							<a4j:ajax event="dataavailable" render="table scroller total" />
 						</a4j:push>
 					</div>
 				</h:form>

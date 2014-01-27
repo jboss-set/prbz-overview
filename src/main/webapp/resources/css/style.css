@@ -15,6 +15,10 @@ h5 {
 	background-color: #ECF3FE;
 }
 
+.left-column {
+	text-align: left;
+}
+
 .center-column {
 	text-align: center;
 }

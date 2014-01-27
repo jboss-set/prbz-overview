@@ -54,7 +54,6 @@ public class DataTableScrollerBean implements Serializable {
     private static final long serialVersionUID = 8201807342793317060L;
     private static final Logger LOGGER = Logger.getLogger(DataTableScrollerBean.class);
 
-    private int total;
     private List<OverviewData> dataList = null;
     private List<RepositoryBranch> branches = null;
 
@@ -76,10 +75,6 @@ public class DataTableScrollerBean implements Serializable {
     public void postContruct() {
     }
 
-    public int getTotal() {
-        return total;
-    }
-
     public List<OverviewData> getDataList() {
         // retrieve a cache
         dataList = new ArrayList<OverviewData>(aider.getCache().values());
@@ -91,7 +86,6 @@ public class DataTableScrollerBean implements Serializable {
                     return -1;
             }
         });
-        total = dataList.size();
         return dataList;
     }
 
@@ -107,7 +101,7 @@ public class DataTableScrollerBean implements Serializable {
 
     public List<SelectItem> getBranchOptions() {
         List<SelectItem> branchOptions = new ArrayList<SelectItem>();
-        branchOptions.add(new SelectItem("", ""));
+        branchOptions.add(new SelectItem("", "All Branches"));
 
         for (RepositoryBranch branch : getBranches()) {
             branchOptions.add(new SelectItem(branch.getName()));
