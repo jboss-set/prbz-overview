@@ -50,6 +50,7 @@ import org.jboss.overview.model.OverviewData;
 import org.jboss.pull.shared.Bug;
 import org.jboss.pull.shared.BuildResult;
 import org.jboss.pull.shared.PullHelper;
+import org.jboss.pull.shared.spi.PullEvaluator;
 import org.richfaces.application.push.MessageException;
 
 /**
@@ -85,7 +86,8 @@ public class SingletonAider {
             helper = new PullHelper("properties.file.path", "./processor.properties");
         } catch (Exception e) {
             e.printStackTrace(System.err);
-            System.exit(1);
+            throw new RuntimeException(e);
+//            System.exit(1);       ;-)
         }
         // create cache
         cache = provider.getCacheContainer().getCache(CACHE_NAME);
@@ -112,28 +114,7 @@ public class SingletonAider {
         }
 
         for (PullRequest pullRequest : pullRequests) {
-            List<PullRequest> upStreamPullRequests = new ArrayList<PullRequest>();
-            BuildResult buildResult;
-            List<Bug> bugs = new ArrayList<Bug>();
-
-            buildResult = helper.checkBuildResult(pullRequest);
-
-            try {
-                upStreamPullRequests = (helper.getUpstreamPullRequest(pullRequest));
-            } catch (IOException e1) {
-                System.err.printf("Cannot get an upstream pull requests of the pull request %d: %s.\n",
-                        pullRequest.getNumber(), e1);
-                e1.printStackTrace(System.err);
-            }
-
-            bugs = helper.getBug(pullRequest);
-
-            boolean mergeable = helper.isMergeable(pullRequest);
-
-            List<String> overallState = makeOverallState(pullRequest);
-
-            OverviewData pullRequestData = new OverviewData(pullRequest, buildResult, upStreamPullRequests, bugs, overallState,
-                    mergeable);
+            OverviewData pullRequestData = getOverviewData(pullRequest);
             cache.put(pullRequest.getNumber(), pullRequestData, -1, TimeUnit.SECONDS);
 
             try {
@@ -145,45 +126,23 @@ public class SingletonAider {
     }
 
     public OverviewData getOverviewData(PullRequest pullRequest) {
-        List<PullRequest> upStreamPullRequests = new ArrayList<PullRequest>();
-        BuildResult buildResult;
-        List<Bug> bugs = new ArrayList<Bug>();
+        final BuildResult buildResult = helper.checkBuildResult(pullRequest);
 
-        buildResult = helper.checkBuildResult(pullRequest);
-
+        List<PullRequest> upStreamPullRequests = null;
         try {
-            upStreamPullRequests = (helper.getUpstreamPullRequest(pullRequest));
+            upStreamPullRequests = helper.getUpstreamPullRequest(pullRequest);
         } catch (IOException e) {
             System.err.printf("Cannot get an upstream pull requests of the pull request %d: %s.\n", pullRequest.getNumber(), e);
             e.printStackTrace(System.err);
         }
 
-        bugs = helper.getBug(pullRequest);
+        final List<Bug> bugs = helper.getBug(pullRequest);
 
-        boolean mergeable = helper.isMergeable(pullRequest);
+        final PullEvaluator.Result mergeable = helper.isMergeable(pullRequest);
 
-        List<String> overallState = makeOverallState(pullRequest);
+        final List<String> overallState = mergeable.getDescription();
 
-        return new OverviewData(pullRequest, buildResult, upStreamPullRequests, bugs, overallState, mergeable);
-    }
-
-    public List<String> makeOverallState(PullRequest pullRequest) {
-        List<String> overallState = new ArrayList<String>();
-
-        // do we have a positive build result of lightning ?
-        // comment this out since we have some intermittent failures
-        // thus we can get a positive overall state even have build failure
-        // BuildResult buildResult = helper.checkBuildResult(pullRequest);
-        // overallState.add(buildResult.equals(BuildResult.SUCCESS) ? " + Lightning build result is " + buildResult :
-        // " - Lightning build result is : " + buildResult);
-
-        // do we have a resolved upstream issue ?
-        overallState.add(helper.isMergeableByUpstream(pullRequest) ? " + Upstream pull request is merged" : " - Upstream pull request is null or unmerged");
-
-        // do we have a bugzilla issue ?
-        overallState.add(helper.isMergeableByBugzilla(pullRequest, null) ? " + Bugzilla has all required flags" : " - Bugzilla misses flags");
-
-        return overallState;
+        return new OverviewData(pullRequest, buildResult, upStreamPullRequests, bugs, overallState, mergeable.isMergeable());
     }
 
     @Lock(LockType.WRITE)

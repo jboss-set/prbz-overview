@@ -89,22 +89,12 @@ public class DataTableScrollerBean implements Serializable {
         return dataList;
     }
 
-    public List<RepositoryBranch> getBranches() {
-        try {
-            branches = aider.getHelper().getRepositoryService().getBranches(aider.getHelper().getRepository());
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        return branches;
-    }
-
     public List<SelectItem> getBranchOptions() {
         List<SelectItem> branchOptions = new ArrayList<SelectItem>();
         branchOptions.add(new SelectItem("", "All Branches"));
 
-        for (RepositoryBranch branch : getBranches()) {
-            branchOptions.add(new SelectItem(branch.getName()));
+        for (String branch : aider.getHelper().getCoveredBranches()) {
+            branchOptions.add(new SelectItem(branch));
         }
         return branchOptions;
     }
