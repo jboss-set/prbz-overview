@@ -33,6 +33,7 @@ import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
+import javax.faces.context.FacesContext;
 import javax.faces.model.SelectItem;
 
 import org.eclipse.egit.github.core.RepositoryBranch;
@@ -69,6 +70,10 @@ public class DataTableScrollerBean implements Serializable {
     public SingletonAider aider;
 
     public DataTableScrollerBean() {
+        FacesContext ctx = FacesContext.getCurrentInstance();
+        String propertyFileName = ctx.getExternalContext().getInitParameter("pull.helper.property.file");
+        System.setProperty("pull.helper.property.file", propertyFileName);
+        LOGGER.debug("pull.helper.property.file: " + propertyFileName);
     }
 
     @PostConstruct
