@@ -22,7 +22,6 @@
 
 package org.jboss.overview;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -98,7 +97,7 @@ public class DataTableScrollerBean implements Serializable {
         List<SelectItem> branchOptions = new ArrayList<SelectItem>();
         branchOptions.add(new SelectItem("", "All Branches"));
 
-        for (String branch : aider.getHelper().getCoveredBranches()) {
+        for (String branch : aider.getHelper().getEvaluatorFacade().getCoveredBranches()) {
             branchOptions.add(new SelectItem(branch));
         }
         return branchOptions;

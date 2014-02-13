@@ -22,8 +22,6 @@
 
 package org.jboss.overview;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,9 +44,10 @@ import org.eclipse.egit.github.core.PullRequest;
 import org.infinispan.api.BasicCache;
 import org.jboss.logging.Logger;
 import org.jboss.overview.model.OverviewData;
-import org.jboss.pull.shared.Bug;
 import org.jboss.pull.shared.BuildResult;
+import org.jboss.pull.shared.Issue;
 import org.jboss.pull.shared.PullHelper;
+import org.jboss.pull.shared.evaluators.BasePullEvaluator;
 import org.jboss.pull.shared.spi.PullEvaluator;
 import org.richfaces.application.push.MessageException;
 
@@ -71,6 +70,7 @@ public class SingletonAider {
     private CacheContainerProvider provider;
     private BasicCache<Integer, OverviewData> cache;
 
+    // FIXME is this correct? javase executors in ee container?
     private ExecutorService executorService = Executors.newSingleThreadExecutor();
     private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(5);
 
@@ -104,13 +104,7 @@ public class SingletonAider {
 
     @Lock(LockType.WRITE)
     public void initCache() {
-        List<PullRequest> pullRequests = new ArrayList<PullRequest>();
-        try {
-            pullRequests = helper.getPullRequestService().getPullRequests(helper.getRepository(), PULL_REQUEST_STATE);
-        } catch (IOException e) {
-            LOGGER.error("Can not retrieve pull requests on repository : " + helper.getRepository());
-            e.printStackTrace(System.err);
-        }
+        final List<PullRequest> pullRequests = helper.getPullRequests(PULL_REQUEST_STATE);
 
         for (PullRequest pullRequest : pullRequests) {
             OverviewData pullRequestData = getOverviewData(pullRequest);
@@ -127,34 +121,24 @@ public class SingletonAider {
     public OverviewData getOverviewData(PullRequest pullRequest) {
         final BuildResult buildResult = helper.checkBuildResult(pullRequest);
 
-        List<PullRequest> upStreamPullRequests = null;
-        try {
-            upStreamPullRequests = helper.getUpstreamPullRequest(pullRequest);
-        } catch (IOException e) {
-            System.err.printf("Cannot get an upstream pull requests of the pull request %d: %s.\n", pullRequest.getNumber(), e);
-            e.printStackTrace(System.err);
-        }
+        final List<PullRequest> upStreamPullRequests = helper.getEvaluatorFacade().getUpstreamPullRequest(pullRequest);
 
-        final List<Bug> bugs = helper.getBug(pullRequest);
+        final List<? extends Issue> bugs = helper.getEvaluatorFacade().getIssue(pullRequest);
 
-        final PullEvaluator.Result mergeable = helper.isMergeable(pullRequest);
+        final PullEvaluator.Result mergeable = helper.getEvaluatorFacade().isMergeable(pullRequest);
+
+        final boolean isReviewed = BasePullEvaluator.isReviewed(mergeable);
 
         final List<String> overallState = mergeable.getDescription();
 
-        return new OverviewData(pullRequest, buildResult, upStreamPullRequests, bugs, overallState, mergeable.isMergeable());
+        return new OverviewData(pullRequest, buildResult, upStreamPullRequests, bugs, overallState, mergeable.isMergeable(), isReviewed);
     }
 
     @Lock(LockType.WRITE)
     public void updateCache() {
         Set<Integer> keys = cache.keySet();
 
-        List<PullRequest> pullRequests = new ArrayList<PullRequest>();
-        try {
-            pullRequests = helper.getPullRequestService().getPullRequests(helper.getRepository(), "open");
-        } catch (IOException e) {
-            LOGGER.info("Error to get pull requests on repository : " + helper.getRepository());
-            e.printStackTrace(System.err);
-        }
+        final List<PullRequest> pullRequests = helper.getPullRequests(PULL_REQUEST_STATE);
 
         Map<Integer, PullRequest> pullRequestsMap = new HashMap<Integer, PullRequest>();
 
