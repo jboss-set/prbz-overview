@@ -101,46 +101,46 @@
 							</rich:column>
 
 							<!-- bugzilla data information -->
-							<ui:param name="bugs"
-								value="#{dataVar.bugs.size() != 0 ? dataVar.bugs : null}" />
+							<ui:param name="issues"
+								value="#{dataVar.issues.size() != 0 ? dataVar.issues : null}" />
 							<rich:column id="bugscol">
 								<f:facet name="header">
-									<h:outputText value="Bugzilla Bug" />
+									<h:outputText value="Issue" />
 								</f:facet>
-								<h:outputText value="N/A" rendered="#{bugs == null}" />
-								<a4j:repeat value="#{bugs}" var="bugid" id="bugid"
-									rendered="#{bugs != null}" rowKeyVar="i">
+								<h:outputText value="N/A" rendered="#{issues == null}" />
+								<a4j:repeat value="#{issues}" var="issueid" id="issueid"
+									rendered="#{issues != null}" rowKeyVar="i">
 									<h:outputText value="&lt;br /&gt;&lt;br /&gt;"
 										rendered="#{i>0}" escape="false" />
 									<h:outputLink
-										value="https://bugzilla.redhat.com/show_bug.cgi?id=#{bugid.id}">
-										<h:outputText value="bz#{bugid.id}" />
+										value="#{issueid.url}">
+										<h:outputText value="bz#{issueid.number}" />
 									</h:outputLink>
 								</a4j:repeat>
 							</rich:column>
 							<rich:column id="statuscol">
 								<f:facet name="header">
-									<h:outputText value="Bugzilla Bug Status" />
+									<h:outputText value="Issue Status" />
 								</f:facet>
-								<h:outputText value="N/A" rendered="#{bugs == null}" />
-								<a4j:repeat value="#{bugs}" var="bugstatus" id="bugstatus"
-									rendered="#{bugs != null}" rowKeyVar="i">
+								<h:outputText value="N/A" rendered="#{issues == null}" />
+								<a4j:repeat value="#{issues}" var="issuestatus" id="issuestatus"
+									rendered="#{issues != null}" rowKeyVar="i">
 									<h:outputText value="&lt;br /&gt;&lt;br /&gt;"
 										rendered="#{i>0}" escape="false" />
-									<h:outputText value="#{bugstatus.status}" />
+									<h:outputText value="#{issuestatus.status}" />
 								</a4j:repeat>
 							</rich:column>
 							<rich:column id="flagscol">
 								<f:facet name="header">
-									<h:outputText value="Bugzilla Bug Flags" />
+									<h:outputText value="Issue Flags" />
 								</f:facet>
-								<h:outputText value="N/A" rendered="#{bugs == null}" />
-								<a4j:repeat value="#{bugs}" var="bugflags" id="bugflags"
-									rendered="#{bugs != null}" rowKeyVar="i">
+								<h:outputText value="N/A" rendered="#{issues == null}" />
+								<a4j:repeat value="#{issues}" var="issueflags" id="issueflags"
+									rendered="#{issues != null}" rowKeyVar="i">
 									<h:outputText value="&lt;br /&gt;" rendered="#{i>0}"
 										escape="false" />
-									<rich:list value="#{bugflags.flags}" var="flag" id="flag"
-										rendered="#{bugflags.flags.size() != 0}"
+									<rich:list value="#{issueflags.flags}" var="flag" id="flag"
+										rendered="#{issueflags.flags.size() != 0}"
 										style="text-align: left">
 										<h:outputText value="#{flag.name} = #{flag.status}" />
 									</rich:list>

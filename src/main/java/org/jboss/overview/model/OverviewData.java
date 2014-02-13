@@ -30,7 +30,7 @@ import javax.annotation.PostConstruct;
 
 import org.eclipse.egit.github.core.PullRequest;
 import org.jboss.pull.shared.BuildResult;
-import org.jboss.pull.shared.Bug;
+import org.jboss.pull.shared.Issue;
 
 /**
  * @author wangchao
@@ -42,21 +42,23 @@ public class OverviewData implements Serializable {
     private PullRequest pullRequest;
     private List<PullRequest> pullRequestUpStreams; // upstream pull request if provided
     private BuildResult buildResult;
-    private List<Bug> bugs; // bugzilla bug if provided
+    private List<? extends Issue> issues; // bugzilla or jira bug if provided
     private List<String> overallState;
     private boolean mergeable = false;
+    private boolean reviewed = false;
 
     public OverviewData(PullRequest pullRequest) {
-        this(pullRequest, null, null, null, null, false);
+        this(pullRequest, null, null, null, null, false, false);
     }
 
-    public OverviewData(PullRequest pullRequest, BuildResult buildResult, List<PullRequest> pullRequestUpStreams, List<Bug> bugs, List<String> overallState, boolean mergeable) {
+    public OverviewData(PullRequest pullRequest, BuildResult buildResult, List<PullRequest> pullRequestUpStreams, List<? extends Issue> issues, List<String> overallState, boolean mergeable, boolean reviewed) {
         this.pullRequest = pullRequest;
         this.buildResult = buildResult;
         this.pullRequestUpStreams = pullRequestUpStreams;
-        this.bugs = bugs;
+        this.issues = issues;
         this.overallState = overallState;
         this.mergeable = mergeable;
+        this.reviewed = reviewed;
     }
 
     @PostConstruct
@@ -87,12 +89,12 @@ public class OverviewData implements Serializable {
         this.buildResult = buildResult;
     }
 
-    public List<Bug> getBugs() {
-        return bugs;
+    public List<? extends Issue> getIssues() {
+        return issues;
     }
 
-    public void setBugs(List<Bug> bugs) {
-        this.bugs = bugs;
+    public void setIssues(List<? extends Issue> issues) {
+        this.issues = issues;
     }
 
     public List<String> getOverallState() {
@@ -111,4 +113,11 @@ public class OverviewData implements Serializable {
         this.mergeable = mergeable;
     }
 
+    public boolean isReviewed() {
+        return reviewed;
+    }
+
+    public void setReviewed(boolean reviewed) {
+        this.reviewed = reviewed;
+    }
 }

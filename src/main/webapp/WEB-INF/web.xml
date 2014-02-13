@@ -7,7 +7,7 @@
 
     <context-param>
    		<param-name>pull.helper.property.file</param-name>
-   		<param-value>processor-eap6.properties</param-value>
+        <param-value>processor-eap6.properties</param-value>
    	</context-param>
 
 	<context-param>
