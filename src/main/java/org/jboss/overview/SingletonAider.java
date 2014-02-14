@@ -38,6 +38,7 @@ import javax.ejb.ConcurrencyManagementType;
 import javax.ejb.Lock;
 import javax.ejb.LockType;
 import javax.ejb.Singleton;
+import javax.ejb.Startup;
 import javax.inject.Inject;
 
 import org.eclipse.egit.github.core.PullRequest;
@@ -55,6 +56,7 @@ import org.richfaces.application.push.MessageException;
  * @author wangchao
  */
 
+@Startup
 @Singleton
 @ConcurrencyManagement(ConcurrencyManagementType.CONTAINER)
 public class SingletonAider {
@@ -79,7 +81,7 @@ public class SingletonAider {
 
     @PostConstruct
     public void postConstruct() {
-        // retrieve properties file defined in web.xml
+        // retrieve properties file defined in standalone.xml
         LOGGER.debug("pull.helper.property.file: " + System.getProperty("pull.helper.property.file"));
         try {
             helper = new PullHelper("pull.helper.property.file", "./processor.properties");

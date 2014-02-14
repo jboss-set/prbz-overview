@@ -32,10 +32,8 @@ import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
-import javax.faces.context.FacesContext;
 import javax.faces.model.SelectItem;
 
-import org.eclipse.egit.github.core.RepositoryBranch;
 import org.jboss.logging.Logger;
 import org.jboss.overview.model.OverviewData;
 import org.richfaces.application.push.MessageException;
@@ -55,7 +53,6 @@ public class DataTableScrollerBean implements Serializable {
     private static final Logger LOGGER = Logger.getLogger(DataTableScrollerBean.class);
 
     private List<OverviewData> dataList = null;
-    private List<RepositoryBranch> branches = null;
 
     public String branchFilter;
 
@@ -69,10 +66,6 @@ public class DataTableScrollerBean implements Serializable {
     public SingletonAider aider;
 
     public DataTableScrollerBean() {
-        FacesContext ctx = FacesContext.getCurrentInstance();
-        String propertyFileName = ctx.getExternalContext().getInitParameter("pull.helper.property.file");
-        System.setProperty("pull.helper.property.file", propertyFileName);
-        LOGGER.debug("pull.helper.property.file: " + propertyFileName);
     }
 
     @PostConstruct
