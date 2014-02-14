@@ -4,12 +4,6 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 	version="2.5">
 	<display-name>Pull Request Bugzilla Overview Application</display-name>
-
-    <context-param>
-   		<param-name>pull.helper.property.file</param-name>
-        <param-value>processor-eap6.properties</param-value>
-   	</context-param>
-
 	<context-param>
 		<param-name>javax.faces.PROJECT_STAGE</param-name>
 		<param-value>Development</param-value>
