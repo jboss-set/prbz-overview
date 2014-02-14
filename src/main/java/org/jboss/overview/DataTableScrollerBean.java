@@ -56,11 +56,12 @@ public class DataTableScrollerBean implements Serializable {
 
     public String branchFilter;
 
-    private SortOrder branchOrder = SortOrder.ascending;
-    private SortOrder pullRequestOrder = SortOrder.ascending;
-    private SortOrder stateOrder = SortOrder.ascending;
-    private SortOrder buildResultOrder = SortOrder.ascending;
-    private SortOrder mergeableOrder = SortOrder.ascending;
+    private SortOrder branchOrder = SortOrder.descending;
+    private SortOrder pullRequestOrder = SortOrder.descending;
+    private SortOrder buildResultOrder = SortOrder.descending;
+    private SortOrder mergeableOrder = SortOrder.descending;
+    private SortOrder isReviewedOrder = SortOrder.descending;
+    private SortOrder pullStateOrder = SortOrder.descending;
 
     @EJB
     public SingletonAider aider;
@@ -112,10 +113,6 @@ public class DataTableScrollerBean implements Serializable {
         return pullRequestOrder;
     }
 
-    public SortOrder getStateOrder() {
-        return stateOrder;
-    }
-
     public SortOrder getBuildResultOrder() {
         return buildResultOrder;
     }
@@ -124,68 +121,95 @@ public class DataTableScrollerBean implements Serializable {
         return mergeableOrder;
     }
 
+    public SortOrder getIsReviewedOrder() {
+        return isReviewedOrder;
+    }
+
+    public SortOrder getPullStateOrder() {
+        return pullStateOrder;
+    }
+
     public void sortByBranch() {
         pullRequestOrder = SortOrder.unsorted;
-        stateOrder = SortOrder.unsorted;
         buildResultOrder = SortOrder.unsorted;
         mergeableOrder = SortOrder.unsorted;
+        isReviewedOrder = SortOrder.unsorted;
+        pullStateOrder = SortOrder.unsorted;
         LOGGER.debug("sortByBranch..." + branchOrder);
-        if (branchOrder.equals(SortOrder.ascending)) {
-            branchOrder = SortOrder.descending;
-        } else {
+        if (branchOrder.equals(SortOrder.descending)) {
             branchOrder = SortOrder.ascending;
+        } else {
+            branchOrder = SortOrder.descending;
         }
     }
 
     public void sortByPullRequest() {
         branchOrder = SortOrder.unsorted;
-        stateOrder = SortOrder.unsorted;
         buildResultOrder = SortOrder.unsorted;
         mergeableOrder = SortOrder.unsorted;
+        isReviewedOrder = SortOrder.unsorted;
+        pullStateOrder = SortOrder.unsorted;
         LOGGER.debug("sortByPullRequest..." + pullRequestOrder);
-        if (pullRequestOrder.equals(SortOrder.ascending)) {
-            pullRequestOrder = SortOrder.descending;
-        } else {
+        if (pullRequestOrder.equals(SortOrder.descending)) {
             pullRequestOrder = SortOrder.ascending;
-        }
-    }
-
-    public void sortByState() {
-        branchOrder = SortOrder.unsorted;
-        pullRequestOrder = SortOrder.unsorted;
-        buildResultOrder = SortOrder.unsorted;
-        mergeableOrder = SortOrder.unsorted;
-        LOGGER.debug("sortByState..." + stateOrder);
-        if (stateOrder.equals(SortOrder.ascending)) {
-            stateOrder = SortOrder.descending;
         } else {
-            stateOrder = SortOrder.ascending;
+            pullRequestOrder = SortOrder.descending;
         }
     }
 
     public void sortByBuildResult() {
         branchOrder = SortOrder.unsorted;
         pullRequestOrder = SortOrder.unsorted;
-        stateOrder = SortOrder.unsorted;
         mergeableOrder = SortOrder.unsorted;
+        isReviewedOrder = SortOrder.unsorted;
+        pullStateOrder = SortOrder.unsorted;
         LOGGER.debug("sortByBuildRequest..." + buildResultOrder);
-        if (buildResultOrder.equals(SortOrder.ascending)) {
-            buildResultOrder = SortOrder.descending;
-        } else {
+        if (buildResultOrder.equals(SortOrder.descending)) {
             buildResultOrder = SortOrder.ascending;
+        } else {
+            buildResultOrder = SortOrder.descending;
         }
     }
 
     public void sortByMergeable() {
         branchOrder = SortOrder.unsorted;
         pullRequestOrder = SortOrder.unsorted;
-        stateOrder = SortOrder.unsorted;
         buildResultOrder = SortOrder.unsorted;
+        isReviewedOrder = SortOrder.unsorted;
+        pullStateOrder = SortOrder.unsorted;
         LOGGER.debug("sortByMergeable..." + mergeableOrder);
-        if (mergeableOrder.equals(SortOrder.ascending)) {
-            mergeableOrder = SortOrder.descending;
-        } else {
+        if (mergeableOrder.equals(SortOrder.descending)) {
             mergeableOrder = SortOrder.ascending;
+        } else {
+            mergeableOrder = SortOrder.descending;
+        }
+    }
+
+    public void sortByReviewed() {
+        branchOrder = SortOrder.unsorted;
+        pullRequestOrder = SortOrder.unsorted;
+        buildResultOrder = SortOrder.unsorted;
+        mergeableOrder = SortOrder.unsorted;
+        pullStateOrder = SortOrder.unsorted;
+        LOGGER.debug("sortByReviewed..." + isReviewedOrder);
+        if (isReviewedOrder.equals(SortOrder.descending)) {
+            isReviewedOrder = SortOrder.ascending;
+        } else {
+            isReviewedOrder = SortOrder.descending;
+        }
+    }
+
+    public void sortByPullState() {
+        branchOrder = SortOrder.unsorted;
+        pullRequestOrder = SortOrder.unsorted;
+        buildResultOrder = SortOrder.unsorted;
+        mergeableOrder = SortOrder.unsorted;
+        isReviewedOrder = SortOrder.unsorted;
+        LOGGER.debug("sortByPullStateOrder..." + pullStateOrder);
+        if (pullStateOrder.equals(SortOrder.descending)) {
+            pullStateOrder = SortOrder.ascending;
+        } else {
+            pullStateOrder = SortOrder.descending;
         }
     }
 

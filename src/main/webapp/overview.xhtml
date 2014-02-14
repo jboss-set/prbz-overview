@@ -7,6 +7,7 @@
 	xmlns:ui="http://java.sun.com/jsf/facelets"
 	xmlns:a4j="http://richfaces.org/a4j"
 	xmlns:rich="http://richfaces.org/rich"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
 	xmlns:fn="http://java.sun.com/jsp/jstl/functions">
 
 	<ui:define name="body">
@@ -16,109 +17,108 @@
 
 			<div id="header">
 				<h:form prependId="false">
-					<h2>
+					<h1>
 						<h:outputText value="Pull Request Bugzilla Overview Page" />
-					</h2>
+					</h1>
 				</h:form>
 			</div>
 
 			<div id="content">
 				<h:form prependId="false">
-					<h4>
+					<h3>
 						<h:outputText id="total"
 							value="All Requests: #{fn:length(dataTableScrollerBean.dataList)}" />
-					</h4>
-					<div id="table">
+					</h3>
+					<div id="display-table">
 						<rich:dataTable value="#{dataTableScrollerBean.dataList}"
 							var="dataVar" id="table" rows="20" rowClasses="odd-row, even-row"
-							columnClasses="center-column,center-column,center-column,center-column,center-column,center-column,center-column,center-column,left-column,center-column"
+							columnClasses="center-column,center-column,center-column,center-column,center-column,center-column,center-column,left-column,center-column,center-column,center-column"
 							styleClass="stable">
 							<rich:column filterValue="#{dataTableScrollerBean.branchFilter}"
-								filterExpression="#{fn:containsIgnoreCase(dataVar.pullRequest.base.ref, dataTableScrollerBean.branchFilter)}">
+								filterExpression="#{fn:containsIgnoreCase(dataVar.pullRequest.base.ref, dataTableScrollerBean.branchFilter)}"
+								headerClass="each-column-header">
 								<f:facet name="header">
 									<h:panelGroup>
 										<h:outputText value="Branch " />
 										<h:selectOneMenu value="#{dataTableScrollerBean.branchFilter}">
 											<f:selectItems value="#{dataTableScrollerBean.branchOptions}" />
-											<a4j:ajax render="table" execute="@this" event="change" />
+											<a4j:ajax render="table scroller selected unselected"
+												execute="@this" event="change" />
 										</h:selectOneMenu>
 									</h:panelGroup>
 								</f:facet>
 								<h:outputText value="#{dataVar.pullRequest.base.ref}" />
 							</rich:column>
+
 							<!-- pull request id and current state -->
 							<rich:column id="pullrequestcol"
 								sortBy="#{dataVar.pullRequest.number}"
-								sortOrder="#{dataTableScrollerBean.pullRequestOrder}">
+								sortOrder="#{dataTableScrollerBean.pullRequestOrder}"
+								headerClass="each-column-header">
 								<f:facet name="header">
 									<a4j:commandLink value="Pull Request"
-										title="Sort By Pull Request" render="table"
+										title="Sort By Pull Request"
+										render="table selected unselected"
 										action="#{dataTableScrollerBean.sortByPullRequest}" />
 								</f:facet>
 								<h:outputLink value="#{dataVar.pullRequest.htmlUrl}">
 									<h:outputText value="##{dataVar.pullRequest.number}" />
 								</h:outputLink>
 							</rich:column>
-							<rich:column id="statecol" sortBy="#{dataVar.pullRequest.state}"
-								sortOrder="#{dataTableScrollerBean.stateOrder}">
-								<f:facet name="header">
-									<a4j:commandLink value="State"
-										title="Sort By Pull Request State" render="table"
-										action="#{dataTableScrollerBean.sortByState}" />
-								</f:facet>
-								<h:outputText value="#{dataVar.pullRequest.state}" />
-							</rich:column>
 
 							<!-- lightning build result -->
 							<rich:column id="buildresultcol" sortBy="#{dataVar.buildResult}"
-								sortOrder="#{dataTableScrollerBean.buildResultOrder}">
+								sortOrder="#{dataTableScrollerBean.buildResultOrder}"
+								headerClass="each-column-header">
 								<f:facet name="header">
 									<a4j:commandLink value="Lightning Build Result"
-										title="Sort By Lightning Build Result" render="table"
-										action="#{dataTableScrollerBean.sortByBuildResult}" />
+										title="Sort By Lightning Build Result"
+										render="table selected unselected"
+										action="#{dataTableScrollerBean.sortByBuildResult}"
+										styleClass="each-column-header" />
 								</f:facet>
 								<h:outputText value="#{dataVar.buildResult}" />
 							</rich:column>
 
 							<!-- upstream pull request id if provided -->
-							<rich:column id="upstreamcol">
+							<rich:column id="upstreamcol" headerClass="upstreamscol">
 								<f:facet name="header">
-									<h:outputText value="Upstream Pull Request" />
+									<h:outputText value="Upstream PR [target branch]" />
 								</f:facet>
 								<h:outputText value="N/A"
-									rendered="#{dataVar.pullRequestUpStreams.size() == 0}" />
+									rendered="#{fn:length(dataVar.pullRequestUpStreams) == 0}" />
 								<a4j:repeat value="#{dataVar.pullRequestUpStreams}"
 									var="upstreampullrequest" id="upstreampullrequest"
-									rendered="#{dataVar.pullRequestUpStreams.size() != 0}"
+									rendered="#{fn:length(dataVar.pullRequestUpStreams) != 0}"
 									rowKeyVar="i">
 									<h:outputText value="&lt;br /&gt;&lt;br /&gt;"
 										rendered="#{i>0}" escape="false" />
 									<h:outputLink value="#{upstreampullrequest.htmlUrl}">
 										<h:outputText value="##{upstreampullrequest.number}" />
 									</h:outputLink>
-
+									<h:outputText value=" [#{upstreampullrequest.base.ref}]" />
 								</a4j:repeat>
 							</rich:column>
 
-							<!-- bugzilla data information -->
+							<!-- issue data information -->
 							<ui:param name="issues"
-								value="#{dataVar.issues.size() != 0 ? dataVar.issues : null}" />
-							<rich:column id="bugscol">
+								value="#{fn:length(dataVar.issues) != 0 ? dataVar.issues : null}" />
+							<rich:column id="issuescol" headerClass="issuescol">
 								<f:facet name="header">
 									<h:outputText value="Issue" />
 								</f:facet>
 								<h:outputText value="N/A" rendered="#{issues == null}" />
-								<a4j:repeat value="#{issues}" var="issueid" id="issueid"
+								<a4j:repeat value="#{issues}" var="issue" id="issue"
 									rendered="#{issues != null}" rowKeyVar="i">
 									<h:outputText value="&lt;br /&gt;&lt;br /&gt;"
 										rendered="#{i>0}" escape="false" />
-									<h:outputLink
-										value="#{issueid.url}">
-										<h:outputText value="bz#{issueid.number}" />
+									<h:outputLink value="#{issue.url}">
+										<h:outputText value="bz#{issue.number}" />
 									</h:outputLink>
+									<h:outputText value=" #{issue.targetRelease}" />
 								</a4j:repeat>
 							</rich:column>
-							<rich:column id="statuscol">
+							<rich:column id="statuscol" headerClass="statuscol">
 								<f:facet name="header">
 									<h:outputText value="Issue Status" />
 								</f:facet>
@@ -130,7 +130,7 @@
 									<h:outputText value="#{issuestatus.status}" />
 								</a4j:repeat>
 							</rich:column>
-							<rich:column id="flagscol">
+							<rich:column id="flagscol" headerClass="flagscol">
 								<f:facet name="header">
 									<h:outputText value="Issue Flags" />
 								</f:facet>
@@ -140,30 +140,61 @@
 									<h:outputText value="&lt;br /&gt;" rendered="#{i>0}"
 										escape="false" />
 									<rich:list value="#{issueflags.flags}" var="flag" id="flag"
-										rendered="#{issueflags.flags.size() != 0}"
+										rendered="#{fn:length(issueflags.flags) != 0}"
 										style="text-align: left">
-										<h:outputText value="#{flag.name} = #{flag.status}" />
+										<h:outputText
+											value="#{flag.setter}: #{flag.name} #{flag.convertedFlag}" />
 									</rich:list>
 								</a4j:repeat>
 							</rich:column>
-							<rich:column id="summarycol">
+							<rich:column id="summarycol" headerClass="summarycol">
 								<f:facet name="header">
 									<h:outputText value="Summary" />
 								</f:facet>
 								<rich:list value="#{dataVar.overallState}" var="overallstate"
 									id="orverallstate">
-									<h:outputText value="#{overallstate}" />
+									<h:outputText value="#{overallstate}" styleClass="larger" />
 								</rich:list>
 							</rich:column>
 							<rich:column id="mergeablecol" sortBy="#{dataVar.mergeable}"
-								sortOrder="#{dataTableScrollerBean.mergeableOrder}">
+								sortOrder="#{dataTableScrollerBean.mergeableOrder}"
+								headerClass="each-column-header">
 								<f:facet name="header">
 									<a4j:commandLink value="Mergeable" title="Sort By Mergeable"
-										render="table"
-										action="#{dataTableScrollerBean.sortByMergeable}" />
+										render="table selected unselected"
+										action="#{dataTableScrollerBean.sortByMergeable}"
+										styleClass="each-column-header" />
 								</f:facet>
-								<h:outputText value="Yes" rendered="#{dataVar.mergeable == true}" class="mergeable"/>
-								<h:outputText value="No" rendered="#{dataVar.mergeable == false}" class="notmergeable"/>
+								<h:outputText value="Yes"
+									rendered="#{dataVar.mergeable == true}" class="green" />
+								<h:outputText value="No"
+									rendered="#{dataVar.mergeable == false}" class="red" />
+							</rich:column>
+							<rich:column id="reviewedcol" sortBy="#{dataVar.reviewed}"
+								sortOrder="#{dataTableScrollerBean.isReviewedOrder}"
+								headerClass="each-column-header">
+								<f:facet name="header">
+									<a4j:commandLink value="Reviewed" title="Sort By review OK"
+										render="table selected unselected"
+										action="#{dataTableScrollerBean.sortByReviewed}"
+										styleClass="each-column-header" />
+								</f:facet>
+								<h:outputText value="Yes" rendered="#{dataVar.reviewed == true}"
+									class="green" />
+								<h:outputText value="No" rendered="#{dataVar.reviewed == false}"
+									class="red" />
+							</rich:column>
+							<rich:column id="statecol" sortBy="#{dataVar.state}"
+								sortOrder="#{dataTableScrollerBean.pullStateOrder}"
+								headerClass="each-column-header">
+								<f:facet name="header">
+									<a4j:commandLink value="Pull State"
+										title="Sort By Pull Request State"
+										render="table selected unselected"
+										action="#{dataTableScrollerBean.sortByPullState}"
+										styleClass="each-column-header" />
+								</f:facet>
+								<h:outputText value="#{dataVar.state}" />
 							</rich:column>
 						</rich:dataTable>
 
@@ -178,7 +209,8 @@
 					</div>
 					<div id="push-to-table">
 						<a4j:push address="pushAddress">
-							<a4j:ajax event="dataavailable" render="table scroller total" />
+							<a4j:ajax event="dataavailable"
+								render="table scroller total selected unselected" />
 						</a4j:push>
 					</div>
 				</h:form>
@@ -187,9 +219,9 @@
 
 		<rich:jQuery selector=".stable tr:odd" query="addClass('odd-row')" />
 		<rich:jQuery selector=".stable tr:even" query="addClass('even-row')" />
-		<rich:jQuery selector=".stable tr" event="mouseover"
-			query="jQuery(this).addClass('active-row')" />
-		<rich:jQuery selector=".stable tr" event="mouseout"
-			query="jQuery(this).removeClass('active-row')" />
+		<rich:jQuery id="selected" selector=".stable tr" event="mouseover"
+			query="jQuery(this).addClass('active-row')" execute="@this" />
+		<rich:jQuery id="unselected" selector=".stable tr" event="mouseout"
+			query="jQuery(this).removeClass('active-row')" execute="@this" />
 	</ui:define>
 </ui:composition>

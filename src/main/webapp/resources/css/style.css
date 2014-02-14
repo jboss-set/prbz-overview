@@ -1,12 +1,5 @@
 @CHARSET "UTF-8";
 
-h5 {
-	height: 30px;
-	width: 95%;
-	margin: auto;
-	text-align: right;
-}
-
 .even-row {
 	background-color: #FCFFFE;
 }
@@ -17,10 +10,12 @@ h5 {
 
 .left-column {
 	text-align: left;
+	font-size: 80%;
 }
 
 .center-column {
 	text-align: center;
+	font-size: 80%;
 }
 
 .active-row {
@@ -52,15 +47,54 @@ h5 {
 	margin: auto;
 }
 
-#button {
-	font-size: 14px;
+.green {
+	color: #3F7F5F;
+	font-size: 90%;
+	font-family: "Arial Black", Gadget, sans-serif;
 }
 
-.mergeable {
-   background-color: #00FF00;
+.red {
+	color: #FF0000;
+	font-size: 90%;
+	font-family: "Arial Black", Gadget, sans-serif;
 }
 
-.notmergeable {
-	background-color: #FF0000;
-	text-align: center;
+.each-column-header {
+	font-size: 90%;
+	font-family: "Arial Black", Gadget, sans-serif;
+}
+
+.upstreamscol {
+	font-size: 90%;
+	font-family: "Arial Black", Gadget, sans-serif;
+	width: 8%;
+}
+
+.issuescol {
+	font-size: 90%;
+	font-family: "Arial Black", Gadget, sans-serif;
+	width: 12%;
+}
+
+.statuscol {
+	font-size: 90%;
+	font-family: "Arial Black", Gadget, sans-serif;
+	width: 8%;
+}
+
+.flagscol {
+	font-size: 90%;
+	font-family: "Arial Black", Gadget, sans-serif;
+	width: 15%;
+}
+
+.summaryscol {
+	font-size: 90%;
+	font-family: "Arial Black", Gadget, sans-serif;
+	width: 15%;
+}
+
+.larger {
+	font-size: larger;
+	font-family: "Arial Black", Gadget, sans-serif;
 }

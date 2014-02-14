@@ -47,6 +47,7 @@ import org.jboss.logging.Logger;
 import org.jboss.overview.model.OverviewData;
 import org.jboss.pull.shared.BuildResult;
 import org.jboss.pull.shared.Issue;
+import org.jboss.pull.shared.ProcessorPullState;
 import org.jboss.pull.shared.PullHelper;
 import org.jboss.pull.shared.evaluators.BasePullEvaluator;
 import org.jboss.pull.shared.spi.PullEvaluator;
@@ -65,7 +66,7 @@ public class SingletonAider {
     private final String PULL_REQUEST_STATE = "open";
     private static final String CACHE_NAME = "cache";
     private PullHelper helper;
-    private final long DELAY = 10; // 10 minutes delay before task is to be executed.
+    private final long DELAY = 15; // 15 minutes delay before task is to be executed.
     private final long PERIOD = 60; // 60 minutes between successive task executions.
 
     @Inject
@@ -131,9 +132,11 @@ public class SingletonAider {
 
         final boolean isReviewed = BasePullEvaluator.isReviewed(mergeable);
 
+        final ProcessorPullState pullState = helper.checkPullRequestState(pullRequest);
+
         final List<String> overallState = mergeable.getDescription();
 
-        return new OverviewData(pullRequest, buildResult, upStreamPullRequests, bugs, overallState, mergeable.isMergeable(), isReviewed);
+        return new OverviewData(pullRequest, buildResult, upStreamPullRequests, bugs, overallState, mergeable.isMergeable(), isReviewed, pullState);
     }
 
     @Lock(LockType.WRITE)
@@ -185,6 +188,7 @@ public class SingletonAider {
                 }
             }
         }
+        LOGGER.info("cache initialization completed.");
     }
 
     public PullHelper getHelper() {
