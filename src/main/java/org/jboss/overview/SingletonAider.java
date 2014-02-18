@@ -119,6 +119,7 @@ public class SingletonAider {
                 e.printStackTrace(System.err);
             }
         }
+        LOGGER.info("cache initialization completed.");
     }
 
     public OverviewData getOverviewData(PullRequest pullRequest) {
@@ -188,7 +189,6 @@ public class SingletonAider {
                 }
             }
         }
-        LOGGER.info("cache initialization completed.");
     }
 
     public PullHelper getHelper() {
