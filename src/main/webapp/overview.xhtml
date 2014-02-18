@@ -51,19 +51,23 @@
 							</rich:column>
 
 							<!-- pull request id and current state -->
-							<rich:column id="pullrequestcol"
+							<rich:column id="pullcol"
 								sortBy="#{dataVar.pullRequest.number}"
 								sortOrder="#{dataTableScrollerBean.pullRequestOrder}"
-								headerClass="each-column-header">
+								headerClass="pullcol">
 								<f:facet name="header">
-									<a4j:commandLink value="Pull Request"
+									<a4j:commandLink value="Pull [Milestone]"
 										title="Sort By Pull Request"
 										render="table selected unselected"
-										action="#{dataTableScrollerBean.sortByPullRequest}" />
+										action="#{dataTableScrollerBean.sortByPullRequest}"
+										styleClass = "pullcol" />
 								</f:facet>
 								<h:outputLink value="#{dataVar.pullRequest.htmlUrl}">
 									<h:outputText value="##{dataVar.pullRequest.number}" />
 								</h:outputLink>
+																								<h:outputText value="&lt;br/&gt;" escape="false" />
+								<h:outputText value="[#{dataVar.pullRequest.milestone.title}]"
+									rendered="#{dataVar.pullRequest.milestone != null}" />
 							</rich:column>
 
 							<!-- lightning build result -->
@@ -78,6 +82,7 @@
 										styleClass="each-column-header" />
 								</f:facet>
 								<h:outputText value="#{dataVar.buildResult}" />
+
 							</rich:column>
 
 							<!-- upstream pull request id if provided -->

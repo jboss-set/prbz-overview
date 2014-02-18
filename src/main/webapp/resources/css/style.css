@@ -64,6 +64,12 @@
 	font-family: "Arial Black", Gadget, sans-serif;
 }
 
+.pullcol {
+	font-size: 90%;
+	font-family: "Arial Black", Gadget, sans-serif;
+	width: 5%;
+}
+
 .upstreamscol {
 	font-size: 90%;
 	font-family: "Arial Black", Gadget, sans-serif;
@@ -88,10 +94,10 @@
 	width: 15%;
 }
 
-.summaryscol {
+.summarycol {
 	font-size: 90%;
 	font-family: "Arial Black", Gadget, sans-serif;
-	width: 15%;
+	width: 25%;
 }
 
 .larger {
