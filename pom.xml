@@ -22,11 +22,17 @@
 		<infinispan.version>5.2.1.Final</infinispan.version>
 		<org.jboss.jbossset.pull-shared.version>1.0-SNAPSHOT</org.jboss.jbossset.pull-shared.version>
 		<version.jboss.spec.javaee.6.0>3.0.2.Final</version.jboss.spec.javaee.6.0>
+		<version.checkstyle.plugin>2.11</version.checkstyle.plugin>
+		<org.wildfly.wildfly.build.config.version>8.0.0.Final</org.wildfly.wildfly.build.config.version>
 	</properties>
 
 	<build>
 		<finalName>prbz-overview</finalName>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+			</plugin>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>2.3.2</version>
@@ -41,6 +47,38 @@
 				<version>7.4.Final</version>
 			</plugin>
 		</plugins>
+		<pluginManagement>
+			<plugins>
+				<!-- Checkstyle -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-checkstyle-plugin</artifactId>
+					<version>${version.checkstyle.plugin}</version>
+					<configuration>
+						<configLocation>jboss-as-checkstyle/checkstyle.xml</configLocation>
+						<consoleOutput>true</consoleOutput>
+						<failsOnError>true</failsOnError>
+						<useFile />
+					</configuration>
+					<dependencies>
+						<dependency>
+							<groupId>org.wildfly</groupId>
+							<artifactId>wildfly-build-config</artifactId>
+							<version>${org.wildfly.wildfly.build.config.version}</version>
+						</dependency>
+					</dependencies>
+					<executions>
+						<execution>
+							<id>check-style</id>
+							<phase>compile</phase>
+							<goals>
+								<goal>checkstyle</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
 
 	<dependencyManagement>
