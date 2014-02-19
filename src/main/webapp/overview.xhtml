@@ -51,8 +51,7 @@
 							</rich:column>
 
 							<!-- pull request id and current state -->
-							<rich:column id="pullcol"
-								sortBy="#{dataVar.pullRequest.number}"
+							<rich:column id="pullcol" sortBy="#{dataVar.pullRequest.number}"
 								sortOrder="#{dataTableScrollerBean.pullRequestOrder}"
 								headerClass="pullcol">
 								<f:facet name="header">
@@ -60,12 +59,12 @@
 										title="Sort By Pull Request"
 										render="table selected unselected"
 										action="#{dataTableScrollerBean.sortByPullRequest}"
-										styleClass = "pullcol" />
+										styleClass="pullcol" />
 								</f:facet>
 								<h:outputLink value="#{dataVar.pullRequest.htmlUrl}">
 									<h:outputText value="##{dataVar.pullRequest.number}" />
 								</h:outputLink>
-																								<h:outputText value="&lt;br/&gt;" escape="false" />
+								<h:outputText value="&lt;br/&gt;" escape="false" />
 								<h:outputText value="[#{dataVar.pullRequest.milestone.title}]"
 									rendered="#{dataVar.pullRequest.milestone != null}" />
 							</rich:column>
@@ -163,12 +162,12 @@
 							</rich:column>
 							<rich:column id="mergeablecol" sortBy="#{dataVar.mergeable}"
 								sortOrder="#{dataTableScrollerBean.mergeableOrder}"
-								headerClass="each-column-header">
+								headerClass="mergeablecol">
 								<f:facet name="header">
 									<a4j:commandLink value="Mergeable" title="Sort By Mergeable"
 										render="table selected unselected"
 										action="#{dataTableScrollerBean.sortByMergeable}"
-										styleClass="each-column-header" />
+										styleClass="mergeablecol" />
 								</f:facet>
 								<h:outputText value="Yes"
 									rendered="#{dataVar.mergeable == true}" class="green" />
@@ -177,12 +176,13 @@
 							</rich:column>
 							<rich:column id="reviewedcol" sortBy="#{dataVar.reviewed}"
 								sortOrder="#{dataTableScrollerBean.isReviewedOrder}"
-								headerClass="each-column-header">
+								headerClass="reviewedcol">
 								<f:facet name="header">
-									<a4j:commandLink value="Reviewed" title="Sort By review OK"
+									<a4j:commandLink value="Merge Req"
+										title="Sort By Merge Req message merge this please"
 										render="table selected unselected"
 										action="#{dataTableScrollerBean.sortByReviewed}"
-										styleClass="each-column-header" />
+										styleClass="reviewedcol" />
 								</f:facet>
 								<h:outputText value="Yes" rendered="#{dataVar.reviewed == true}"
 									class="green" />
