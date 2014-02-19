@@ -100,6 +100,18 @@
 	width: 25%;
 }
 
+.mergeablecol {
+	font-size: 90%;
+	font-family: "Arial Black", Gadget, sans-serif;
+	width: 5%;
+}
+
+.reviewedcol {
+	font-size: 90%;
+	font-family: "Arial Black", Gadget, sans-serif;
+	width: 6%;
+}
+
 .larger {
 	font-size: larger;
 	font-family: "Arial Black", Gadget, sans-serif;
