@@ -46,7 +46,7 @@ import org.infinispan.api.BasicCache;
 import org.jboss.logging.Logger;
 import org.jboss.overview.model.OverviewData;
 import org.jboss.pull.shared.BuildResult;
-import org.jboss.pull.shared.Issue;
+import org.jboss.pull.shared.connectors.bugzilla.Issue;
 import org.jboss.pull.shared.ProcessorPullState;
 import org.jboss.pull.shared.PullHelper;
 import org.jboss.pull.shared.evaluators.BasePullEvaluator;
@@ -107,7 +107,7 @@ public class SingletonAider {
 
     @Lock(LockType.WRITE)
     public void initCache() {
-        final List<PullRequest> pullRequests = helper.getPullRequests(PULL_REQUEST_STATE);
+        final List<PullRequest> pullRequests = helper.getGHHelper().getPullRequests(PULL_REQUEST_STATE);
 
         for (PullRequest pullRequest : pullRequests) {
             OverviewData pullRequestData = getOverviewData(pullRequest);
@@ -144,7 +144,7 @@ public class SingletonAider {
     public void updateCache() {
         Set<Integer> keys = cache.keySet();
 
-        final List<PullRequest> pullRequests = helper.getPullRequests(PULL_REQUEST_STATE);
+        final List<PullRequest> pullRequests = helper.getGHHelper().getPullRequests(PULL_REQUEST_STATE);
 
         Map<Integer, PullRequest> pullRequestsMap = new HashMap<Integer, PullRequest>();
 
