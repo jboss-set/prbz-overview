@@ -30,7 +30,7 @@ import javax.annotation.PostConstruct;
 
 import org.eclipse.egit.github.core.PullRequest;
 import org.jboss.pull.shared.BuildResult;
-import org.jboss.pull.shared.Issue;
+import org.jboss.pull.shared.connectors.bugzilla.Issue;
 import org.jboss.pull.shared.ProcessorPullState;
 
 /**
