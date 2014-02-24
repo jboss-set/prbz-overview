@@ -46,7 +46,7 @@ import org.infinispan.api.BasicCache;
 import org.jboss.logging.Logger;
 import org.jboss.overview.model.OverviewData;
 import org.jboss.pull.shared.BuildResult;
-import org.jboss.pull.shared.connectors.bugzilla.Issue;
+import org.jboss.pull.shared.connectors.common.Issue;
 import org.jboss.pull.shared.ProcessorPullState;
 import org.jboss.pull.shared.PullHelper;
 import org.jboss.pull.shared.evaluators.BasePullEvaluator;
