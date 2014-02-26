@@ -59,8 +59,9 @@ public class CacheContainerProvider {
             //Builds  the GlobalConfiguration object
             Configuration loc = new ConfigurationBuilder()
                 .clustering().cacheMode(CacheMode.LOCAL) //Set Cache mode to LOCAL - Data is not replicated.
-                .eviction().maxEntries(100).strategy(EvictionStrategy.LIRS) //Sets 100 as maximum number of entries in a cache instance and uses the LIRS strategy - an efficient low inter-reference recency set replacement policy to improve buffer cache performance
+                .eviction().maxEntries(500).strategy(EvictionStrategy.LIRS) //Sets 500 as maximum number of entries in a cache instance and uses the LIRS strategy - an efficient low inter-reference recency set replacement policy to improve buffer cache performance
                 .loaders().passivation(false) //Disable passivation and adds a FileCacheStore that is Purged on Startup
+                .locking().concurrencyLevel(16)
                 .build(); //Builds the Configuration object
             manager = new DefaultCacheManager(glob, loc, true);
             LOGGER.info("=== Using DefaultCacheManager (library mode) ===");
