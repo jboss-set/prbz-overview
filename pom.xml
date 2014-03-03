@@ -13,7 +13,7 @@
 	<groupId>org.jboss.jbossset</groupId>
 	<artifactId>prbz-overview</artifactId>
 	<name>prbz-overview</name>
-	<version>0.1.Final</version>
+	<version>0.2-SNAPSHOT</version>
 	<packaging>war</packaging>
 
 	<properties>
@@ -243,7 +243,7 @@
 		<connection>scm:git:git://github.com/jboss-set/prbz-overview.git</connection>
 		<developerConnection>scm:git:git@github.com:jboss-set/prbz-overview.git</developerConnection>
 		<url>https://github.com/jboss-set/prbz-overview</url>
-		<tag>prbz-overview-0.1.Final</tag>
+		<tag>HEAD</tag>
 	</scm>
 
 </project>
