@@ -41,16 +41,15 @@ import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.inject.Inject;
 
-import org.eclipse.egit.github.core.PullRequest;
 import org.infinispan.api.BasicCache;
 import org.jboss.logging.Logger;
 import org.jboss.overview.model.OverviewData;
 import org.jboss.pull.shared.BuildResult;
+import org.jboss.pull.shared.connectors.RedhatPullRequest;
 import org.jboss.pull.shared.connectors.common.Issue;
 import org.jboss.pull.shared.ProcessorPullState;
 import org.jboss.pull.shared.PullHelper;
-import org.jboss.pull.shared.evaluators.BasePullEvaluator;
-import org.jboss.pull.shared.spi.PullEvaluator;
+import org.jboss.pull.shared.spi.PullEvaluator.Result;
 import org.richfaces.application.push.MessageException;
 
 /**
@@ -89,7 +88,7 @@ public class SingletonAider {
         } catch (Exception e) {
             e.printStackTrace(System.err);
             throw new RuntimeException(e);
-//            System.exit(1);       ;-)
+            // System.exit(1); ;-)
         }
         // create cache
         cache = provider.getCacheContainer().getCache(CACHE_NAME);
@@ -107,9 +106,9 @@ public class SingletonAider {
 
     @Lock(LockType.WRITE)
     public void initCache() {
-        final List<PullRequest> pullRequests = helper.getGHHelper().getPullRequests(PULL_REQUEST_STATE);
+        final List<RedhatPullRequest> pullRequests = helper.getOpenPullRequests();
 
-        for (PullRequest pullRequest : pullRequests) {
+        for (RedhatPullRequest pullRequest : pullRequests) {
             OverviewData pullRequestData = getOverviewData(pullRequest);
             cache.put(pullRequest.getNumber(), pullRequestData, -1, TimeUnit.SECONDS);
 
@@ -122,33 +121,34 @@ public class SingletonAider {
         LOGGER.info("cache initialization completed.");
     }
 
-    public OverviewData getOverviewData(PullRequest pullRequest) {
-        final BuildResult buildResult = helper.checkBuildResult(pullRequest);
+    public OverviewData getOverviewData(RedhatPullRequest pullRequest) {
+        final BuildResult buildResult = pullRequest.getBuildResult();
 
-        final List<PullRequest> upStreamPullRequests = helper.getEvaluatorFacade().getUpstreamPullRequest(pullRequest);
+        final List<RedhatPullRequest> upStreamPullRequests = helper.getEvaluatorFacade().getUpstreamPullRequest(pullRequest);
 
         final List<? extends Issue> bugs = helper.getEvaluatorFacade().getIssue(pullRequest);
 
-        final PullEvaluator.Result mergeable = helper.getEvaluatorFacade().isMergeable(pullRequest);
+        final Result mergeable = helper.getEvaluatorFacade().isMergeable(pullRequest);
 
-        final boolean isReviewed = BasePullEvaluator.isReviewed(mergeable);
+        final boolean isReviewed = mergeable.isMergeable();
 
         final ProcessorPullState pullState = helper.checkPullRequestState(pullRequest);
 
         final List<String> overallState = mergeable.getDescription();
 
-        return new OverviewData(pullRequest, buildResult, upStreamPullRequests, bugs, overallState, mergeable.isMergeable(), isReviewed, pullState);
+        return new OverviewData(pullRequest, buildResult, upStreamPullRequests, bugs, overallState, mergeable.isMergeable(),
+                isReviewed, pullState);
     }
 
     @Lock(LockType.WRITE)
     public void updateCache() {
         Set<Integer> keys = cache.keySet();
 
-        final List<PullRequest> pullRequests = helper.getGHHelper().getPullRequests(PULL_REQUEST_STATE);
+        final List<RedhatPullRequest> pullRequests = helper.getOpenPullRequests();
 
-        Map<Integer, PullRequest> pullRequestsMap = new HashMap<Integer, PullRequest>();
+        Map<Integer, RedhatPullRequest> pullRequestsMap = new HashMap<Integer, RedhatPullRequest>();
 
-        for (PullRequest pullRequest : pullRequests) {
+        for (RedhatPullRequest pullRequest : pullRequests) {
             pullRequestsMap.put(pullRequest.getNumber(), pullRequest);
         }
 
