@@ -28,8 +28,8 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
-import org.eclipse.egit.github.core.PullRequest;
 import org.jboss.pull.shared.BuildResult;
+import org.jboss.pull.shared.connectors.RedhatPullRequest;
 import org.jboss.pull.shared.connectors.common.Issue;
 import org.jboss.pull.shared.ProcessorPullState;
 
@@ -40,8 +40,8 @@ import org.jboss.pull.shared.ProcessorPullState;
 public class OverviewData implements Serializable {
 
     private static final long serialVersionUID = -2423691441325004516L;
-    private PullRequest pullRequest;
-    private List<PullRequest> pullRequestUpStreams; // upstream pull request if provided
+    private RedhatPullRequest pullRequest;
+    private List<RedhatPullRequest> pullRequestUpStreams; // upstream pull request if provided
     private BuildResult buildResult;
     private List<? extends Issue> issues; // bugzilla or jira bug if provided
     private List<String> overallState;
@@ -49,11 +49,11 @@ public class OverviewData implements Serializable {
     private boolean isReviewed = false;
     private ProcessorPullState state = ProcessorPullState.NEW;
 
-    public OverviewData(PullRequest pullRequest) {
+    public OverviewData(RedhatPullRequest pullRequest) {
         this(pullRequest, null, null, null, null, false, false, ProcessorPullState.NEW);
     }
 
-    public OverviewData(PullRequest pullRequest, BuildResult buildResult, List<PullRequest> pullRequestUpStreams, List<? extends Issue> issues, List<String> overallState, boolean mergeable, boolean isReviewed, ProcessorPullState state) {
+    public OverviewData(RedhatPullRequest pullRequest, BuildResult buildResult, List<RedhatPullRequest> pullRequestUpStreams, List<? extends Issue> issues, List<String> overallState, boolean mergeable, boolean isReviewed, ProcessorPullState state) {
         this.pullRequest = pullRequest;
         this.buildResult = buildResult;
         this.pullRequestUpStreams = pullRequestUpStreams;
@@ -68,19 +68,19 @@ public class OverviewData implements Serializable {
     public void postContruct() throws Exception {
     }
 
-    public PullRequest getPullRequest() {
+    public RedhatPullRequest getPullRequest() {
         return pullRequest;
     }
 
-    public void setPullRequest(PullRequest pullRequest) {
+    public void setPullRequest(RedhatPullRequest pullRequest) {
         this.pullRequest = pullRequest;
     }
 
-    public List<PullRequest> getPullRequestUpStreams() {
+    public List<RedhatPullRequest> getPullRequestUpStreams() {
         return pullRequestUpStreams;
     }
 
-    public void setPullRequestUpStreams(ArrayList<PullRequest> pullRequestUpStreams) {
+    public void setPullRequestUpStreams(ArrayList<RedhatPullRequest> pullRequestUpStreams) {
         this.pullRequestUpStreams = pullRequestUpStreams;
     }
 
