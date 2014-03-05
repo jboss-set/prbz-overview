@@ -35,7 +35,7 @@
 							columnClasses="center-column,center-column,center-column,center-column,center-column,center-column,center-column,left-column,center-column,center-column,center-column"
 							styleClass="stable">
 							<rich:column filterValue="#{dataTableScrollerBean.branchFilter}"
-								filterExpression="#{fn:containsIgnoreCase(dataVar.pullRequest.base.ref, dataTableScrollerBean.branchFilter)}"
+								filterExpression="#{fn:containsIgnoreCase(dataVar.pullRequest.targetBranchTitle, dataTableScrollerBean.branchFilter)}"
 								headerClass="each-column-header">
 								<f:facet name="header">
 									<h:panelGroup>
@@ -47,7 +47,7 @@
 										</h:selectOneMenu>
 									</h:panelGroup>
 								</f:facet>
-								<h:outputText value="#{dataVar.pullRequest.base.ref}" />
+								<h:outputText value="#{dataVar.pullRequest.targetBranchTitle}" />
 							</rich:column>
 
 							<!-- pull request id and current state -->
@@ -100,7 +100,7 @@
 									<h:outputLink value="#{upstreampullrequest.htmlUrl}">
 										<h:outputText value="##{upstreampullrequest.number}" />
 									</h:outputLink>
-									<h:outputText value=" [#{upstreampullrequest.base.ref}]" />
+									<h:outputText value=" [#{upstreampullrequest.targetBranchTitle}]" />
 								</a4j:repeat>
 							</rich:column>
 
