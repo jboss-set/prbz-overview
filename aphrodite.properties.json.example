@@ -1,0 +1,32 @@
+{
+    "issueTrackerConfigs": [
+        {
+            "url": "https://issues.jboss.org/",
+            "username": "user",
+            "password": "pass",
+            "tracker": "JIRA",
+            "defaultIssueLimit": 1
+        },
+	{
+            "url": "https://bugzilla.redhat.com/",
+            "username": "user",
+            "password": "pass",
+            "tracker": "BUGZILLA",
+            "defaultIssueLimit": 1
+        }
+    ],
+    "repositoryConfigs": [
+        {
+            "url": "https://github.com/",
+            "username": "user",
+            "password": "pass",
+            "type": "GITHUB"
+        }
+    ],
+    "streamConfigs": [
+        {
+            "file": "...",
+            "type": "JSON"
+        }
+    ]
+}

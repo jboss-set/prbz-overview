@@ -1,0 +1,8 @@
+org.jboss.set.assistant.evaluator.impl.BranchEvaluator
+org.jboss.set.assistant.evaluator.impl.IssuesRelatedEvaluator
+org.jboss.set.assistant.evaluator.impl.LabelsEvaluator
+org.jboss.set.assistant.evaluator.impl.PullRequestEvaluator
+org.jboss.set.assistant.evaluator.impl.PullRequestRelatedEvaluator
+org.jboss.set.assistant.evaluator.impl.RepositoryEvaluator
+org.jboss.set.assistant.evaluator.impl.StreamsEvaluator
+org.jboss.set.assistant.evaluator.impl.UpstreamEvaluator

@@ -1,76 +1,73 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<artifactId>jboss-parent</artifactId>
 		<groupId>org.jboss</groupId>
-		<version>11-redhat-1</version>
-		<relativePath />
+		<artifactId>jboss-parent</artifactId>
+		<version>19</version>
 	</parent>
 
-	<groupId>org.jboss.jbossset</groupId>
+	<groupId>org.jboss.set</groupId>
 	<artifactId>prbz-overview</artifactId>
 	<name>prbz-overview</name>
 	<version>0.2-SNAPSHOT</version>
 	<packaging>war</packaging>
+	<description>An overview place to review all pull requests on GitHub repository and issues in each payload tracker.</description>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.source>1.6</maven.compiler.source>
-		<maven.compiler.target>1.6</maven.compiler.target>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<jdk.min.version>1.8</jdk.min.version>
 
 		<!-- Versions -->
-		<org.richfaces.bom.version>4.3.4.Final</org.richfaces.bom.version>
-		<org.eclipse.egit.github.core.version>2.1.2</org.eclipse.egit.github.core.version>
-		<jboss-logging.version>3.1.3.GA</jboss-logging.version>
-		<infinispan.version>5.3.0.Final</infinispan.version>
-		<org.jboss.jbossset.pull-shared.version>0.5.3</org.jboss.jbossset.pull-shared.version>
-		<version.jboss.spec.javaee.6.0>3.0.2.Final</version.jboss.spec.javaee.6.0>
 		<version.checkstyle.plugin>2.11</version.checkstyle.plugin>
-		<org.wildfly.wildfly.build.config.version>8.0.0.Final</org.wildfly.wildfly.build.config.version>
+		<version.jboss.spec.javaee.7.0>1.0.3.Final</version.jboss.spec.javaee.7.0>
+		<version.org.freemaker.freemarker>2.3.23</version.org.freemaker.freemarker>
+		<version.org.jboss.set.assistant>0.1-SNAPSHOT</version.org.jboss.set.assistant>
+		<version.org.wildfly.checkstyle-config>1.0.4.Final</version.org.wildfly.checkstyle-config>
+		<version.org.wildfly.wildfly.build.config>8.0.0.Final</version.org.wildfly.wildfly.build.config>
+		<version.war.plugin>2.1.1</version.war.plugin>
 	</properties>
 
 	<build>
-		<finalName>prbz-overview</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
 			</plugin>
-			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
-			</plugin>
-			<plugin>
-				<artifactId>maven-war-plugin</artifactId>
-				<version>2.1.1</version>
-			</plugin>
-			<plugin>
-				<groupId>org.jboss.as.plugins</groupId>
-				<artifactId>jboss-as-maven-plugin</artifactId>
-				<version>7.4.Final</version>
-			</plugin>
 		</plugins>
 		<pluginManagement>
 			<plugins>
-				<!-- Checkstyle -->
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-checkstyle-plugin</artifactId>
-					<version>${version.checkstyle.plugin}</version>
 					<configuration>
-						<configLocation>jboss-as-checkstyle/checkstyle.xml</configLocation>
+						<configLocation>wildfly-checkstyle/checkstyle.xml</configLocation>
 						<consoleOutput>true</consoleOutput>
 						<failsOnError>true</failsOnError>
 						<useFile />
+						<linkXRef>false</linkXRef>
 					</configuration>
 					<dependencies>
 						<dependency>
-							<groupId>org.wildfly</groupId>
-							<artifactId>wildfly-build-config</artifactId>
-							<version>${org.wildfly.wildfly.build.config.version}</version>
+							<groupId>com.puppycrawl.tools</groupId>
+							<artifactId>checkstyle</artifactId>
+							<version>${version.checkstyle}</version>
+							<exclusions>
+								<exclusion>
+									<groupId>com.sun</groupId>
+									<artifactId>tools</artifactId>
+								</exclusion>
+							</exclusions>
+						</dependency>
+						<dependency>
+							<groupId>org.wildfly.checkstyle</groupId>
+							<artifactId>wildfly-checkstyle-config</artifactId>
+							<version>${version.org.wildfly.checkstyle-config}</version>
 						</dependency>
 					</dependencies>
 					<executions>
@@ -90,16 +87,9 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<groupId>org.richfaces</groupId>
-				<artifactId>richfaces-bom</artifactId>
-				<version>${org.richfaces.bom.version}</version>
-				<scope>import</scope>
-				<type>pom</type>
-			</dependency>
-			<dependency>
 				<groupId>org.jboss.spec</groupId>
-				<artifactId>jboss-javaee-6.0</artifactId>
-				<version>${version.jboss.spec.javaee.6.0}</version>
+				<artifactId>jboss-javaee-7.0</artifactId>
+				<version>${version.jboss.spec.javaee.7.0}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -108,73 +98,41 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.atmosphere</groupId>
-			<artifactId>atmosphere-runtime</artifactId>
+			<groupId>org.freemarker</groupId>
+			<artifactId>freemarker</artifactId>
+			<version>${version.org.freemarker}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.richfaces.ui</groupId>
-			<artifactId>richfaces-components-ui</artifactId>
+			<groupId>org.jboss.set</groupId>
+			<artifactId>assistant</artifactId>
+			<version>${version.org.jboss.set.assistant}</version>
 		</dependency>
-		<dependency>
-			<groupId>org.richfaces.core</groupId>
-			<artifactId>richfaces-core-impl</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>javax.faces</groupId>
-			<artifactId>javax.faces-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.servlet.jsp</groupId>
-			<artifactId>jsp-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.el</groupId>
-			<artifactId>el-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.servlet.jsp.jstl</groupId>
-			<artifactId>jstl-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.ehcache</groupId>
-			<artifactId>ehcache</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.mylyn.github</groupId>
-			<artifactId>org.eclipse.egit.github.core</artifactId>
-			<version>${org.eclipse.egit.github.core.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.jboss.logging</groupId>
-			<artifactId>jboss-logging</artifactId>
-			<version>${jboss-logging.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.infinispan</groupId>
-			<artifactId>infinispan-core</artifactId>
-			<version>${infinispan.version}</version>
-		</dependency>
+		<!-- Import the CDI API, we use provided scope as the API is included in 
+			WildFly -->
 		<dependency>
 			<groupId>javax.enterprise</groupId>
 			<artifactId>cdi-api</artifactId>
+			<scope>provided</scope>
 		</dependency>
+
+		<!-- Import the Servlet API, we use provided scope as the API is included 
+			in WildFly -->
 		<dependency>
-			<groupId>org.jboss.jbossset</groupId>
-			<artifactId>pull-shared</artifactId>
-			<version>${org.jboss.jbossset.pull-shared.version}</version>
+			<groupId>org.jboss.spec.javax.servlet</groupId>
+			<artifactId>jboss-servlet-api_3.1_spec</artifactId>
+			<scope>provided</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>org.jboss.spec.javax.ejb</groupId>
-			<artifactId>jboss-ejb-api_3.1_spec</artifactId>
+			<artifactId>jboss-ejb-api_3.2_spec</artifactId>
 			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.freemarker</groupId>
+			<artifactId>freemarker</artifactId>
+			<version>${version.org.freemaker.freemarker}</version>
 		</dependency>
 	</dependencies>
 
@@ -185,14 +143,14 @@
 				<plugins>
 					<plugin>
 						<artifactId>maven-war-plugin</artifactId>
+						<version>${version.war.plugin}</version>
 						<configuration>
-							<webappDirectory>${project.build.directory}/${project.build.finalName}-jee6</webappDirectory>
-							<classifier>jee6</classifier>
+							<!-- Java EE doesn't require web.xml, Maven needs to catch up! -->
+							<failOnMissingWebXml>false</failOnMissingWebXml>
 						</configuration>
 					</plugin>
 				</plugins>
 			</build>
-
 			<dependencies>
 				<dependency>
 					<groupId>javax.faces</groupId>
@@ -238,6 +196,23 @@
 			</build>
 		</profile>
 	</profiles>
+
+	<repositories>
+		<repository>
+			<id>jboss-product-repository</id>
+			<name>JBoss Internal Product Repository</name>
+			<url>http://download.lab.bos.redhat.com/brewroot/repos/jb-eap-6-rhel-6-build/latest/maven/</url>
+			<layout>default</layout>
+			<releases>
+				<enabled>true</enabled>
+				<updatePolicy>never</updatePolicy>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+				<updatePolicy>never</updatePolicy>
+			</snapshots>
+		</repository>
+	</repositories>
 
 	<scm>
 		<connection>scm:git:git://github.com/jboss-set/prbz-overview.git</connection>
