@@ -118,7 +118,7 @@ public class PullRequestOverviewProcessor implements Processor {
                 }
                 return new ProcessorData(data);
             } catch (Throwable th) {
-                logger.log(Level.SEVERE, "failed to " + patch.getURL(), th);
+                logger.log(Level.SEVERE, "failed to read" + patch.getURL(), th);
                 throw new Exception(th);
             }
         }

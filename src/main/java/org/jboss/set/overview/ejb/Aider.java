@@ -25,17 +25,14 @@ package org.jboss.set.overview.ejb;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ServiceLoader;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.ejb.Singleton;
+import javax.ejb.Schedule;
 import javax.ejb.Startup;
+import javax.ejb.Stateless;
 
 import org.jboss.set.aphrodite.Aphrodite;
 import org.jboss.set.aphrodite.domain.Repository;
@@ -51,35 +48,21 @@ import org.jboss.set.assistant.processor.Processor;
  * @author wangc
  *
  */
-@Singleton
+@Stateless
 @Startup
 public class Aider {
     public static Logger logger = Logger.getLogger(Aider.class.getCanonicalName());
-    private ExecutorService executorService = Executors.newSingleThreadExecutor();
-    private ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-    private final long DELAY = 10; // 10 minutes delay before task is to be executed.
-    private final long PERIOD = 60; // 60 minutes between successive task executions.
-    private Aphrodite aphrodite;
+    private static Aphrodite aphrodite;
+    private List<ProcessorData> data = new ArrayList<>();
 
     @PostConstruct
     public void init() {
-        System.out.println("First time data initialisation in @PostConstruct");
         try {
             aphrodite = AssistantClient.getAphrodite();
         } catch (AphroditeException e) {
             logger.log(Level.SEVERE, "Failed to get aphrodite instance", e);
         }
-        executorService.execute(new Runnable() {
-            public void run() {
-                generateData();
-            }
-        });
-
-        // Scheduled task timer to update data values
-        scheduler.scheduleAtFixedRate(new TaskThread(), DELAY, PERIOD, TimeUnit.MINUTES);
     }
-
-    List<ProcessorData> data;
 
     public List<ProcessorData> getData() {
         return data;
@@ -94,14 +77,14 @@ public class Aider {
         }
     }
 
-    private synchronized void generateData() {
-        logger.info("new data values genearation is started...");
+    public synchronized void generateData() {
         // FIXME hard-coded stream name
         String streamName = "jboss-eap-6.4.z";
         // use -Daphrodite.config=/path/to/aphrodite.properties.json
+        List<ProcessorData> dataList = new ArrayList<>();
         try {
+            logger.info("new data values genearation is started...");
             Stream stream;
-            List<ProcessorData> dataList = new ArrayList<>();
             stream = aphrodite.getStream(streamName);
             StreamComponent streamComponent = stream.getComponent("Application Server");
             Repository repository = streamComponent.getRepository();
@@ -114,23 +97,22 @@ public class Aider {
                 processor.init(aphrodite);
                 dataList.addAll(processor.process(repository));
             }
-            if (!dataList.isEmpty()) {
-                this.data = dataList;
-            }
             logger.info("new data values genearation is finished...");
         } catch (NotFoundException e) {
             e.printStackTrace();
         } catch (Exception e1) {
             e1.printStackTrace();
         }
+        if (!dataList.isEmpty()) {
+            data = dataList;
+        }
     }
 
-    class TaskThread implements Runnable {
-        @Override
-        public void run() {
-            logger.info("schedule update is started ...");
-            generateData();
-            logger.info("schedule update is finished ...");
-        }
+    // Scheduled task timer to update data values every hour
+    @Schedule(hour = "*")
+    public void doWork() {
+        logger.info("schedule update is started ...");
+        generateData();
+        logger.info("schedule update is finished ...");
     }
 }
