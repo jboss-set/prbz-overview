@@ -52,6 +52,7 @@ public class PullRequestOverviewServlet extends HttpServlet {
         // Put the data list in request and let Freemarker paint it.
         pullRequestData = aiderService.getData();
         if (pullRequestData == null || pullRequestData.isEmpty()) {
+            response.addHeader("Refresh", "5");
             request.getRequestDispatcher("/error.html").forward(request, response);
         } else {
             request.setAttribute("rows", pullRequestData);
