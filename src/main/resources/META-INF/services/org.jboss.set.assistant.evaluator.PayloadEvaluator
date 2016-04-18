@@ -1,0 +1,2 @@
+org.jboss.set.assistant.evaluator.impl.payload.PayloadIssueEvaluator
+org.jboss.set.assistant.evaluator.impl.payload.AssociatedPullRequestEvaluator

@@ -32,14 +32,39 @@
 			  	<table id="eventTable" class="table table-striped">
 			  		<thead>
 			  			<tr>
-			  				<th>Issue (status) (flags)</th>
-			  				<th>Type</th>
-							<th>Streams</th>
-							<th>Associated Pull Requests</th>
-							<th>Blocks (status) (streams)</th>
-							<th>Depends On (status) (streams)</th>
+			  				<th>Dendency Issue - Status - Type</th>
+							<th>Associated Pull Requests - Branch</th>
+							<th>Blocks (status) (Type)</th>
+							<th>Depends On (status) (Type)</th>
 			  			</tr>
 			  		</thead>
+			  		<tbody id="eventTableBody">
+						<#list rows as row>
+							<#assign data = row.data>
+							<tr>
+								<td><a href="${data.payloadDependency.link}">#${data.payloadDependency.label}</a> - ${data.payloadDependency.status} - ${data.payloadDependency.type}</td>
+								 <td>
+								 	<#if data.associatedPullRequest?has_content>
+								    	<#list data.associatedPullRequest>
+								    		<ul>
+								    		<#items as patch>
+				  								<li>
+				  									<a href="${patch.link}">#${patch.label}</a> - ${patch.codebase} 
+													<#switch patch.commitStatus>
+														<#case "success"> <span class="label label-success">success</span><#break>
+													  	<#case "failure"> <span class="label label-warning">failure</span><#break>
+													  	<#case "error"> <span class="label label-danger">error</span><#break>
+													  	<#case "pending"> <span class="label label-default">pending</span><#break>
+													</#switch>
+				  								</li>
+				  							</#items>
+				  							</ul>
+										</#list>
+									</#if>
+							    </td>
+							</tr>
+						</#list>
+			  		</tbody>
 			  	</table>
 		    </div>
 		</div>

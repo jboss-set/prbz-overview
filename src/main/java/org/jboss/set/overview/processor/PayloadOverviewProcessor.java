@@ -22,6 +22,7 @@
 
 package org.jboss.set.overview.processor;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,41 +38,54 @@ import java.util.stream.Collectors;
 
 import org.jboss.set.aphrodite.Aphrodite;
 import org.jboss.set.aphrodite.domain.Issue;
-import org.jboss.set.aphrodite.domain.Patch;
-import org.jboss.set.aphrodite.domain.PatchState;
-import org.jboss.set.aphrodite.domain.Repository;
 import org.jboss.set.aphrodite.spi.NotFoundException;
 import org.jboss.set.assistant.data.ProcessorData;
-import org.jboss.set.assistant.evaluator.Evaluator;
-import org.jboss.set.assistant.evaluator.EvaluatorContext;
-import org.jboss.set.assistant.processor.Processor;
+import org.jboss.set.assistant.evaluator.PayloadEvaluator;
+import org.jboss.set.assistant.evaluator.PayloadEvaluatorContext;
+import org.jboss.set.assistant.processor.PayloadProcessor;
 import org.jboss.set.assistant.processor.ProcessorException;
 
-public class PullRequestOverviewProcessor implements Processor {
+/**
+ * @author wangc
+ *
+ */
+public class PayloadOverviewProcessor implements PayloadProcessor {
 
-    private static Logger logger = Logger.getLogger(PullRequestOverviewProcessor.class.getCanonicalName());
+    private static Logger logger = Logger.getLogger(PayloadOverviewProcessor.class.getCanonicalName());
 
     private Aphrodite aphrodite;
 
-    private List<Evaluator> evaluators;
+    private List<PayloadEvaluator> evaluators;
 
     private ExecutorService service;
 
     @Override
     public void init(Aphrodite aphrodite) throws Exception {
         this.aphrodite = aphrodite;
-        this.evaluators = getEvaluators();
+        this.evaluators = getPayloadEvaluators();
         this.service = Executors.newFixedThreadPool(10);
     }
 
     @Override
-    public List<ProcessorData> process(Repository repository) throws ProcessorException {
-        logger.info("PullRequestOverviewProcessor process is started...");
-        try {
-            List<Patch> patches = aphrodite.getPatchesByState(repository, PatchState.OPEN);
+    public List<ProcessorData> process(Issue issue) throws ProcessorException {
+        logger.info("PayloadProcessor process is started...");
 
+        List<Issue> dependencyIssues = new ArrayList<>();
+        List<URL> dependencyURLs = issue.getDependsOn();
+
+        for (URL url : dependencyURLs) {
+            Issue i;
+            try {
+                i = aphrodite.getIssue(url);
+                dependencyIssues.add(i);
+            } catch (NotFoundException e) {
+                logger.log(Level.WARNING, "failed to find depends on issue from " + url, e);
+            }
+
+        }
+        try {
             List<Future<ProcessorData>> results = this.service
-                    .invokeAll(patches.stream().map(e -> new PatchProcessingTask(repository, e)).collect(Collectors.toList()));
+                    .invokeAll(dependencyIssues.stream().map(e -> new PayloadrocessingTask(e)).collect(Collectors.toList()));
 
             List<ProcessorData> data = new ArrayList<>();
             for (Future<ProcessorData> result : results) {
@@ -83,51 +97,44 @@ public class PullRequestOverviewProcessor implements Processor {
             }
 
             this.service.shutdown();
-            logger.info("PullRequestOverviewProcessor process is finished...");
+            logger.info("PayloadProcessor process is finished...");
             return data;
 
-        } catch (NotFoundException | InterruptedException ex) {
+        } catch (InterruptedException ex) {
             throw new ProcessorException("processor execution failed", ex);
         }
     }
 
-    private class PatchProcessingTask implements Callable<ProcessorData> {
-        private Repository repository;
-        private Patch patch;
+    private class PayloadrocessingTask implements Callable<ProcessorData> {
+        private Issue dependencyIssue;
 
-        public PatchProcessingTask(Repository repository, Patch patch) {
-            this.repository = repository;
-            this.patch = patch;
+        PayloadrocessingTask(Issue dependencyIssue) {
+            this.dependencyIssue = dependencyIssue;
         }
 
         @Override
         public ProcessorData call() throws Exception {
             try {
-                logger.info("processing " + patch.getURL().toString());
-                List<Issue> issues = aphrodite.getIssuesAssociatedWith(patch);
+                logger.info("processing " + dependencyIssue.getURL());
 
-                List<Patch> relatedPatches = aphrodite.findPatchesRelatedTo(patch);
                 Map<String, Object> data = new HashMap<>();
-                EvaluatorContext context = new EvaluatorContext(aphrodite, repository, patch, issues,
-                        relatedPatches);
-                for (Evaluator evaluator : evaluators) {
-                    logger.fine(
-                            "repository " + repository.getURL() + "applying evaluator " + evaluator.name() + " to "
-                                    + patch.getId());
+                PayloadEvaluatorContext context = new PayloadEvaluatorContext(aphrodite, dependencyIssue);
+                for (PayloadEvaluator evaluator : evaluators) {
+                    logger.fine("issue " + dependencyIssue.getURL() + " is applying evaluator " + evaluator.name());
                     evaluator.eval(context, data);
                 }
                 return new ProcessorData(data);
             } catch (Throwable th) {
-                logger.log(Level.SEVERE, "failed to read" + patch.getURL(), th);
+                logger.log(Level.SEVERE, "failed to read" + dependencyIssue.getURL(), th);
                 throw new Exception(th);
             }
         }
     }
 
-    private List<Evaluator> getEvaluators() {
-        ServiceLoader<Evaluator> rules = ServiceLoader.load(Evaluator.class);
-        List<Evaluator> evaluators = new ArrayList<Evaluator>();
-        for (Evaluator rule : rules) {
+    private List<PayloadEvaluator> getPayloadEvaluators() {
+        ServiceLoader<PayloadEvaluator> rules = ServiceLoader.load(PayloadEvaluator.class);
+        List<PayloadEvaluator> evaluators = new ArrayList<PayloadEvaluator>();
+        for (PayloadEvaluator rule : rules) {
             evaluators.add(rule);
         }
         return evaluators;

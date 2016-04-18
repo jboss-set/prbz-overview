@@ -18,21 +18,21 @@ import javax.servlet.http.HttpServletResponse;
 import org.jboss.set.assistant.data.ProcessorData;
 import org.jboss.set.overview.ejb.Aider;
 
-@WebServlet(name = "PullRequestOverviewServlet", loadOnStartup = 1, urlPatterns = { "/pullrequestoverview" })
-public class PullRequestOverviewServlet extends HttpServlet {
+@WebServlet(name = "PayloadOverviewServlet", loadOnStartup = 1, urlPatterns = { "/payloadoverview" })
+public class PayloadOverviewServlet extends HttpServlet {
 
-    public static Logger logger = Logger.getLogger(PullRequestOverviewServlet.class.getCanonicalName());
+    private static final long serialVersionUID = 8833071859201802046L;
 
-    private static final long serialVersionUID = -8119634403150269667L;
+    public static Logger logger = Logger.getLogger(PayloadOverviewServlet.class.getCanonicalName());
 
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
-    private List<ProcessorData> pullRequestData = new ArrayList<>();
+    private List<ProcessorData> payloadData = new ArrayList<>();
 
     @EJB
     private Aider aiderService;
 
-    public PullRequestOverviewServlet() {
+    public PayloadOverviewServlet() {
         super();
     }
 
@@ -41,8 +41,8 @@ public class PullRequestOverviewServlet extends HttpServlet {
         executorService.submit(new Runnable() {
             @Override
             public void run() {
-                logger.log(Level.INFO, "pull request data initialisation in Servlet init()");
-                aiderService.generatePullRequestData();
+                logger.log(Level.INFO, "payload data initialisation in Servlet init()");
+                aiderService.generatePayloadData();
             }
         });
         executorService.shutdown();
@@ -51,13 +51,13 @@ public class PullRequestOverviewServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         // Put the data list in request and let Freemarker paint it.
-        pullRequestData = Aider.getPullRequestData();
-        if (pullRequestData == null || pullRequestData.isEmpty()) {
+        payloadData = Aider.getPayloadData();
+        if (payloadData == null || payloadData.isEmpty()) {
             response.addHeader("Refresh", "5");
             request.getRequestDispatcher("/error.html").forward(request, response);
         } else {
-            request.setAttribute("rows", pullRequestData);
-            request.getRequestDispatcher("/pullrequest.ftl").forward(request, response);
+            request.setAttribute("rows", payloadData);
+            request.getRequestDispatcher("/payload.ftl").forward(request, response);
         }
     }
 

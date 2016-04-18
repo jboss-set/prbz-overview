@@ -22,6 +22,8 @@
 
 package org.jboss.set.overview.ejb;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ServiceLoader;
@@ -35,6 +37,7 @@ import javax.ejb.Startup;
 import javax.ejb.Stateless;
 
 import org.jboss.set.aphrodite.Aphrodite;
+import org.jboss.set.aphrodite.domain.Issue;
 import org.jboss.set.aphrodite.domain.Repository;
 import org.jboss.set.aphrodite.domain.Stream;
 import org.jboss.set.aphrodite.domain.StreamComponent;
@@ -42,7 +45,9 @@ import org.jboss.set.aphrodite.spi.AphroditeException;
 import org.jboss.set.aphrodite.spi.NotFoundException;
 import org.jboss.set.assistant.AssistantClient;
 import org.jboss.set.assistant.data.ProcessorData;
+import org.jboss.set.assistant.processor.PayloadProcessor;
 import org.jboss.set.assistant.processor.Processor;
+import org.jboss.set.assistant.processor.ProcessorException;
 
 /**
  * @author wangc
@@ -53,7 +58,10 @@ import org.jboss.set.assistant.processor.Processor;
 public class Aider {
     public static Logger logger = Logger.getLogger(Aider.class.getCanonicalName());
     private static Aphrodite aphrodite;
-    private List<ProcessorData> data = new ArrayList<>();
+    private static List<ProcessorData> pullRequestData = new ArrayList<>();
+    private static List<ProcessorData> payloadData = new ArrayList<>();
+    private static final Object pullRequestDataLock = new Object();
+    private static final Object payloadDataLock = new Object();
 
     @PostConstruct
     public void init() {
@@ -64,8 +72,12 @@ public class Aider {
         }
     }
 
-    public List<ProcessorData> getData() {
-        return data;
+    public static List<ProcessorData> getPullRequestData() {
+        return pullRequestData;
+    }
+
+    public static List<ProcessorData> getPayloadData() {
+        return payloadData;
     }
 
     @PreDestroy
@@ -77,13 +89,13 @@ public class Aider {
         }
     }
 
-    public synchronized void generateData() {
+    public void generatePullRequestData() {
         // FIXME hard-coded stream name
         String streamName = "jboss-eap-6.4.z";
         // use -Daphrodite.config=/path/to/aphrodite.properties.json
         List<ProcessorData> dataList = new ArrayList<>();
         try {
-            logger.info("new data values genearation is started...");
+            logger.info("new pull request data values genearation is started...");
             Stream stream;
             stream = aphrodite.getStream(streamName);
             StreamComponent streamComponent = stream.getComponent("Application Server");
@@ -97,22 +109,68 @@ public class Aider {
                 processor.init(aphrodite);
                 dataList.addAll(processor.process(repository));
             }
-            logger.info("new data values genearation is finished...");
+            logger.info("new pull request data values genearation is finished...");
         } catch (NotFoundException e) {
-            e.printStackTrace();
-        } catch (Exception e1) {
-            e1.printStackTrace();
+            logger.log(Level.FINE, e.getMessage(), e);
+        } catch (ProcessorException e) {
+            logger.log(Level.WARNING, e.getMessage(), e);
+        } catch (Exception e) {
+            logger.log(Level.WARNING, e.getMessage(), e);
+            Thread.currentThread().interrupt();
         }
         if (!dataList.isEmpty()) {
-            data = dataList;
+            synchronized (pullRequestDataLock) {
+                pullRequestData = dataList;
+            }
+        }
+    }
+
+    public void generatePayloadData() {
+        List<ProcessorData> dataList = new ArrayList<>();
+        try {
+            logger.info("new payload data values genearation is started...");
+            // FIXME hard-coded payload url
+            URL payloadURL = new URL("https://bugzilla.redhat.com/show_bug.cgi?id=1324262");
+            Issue payloadTracker = aphrodite.getIssue(payloadURL);
+            ServiceLoader<PayloadProcessor> processors = ServiceLoader.load(PayloadProcessor.class);
+            for (PayloadProcessor processor : processors) {
+                logger.info("executing processor: " + processor.getClass().getName());
+                processor.init(aphrodite);
+                dataList.addAll(processor.process(payloadTracker));
+            }
+            logger.info("new payload data values genearation is finished...");
+
+        } catch (MalformedURLException e) {
+            logger.log(Level.SEVERE, "payload tracker url is malformed", e);
+            e.printStackTrace();
+        } catch (NotFoundException e) {
+            logger.log(Level.FINE, e.getMessage(), e);
+        } catch (ProcessorException e) {
+            logger.log(Level.WARNING, e.getMessage(), e);
+        } catch (Exception e) {
+            logger.log(Level.WARNING, e.getMessage(), e);
+            Thread.currentThread().interrupt();
+        }
+
+        if (!dataList.isEmpty()) {
+            synchronized (payloadDataLock) {
+                payloadData = dataList;
+            }
         }
     }
 
     // Scheduled task timer to update data values every hour
     @Schedule(hour = "*")
-    public void doWork() {
-        logger.info("schedule update is started ...");
-        generateData();
-        logger.info("schedule update is finished ...");
+    public void updatePullRequestData() {
+        logger.info("schedule pull request data update is started ...");
+        generatePullRequestData();
+        logger.info("schedule pull request data update is finished ...");
+    }
+
+    @Schedule(hour = "*")
+    public void updatePayloadData() {
+        logger.info("schedule payload data update is started ...");
+        generatePayloadData();
+        logger.info("schedule payload data update is finished ...");
     }
 }
