@@ -49,7 +49,7 @@
 								    		<ul>
 								    		<#items as patch>
 				  								<li>
-				  									<a href="${patch.link}">#${patch.label}</a> - ${patch.codebase} 
+													<a href="${patch.link}">#${patch.label}</a> - ${patch.codebase} -
 													<#switch patch.commitStatus>
 														<#case "success"> <span class="label label-success">success</span><#break>
 														<#case "failure"> <span class="label label-warning">failure</span><#break>
@@ -57,6 +57,10 @@
 														<#case "pending"> <span class="label label-default">pending</span><#break>
 														<#case "unknown"> <span class="label label-primary">unknown</span><#break>
 													</#switch>
+
+													<#if patch.noUpstreamRequired?? && (patch.noUpstreamRequired==true)>
+														<span class="label label-success">No Upstream Required</span><#break>
+													</#if>
 				  								</li>
 				  							</#items>
 				  							</ul>
