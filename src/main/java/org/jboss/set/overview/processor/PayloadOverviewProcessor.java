@@ -37,6 +37,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.jboss.set.aphrodite.Aphrodite;
+import org.jboss.set.aphrodite.config.TrackerType;
 import org.jboss.set.aphrodite.domain.Issue;
 import org.jboss.set.aphrodite.spi.NotFoundException;
 import org.jboss.set.assistant.data.ProcessorData;
@@ -71,21 +72,32 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
         logger.info("PayloadProcessor process is started...");
 
         List<Issue> dependencyIssues = new ArrayList<>();
-        List<URL> dependencyURLs = issue.getDependsOn();
 
-        for (URL url : dependencyURLs) {
-            Issue i;
-            try {
-                i = aphrodite.getIssue(url);
-                dependencyIssues.add(i);
-            } catch (NotFoundException e) {
-                logger.log(Level.WARNING, "failed to find depends on issue from " + url, e);
+        TrackerType trackerType = issue.getTrackerType();
+        if (trackerType.equals(TrackerType.BUGZILLA)) {
+            // Bugzilla payload tracker for EAP 6
+            List<URL> dependencyURLs = issue.getDependsOn();
+
+            for (URL url : dependencyURLs) {
+                Issue i;
+                try {
+                    i = aphrodite.getIssue(url);
+                    dependencyIssues.add(i);
+                } catch (NotFoundException e) {
+                    logger.log(Level.WARNING, "failed to find depends on issue from " + url, e);
+                }
+
             }
-
+        } else if (trackerType.equals(TrackerType.JIRA)) {
+            // Jira payload tracker for EAP 7
+            // dependencyIssues =
+        } else {
+            throw new IllegalStateException("Tracker Type: " + trackerType + " of " + issue.getURL() + " is not supported");
         }
+
         try {
             List<Future<ProcessorData>> results = this.service
-                    .invokeAll(dependencyIssues.stream().map(e -> new PayloadrocessingTask(e)).collect(Collectors.toList()));
+                    .invokeAll(dependencyIssues.stream().map(e -> new PayloadrocessingTask(e, trackerType)).collect(Collectors.toList()));
 
             List<ProcessorData> data = new ArrayList<>();
             for (Future<ProcessorData> result : results) {
@@ -107,9 +119,11 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
 
     private class PayloadrocessingTask implements Callable<ProcessorData> {
         private Issue dependencyIssue;
+        private TrackerType trackerType;
 
-        PayloadrocessingTask(Issue dependencyIssue) {
+        PayloadrocessingTask(Issue dependencyIssue, TrackerType trackerType) {
             this.dependencyIssue = dependencyIssue;
+            this.trackerType = trackerType;
         }
 
         @Override
@@ -118,7 +132,7 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
                 logger.info("processing " + dependencyIssue.getURL());
 
                 Map<String, Object> data = new HashMap<>();
-                PayloadEvaluatorContext context = new PayloadEvaluatorContext(aphrodite, dependencyIssue);
+                PayloadEvaluatorContext context = new PayloadEvaluatorContext(aphrodite, dependencyIssue, trackerType);
                 for (PayloadEvaluator evaluator : evaluators) {
                     logger.fine("issue " + dependencyIssue.getURL() + " is applying evaluator " + evaluator.name());
                     evaluator.eval(context, data);

@@ -33,7 +33,7 @@
 			  		<thead>
 			  			<tr>
 			  				<th>Dendency Issue - Status - Type</th>
-							<th>Associated Pull Requests - Branch</th>
+							<th>Pull Requests - Branch - Build Result</th>
 							<th>Blocks (status) (Type)</th>
 							<th>Depends On (status) (Type)</th>
 			  			</tr>
@@ -52,9 +52,10 @@
 				  									<a href="${patch.link}">#${patch.label}</a> - ${patch.codebase} 
 													<#switch patch.commitStatus>
 														<#case "success"> <span class="label label-success">success</span><#break>
-													  	<#case "failure"> <span class="label label-warning">failure</span><#break>
-													  	<#case "error"> <span class="label label-danger">error</span><#break>
-													  	<#case "pending"> <span class="label label-default">pending</span><#break>
+														<#case "failure"> <span class="label label-warning">failure</span><#break>
+														<#case "error"> <span class="label label-danger">error</span><#break>
+														<#case "pending"> <span class="label label-default">pending</span><#break>
+														<#case "unknown"> <span class="label label-primary">unknown</span><#break>
 													</#switch>
 				  								</li>
 				  							</#items>
