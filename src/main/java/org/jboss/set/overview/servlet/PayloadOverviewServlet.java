@@ -42,7 +42,7 @@ public class PayloadOverviewServlet extends HttpServlet {
             @Override
             public void run() {
                 logger.log(Level.INFO, "payload data initialisation in Servlet init()");
-                aiderService.generatePayloadData();
+                aiderService.initAllPayloadData();
             }
         });
         executorService.shutdown();
@@ -50,14 +50,19 @@ public class PayloadOverviewServlet extends HttpServlet {
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Put the data list in request and let Freemarker paint it.
-        payloadData = Aider.getPayloadData();
-        if (payloadData == null || payloadData.isEmpty()) {
-            response.addHeader("Refresh", "5");
-            request.getRequestDispatcher("/error.html").forward(request, response);
+        String payloadName = request.getParameter("payloadName");
+        if (payloadName != null) {
+            // Put the data list in request and let Freemarker paint it.
+            payloadData = Aider.getPayloadData(payloadName);
+            if (payloadData == null || payloadData.isEmpty()) {
+                response.addHeader("Refresh", "5");
+                request.getRequestDispatcher("/error.html").forward(request, response);
+            } else {
+                request.setAttribute("rows", payloadData);
+                request.getRequestDispatcher("/payload.ftl").forward(request, response);
+            }
         } else {
-            request.setAttribute("rows", payloadData);
-            request.getRequestDispatcher("/payload.ftl").forward(request, response);
+            logger.log(Level.WARNING, "payloadName is not specified in request parameter");
         }
     }
 

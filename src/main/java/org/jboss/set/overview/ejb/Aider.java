@@ -22,11 +22,19 @@
 
 package org.jboss.set.overview.ejb;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.ServiceLoader;
+import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -44,6 +52,7 @@ import org.jboss.set.aphrodite.domain.StreamComponent;
 import org.jboss.set.aphrodite.spi.AphroditeException;
 import org.jboss.set.aphrodite.spi.NotFoundException;
 import org.jboss.set.assistant.AssistantClient;
+import org.jboss.set.assistant.Util;
 import org.jboss.set.assistant.data.ProcessorData;
 import org.jboss.set.assistant.processor.PayloadProcessor;
 import org.jboss.set.assistant.processor.Processor;
@@ -57,9 +66,12 @@ import org.jboss.set.assistant.processor.ProcessorException;
 @Startup
 public class Aider {
     public static Logger logger = Logger.getLogger(Aider.class.getCanonicalName());
+
     private static Aphrodite aphrodite;
+    private static Map<String, URL> payloadMap = new HashMap<>();
     private static List<ProcessorData> pullRequestData = new ArrayList<>();
-    private static List<ProcessorData> payloadData = new ArrayList<>();
+    private static Map<String, List<ProcessorData>> payloadData = new HashMap<>();
+
     private static final Object pullRequestDataLock = new Object();
     private static final Object payloadDataLock = new Object();
 
@@ -67,8 +79,13 @@ public class Aider {
     public void init() {
         try {
             aphrodite = AssistantClient.getAphrodite();
+            payloadMap = getPayloadMap("payload.properties"); // TODO how EAP 7 CP payload defined ?
         } catch (AphroditeException e) {
-            logger.log(Level.SEVERE, "Failed to get aphrodite instance", e);
+            throw new IllegalStateException("Failed to get aphrodite instance", e);
+        } catch (FileNotFoundException e) {
+            throw new IllegalArgumentException("Failed to find payload.properties File", e);
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Failed to load payload.properties File", e);
         }
     }
 
@@ -76,8 +93,8 @@ public class Aider {
         return pullRequestData;
     }
 
-    public static List<ProcessorData> getPayloadData() {
-        return payloadData;
+    public static List<ProcessorData> getPayloadData(String payloadName) {
+        return payloadData.get(payloadName);
     }
 
     @PreDestroy
@@ -125,12 +142,15 @@ public class Aider {
         }
     }
 
-    public void generatePayloadData() {
+    public void initAllPayloadData() {
+        payloadMap.keySet().stream().forEach(e -> generatePayloadData(e));
+    }
+
+    public void generatePayloadData(String payloadName) {
         List<ProcessorData> dataList = new ArrayList<>();
         try {
-            logger.info("new payload data values genearation is started...");
-            // FIXME hard-coded payload url
-            URL payloadURL = new URL("https://bugzilla.redhat.com/show_bug.cgi?id=1324262");
+            logger.info(payloadName + " data genearation is started...");
+            URL payloadURL = payloadMap.get(payloadName);
             Issue payloadTracker = aphrodite.getIssue(payloadURL);
             ServiceLoader<PayloadProcessor> processors = ServiceLoader.load(PayloadProcessor.class);
             for (PayloadProcessor processor : processors) {
@@ -138,7 +158,7 @@ public class Aider {
                 processor.init(aphrodite);
                 dataList.addAll(processor.process(payloadTracker));
             }
-            logger.info("new payload data values genearation is finished...");
+            logger.info(payloadName + " data genearation is finished...");
 
         } catch (MalformedURLException e) {
             logger.log(Level.SEVERE, "payload tracker url is malformed", e);
@@ -154,7 +174,7 @@ public class Aider {
 
         if (!dataList.isEmpty()) {
             synchronized (payloadDataLock) {
-                payloadData = dataList;
+                payloadData.put(payloadName, dataList);
             }
         }
     }
@@ -170,7 +190,32 @@ public class Aider {
     @Schedule(hour = "*")
     public void updatePayloadData() {
         logger.info("schedule payload data update is started ...");
-        generatePayloadData();
+        payloadMap.keySet().stream().forEach(e -> generatePayloadData(e));
         logger.info("schedule payload data update is finished ...");
+    }
+
+    // load payload list from payload.properties file
+    public Map<String, URL> getPayloadMap(String payloadProperties) throws FileNotFoundException, IOException {
+        String payloadProperiesFilePath = System.getProperty(payloadProperties);
+        if (payloadProperiesFilePath == null)
+            throw new IllegalArgumentException("Unable to find payload properties file path with property name : " + payloadProperties);
+        Properties props = new Properties();
+        File file = new File(payloadProperiesFilePath);
+        try (FileReader reader = new FileReader(file)) {
+            props.load(reader);
+        }
+        String payloads = Util.require(props, "payloadlist");
+        StringTokenizer tokenizer = new StringTokenizer(payloads, ",");
+        Map<String, URL> payloadMap = new HashMap<>();
+        while (tokenizer.hasMoreElements()) {
+            String payloadName = (String) tokenizer.nextElement();
+            URL payloadURL = new URL(Util.require(props, payloadName));
+            payloadMap.put(payloadName, payloadURL);
+        }
+        return payloadMap;
+    }
+
+    public static Map<String, URL> getPayloadMap() {
+        return payloadMap;
     }
 }
