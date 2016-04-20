@@ -5,12 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.ejb.EJB;
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -18,7 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.jboss.set.assistant.data.ProcessorData;
 import org.jboss.set.overview.ejb.Aider;
 
-@WebServlet(name = "PullRequestOverviewServlet", loadOnStartup = 1, urlPatterns = { "/pullrequestoverview" })
+//@WebServlet(name = "PullRequestOverviewServlet", loadOnStartup = 1, urlPatterns = { "/pullrequestoverview" })
 public class PullRequestOverviewServlet extends HttpServlet {
 
     public static Logger logger = Logger.getLogger(PullRequestOverviewServlet.class.getCanonicalName());
@@ -38,14 +36,14 @@ public class PullRequestOverviewServlet extends HttpServlet {
 
     @Override
     public void init() {
-        executorService.submit(new Runnable() {
-            @Override
-            public void run() {
-                logger.log(Level.INFO, "pull request data initialisation in Servlet init()");
-                aiderService.generatePullRequestData();
-            }
-        });
-        executorService.shutdown();
+//        executorService.submit(new Runnable() {
+//            @Override
+//            public void run() {
+//                logger.log(Level.INFO, "pull request data initialisation in Servlet init()");
+//                aiderService.generatePullRequestData();
+//            }
+//        });
+//        executorService.shutdown();
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response)

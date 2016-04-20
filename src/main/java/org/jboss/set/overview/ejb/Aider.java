@@ -180,12 +180,12 @@ public class Aider {
     }
 
     // Scheduled task timer to update data values every hour
-    @Schedule(hour = "*")
-    public void updatePullRequestData() {
-        logger.info("schedule pull request data update is started ...");
-        generatePullRequestData();
-        logger.info("schedule pull request data update is finished ...");
-    }
+    // @Schedule(hour = "*")
+    // public void updatePullRequestData() {
+    // logger.info("schedule pull request data update is started ...");
+    // generatePullRequestData();
+    // logger.info("schedule pull request data update is finished ...");
+    // }
 
     @Schedule(hour = "*")
     public void updatePayloadData() {
