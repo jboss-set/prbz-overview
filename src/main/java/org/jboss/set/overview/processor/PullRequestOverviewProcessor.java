@@ -31,6 +31,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -76,7 +77,7 @@ public class PullRequestOverviewProcessor implements Processor {
             List<ProcessorData> data = new ArrayList<>();
             for (Future<ProcessorData> result : results) {
                 try {
-                    data.add(result.get());
+                    data.add(result.get(120, TimeUnit.SECONDS));
                 } catch (Exception ex) {
                     logger.log(Level.SEVERE, "ouch !" + ex.getCause());
                 }

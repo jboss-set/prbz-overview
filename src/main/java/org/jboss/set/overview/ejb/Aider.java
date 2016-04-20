@@ -26,7 +26,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -71,6 +70,7 @@ public class Aider {
     private static Map<String, URL> payloadMap = new HashMap<>();
     private static List<ProcessorData> pullRequestData = new ArrayList<>();
     private static Map<String, List<ProcessorData>> payloadData = new HashMap<>();
+    private static ServiceLoader<PayloadProcessor> payloadProcessors;
 
     private static final Object pullRequestDataLock = new Object();
     private static final Object payloadDataLock = new Object();
@@ -80,6 +80,7 @@ public class Aider {
         try {
             aphrodite = AssistantClient.getAphrodite();
             payloadMap = getPayloadMap("payload.properties"); // TODO how EAP 7 CP payload defined ?
+            initProcessors();
         } catch (AphroditeException e) {
             throw new IllegalStateException("Failed to get aphrodite instance", e);
         } catch (FileNotFoundException e) {
@@ -146,23 +147,26 @@ public class Aider {
         payloadMap.keySet().stream().forEach(e -> generatePayloadData(e));
     }
 
+    private void initProcessors() {
+        payloadProcessors = ServiceLoader.load(PayloadProcessor.class);
+        for (PayloadProcessor processor : payloadProcessors) {
+            logger.info("init processor: " + processor.getClass().getName());
+            processor.init(aphrodite);
+        }
+    }
+
     public void generatePayloadData(String payloadName) {
         List<ProcessorData> dataList = new ArrayList<>();
         try {
             logger.info(payloadName + " data genearation is started...");
             URL payloadURL = payloadMap.get(payloadName);
             Issue payloadTracker = aphrodite.getIssue(payloadURL);
-            ServiceLoader<PayloadProcessor> processors = ServiceLoader.load(PayloadProcessor.class);
-            for (PayloadProcessor processor : processors) {
+            for (PayloadProcessor processor : payloadProcessors) {
                 logger.info("executing processor: " + processor.getClass().getName());
-                processor.init(aphrodite);
                 dataList.addAll(processor.process(payloadTracker));
             }
             logger.info(payloadName + " data genearation is finished...");
 
-        } catch (MalformedURLException e) {
-            logger.log(Level.SEVERE, "payload tracker url is malformed", e);
-            e.printStackTrace();
         } catch (NotFoundException e) {
             logger.log(Level.FINE, e.getMessage(), e);
         } catch (ProcessorException e) {
