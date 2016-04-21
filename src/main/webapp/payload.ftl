@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <title>Set Feed</title>
+    <title>SET Payload Tracker Issue List</title>
 
     <!-- Bootstrap -->
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
@@ -25,7 +25,7 @@
   <body>
      <div class="container">
 		<div class="row">
-		  <div class="col-md-12"><h1>payload feed</h1></div>
+		  <div class="col-md-12"><h1>EAP Cumulative Patch Releases Payload Tracker Issue List</h1></div>
 		</div>
 		<div class="row">
 		  <div class="col-md-12">
@@ -34,8 +34,8 @@
 			  			<tr>
 			  				<th>Dendency Issue - Status - Type</th>
 							<th>Pull Requests - Branch - Build Result</th>
-							<th>Blocks (status) (Type)</th>
-							<th>Depends On (status) (Type)</th>
+							<th>Depends On - Status - Type</th>
+							<th>Blocks - Status - Type</th>
 			  			</tr>
 			  		</thead>
 			  		<tbody id="eventTableBody">
@@ -77,6 +77,22 @@
 										</#list>
 									</#if>
 							    </td>
+							    <td>
+								<#if data.dependsOn?has_content>
+									<#list data.dependsOn>
+										<ul>
+											<#items as issue>
+												<li>
+													<a href="${issue.link}">#${issue.label}</a> - ${issue.status} - ${issue.type}
+														<#if issue.inPayload?? && (issue.inPayload==false)>
+															<span class="label label-warning">Not in Payload</span><#break>
+														</#if>
+												</li>
+											</#items>
+										</ul>
+									</#list>
+									</#if>
+								</td>
 							</tr>
 						</#list>
 			  		</tbody>

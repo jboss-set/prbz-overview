@@ -98,7 +98,7 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
 
         try {
             List<Future<ProcessorData>> results = this.service
-                    .invokeAll(dependencyIssues.stream().map(e -> new PayloadrocessingTask(e, trackerType)).collect(Collectors.toList()));
+                    .invokeAll(dependencyIssues.stream().map(e -> new PayloadrocessingTask(e, issue, trackerType)).collect(Collectors.toList()));
 
             List<ProcessorData> data = new ArrayList<>();
             for (Future<ProcessorData> result : results) {
@@ -119,10 +119,12 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
 
     private class PayloadrocessingTask implements Callable<ProcessorData> {
         private Issue dependencyIssue;
+        private Issue payloadTracker;
         private TrackerType trackerType;
 
-        PayloadrocessingTask(Issue dependencyIssue, TrackerType trackerType) {
+        PayloadrocessingTask(Issue dependencyIssue, Issue payloadTracker, TrackerType trackerType) {
             this.dependencyIssue = dependencyIssue;
+            this.payloadTracker = payloadTracker;
             this.trackerType = trackerType;
         }
 
@@ -132,7 +134,7 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
                 logger.info("processing " + dependencyIssue.getURL());
 
                 Map<String, Object> data = new HashMap<>();
-                PayloadEvaluatorContext context = new PayloadEvaluatorContext(aphrodite, dependencyIssue, trackerType);
+                PayloadEvaluatorContext context = new PayloadEvaluatorContext(aphrodite, dependencyIssue, payloadTracker, trackerType);
                 for (PayloadEvaluator evaluator : evaluators) {
                     logger.fine("issue " + dependencyIssue.getURL() + " is applying evaluator " + evaluator.name());
                     evaluator.eval(context, data);
