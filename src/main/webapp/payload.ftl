@@ -42,7 +42,17 @@
 						<#list rows as row>
 							<#assign data = row.data>
 							<tr>
-								<td><a href="${data.payloadDependency.link}">#${data.payloadDependency.label}</a> - ${data.payloadDependency.status} - ${data.payloadDependency.type}</td>
+								<td>
+									<a href="${data.payloadDependency.link}">#${data.payloadDependency.label}</a> - ${data.payloadDependency.status} - ${data.payloadDependency.type}
+									</br>
+									<#list data.payloadDependency.flags?keys as key>
+										<#switch data.payloadDependency.flags[key]>
+											<#case "SET"> <span class="label label-primary">${key} ?</span><#break>
+											<#case "ACCEPTED"> <span class="label label-success">${key} +</span><#break>
+											<#case "REJECTED"> <span class="label label-danger">${key} -</span><#break>
+										</#switch>
+									</#list>
+								</td>
 								 <td>
 								 	<#if data.associatedPullRequest?has_content>
 								    	<#list data.associatedPullRequest>
