@@ -23,7 +23,7 @@
 package org.jboss.set.overview.servlet;
 
 import java.io.IOException;
-import java.util.Set;
+import java.util.TreeSet;
 
 import javax.ejb.EJB;
 import javax.servlet.ServletException;
@@ -48,12 +48,12 @@ public class DefaultServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        Set<String> payloadMap = aiderService.getPayloadMap().keySet();
-        if (payloadMap.isEmpty()) {
+        TreeSet<String> payloadSet = new TreeSet<String>(aiderService.getPayloadMap().keySet());
+        if (payloadSet.isEmpty()) {
             response.addHeader("Refresh", "5");
             request.getRequestDispatcher("/error.html").forward(request, response);
         } else {
-            request.setAttribute("payloadMap", payloadMap);
+            request.setAttribute("payloadSet", payloadSet);
             request.getRequestDispatcher("/index.jsp").forward(request, response);
         }
     }

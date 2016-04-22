@@ -11,7 +11,7 @@
 		<h3>Following Payload tracker lists are configured to review</h3>
 		<div class="payload">
 			<ul>
-				<c:forEach var="i" items="${payloadMap}">
+				<c:forEach var="i" items="${payloadSet}">
 					<h4>
 						<li>
 							<a href="payloadoverview?payloadName=${i}" id=${i}}> <c:out value="${i}" /></a>
