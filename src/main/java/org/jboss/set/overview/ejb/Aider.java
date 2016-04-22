@@ -65,9 +65,11 @@ import org.jboss.set.assistant.processor.ProcessorException;
 @Startup
 public class Aider {
     public static Logger logger = Logger.getLogger(Aider.class.getCanonicalName());
+    public static final String PAYLOAD_PROPERTIES = "payload.properties";
+    public static final String PAYLOAD_LIST = "payloadlist";
 
     private static Aphrodite aphrodite;
-    private static Map<String, URL> payloadMap = new HashMap<>();
+    private static Map<String, String> payloadMap = new HashMap<>();
     private static List<ProcessorData> pullRequestData = new ArrayList<>();
     private static Map<String, List<ProcessorData>> payloadData = new HashMap<>();
     private static ServiceLoader<PayloadProcessor> payloadProcessors;
@@ -79,7 +81,7 @@ public class Aider {
     public void init() {
         try {
             aphrodite = AssistantClient.getAphrodite();
-            payloadMap = getPayloadMap("payload.properties"); // TODO how EAP 7 CP payload defined ?
+            payloadMap = loadPayloadMap();
             initProcessors();
         } catch (AphroditeException e) {
             throw new IllegalStateException("Failed to get aphrodite instance", e);
@@ -158,15 +160,25 @@ public class Aider {
     public void generatePayloadData(String payloadName) {
         List<ProcessorData> dataList = new ArrayList<>();
         try {
+            boolean eap6 = payloadName.toLowerCase().contains("eap6");
             logger.info(payloadName + " data genearation is started...");
-            URL payloadURL = payloadMap.get(payloadName);
-            Issue payloadTracker = aphrodite.getIssue(payloadURL);
-            for (PayloadProcessor processor : payloadProcessors) {
-                logger.info("executing processor: " + processor.getClass().getName());
-                dataList.addAll(processor.process(payloadTracker));
+            String payloadValue = payloadMap.get(payloadName);
+            if (eap6) {
+                // EAP 6 based on Bugzilla tracker bug
+                URL payloadURL = new URL(payloadValue);
+                Issue payloadTracker = aphrodite.getIssue(payloadURL);
+                for (PayloadProcessor processor : payloadProcessors) {
+                    logger.info("executing processor: " + processor.getClass().getName());
+                    dataList.addAll(processor.process(payloadTracker));
+                }
+            } else {
+                // EAP 7 based on Jira fix version e.g. 7.0.1.GA
+                for (PayloadProcessor processor : payloadProcessors) {
+                    logger.info("executing processor: " + processor.getClass().getName());
+                    dataList.addAll(processor.process(payloadValue));
+                }
             }
             logger.info(payloadName + " data genearation is finished...");
-
         } catch (NotFoundException e) {
             logger.log(Level.FINE, e.getMessage(), e);
         } catch (ProcessorException e) {
@@ -199,27 +211,27 @@ public class Aider {
     }
 
     // load payload list from payload.properties file
-    public Map<String, URL> getPayloadMap(String payloadProperties) throws FileNotFoundException, IOException {
-        String payloadProperiesFilePath = System.getProperty(payloadProperties);
+    public Map<String, String> loadPayloadMap() throws FileNotFoundException, IOException {
+        String payloadProperiesFilePath = System.getProperty(PAYLOAD_PROPERTIES);
         if (payloadProperiesFilePath == null)
-            throw new IllegalArgumentException("Unable to find payload properties file path with property name : " + payloadProperties);
+            throw new IllegalArgumentException("Unable to find payload properties file path with property name : " + PAYLOAD_PROPERTIES);
         Properties props = new Properties();
         File file = new File(payloadProperiesFilePath);
         try (FileReader reader = new FileReader(file)) {
             props.load(reader);
         }
-        String payloads = Util.require(props, "payloadlist");
+        String payloads = Util.require(props, PAYLOAD_LIST);
         StringTokenizer tokenizer = new StringTokenizer(payloads, ",");
-        Map<String, URL> payloadMap = new HashMap<>();
+        Map<String, String> payloadMap = new HashMap<>();
         while (tokenizer.hasMoreElements()) {
             String payloadName = (String) tokenizer.nextElement();
-            URL payloadURL = new URL(Util.require(props, payloadName));
-            payloadMap.put(payloadName, payloadURL);
+            String payloadValue = Util.require(props, payloadName);
+            payloadMap.put(payloadName, payloadValue);
         }
         return payloadMap;
     }
 
-    public static Map<String, URL> getPayloadMap() {
+    public static Map<String, String> getPayloadMap() {
         return payloadMap;
     }
 }
