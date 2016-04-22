@@ -1,6 +1,6 @@
-# Please put each payload link as format below
-payloadlist=eap648-payload,eap649-payload,eap634-payload
+# put each payload metadata as below format, payload tracker link for EAP6, fix version for EAP 7
+payloadlist=eap648-payload,eap649-payload,eap634-payload,eap701-payload
 eap648-payload=https://bugzilla.redhat.com/show_bug.cgi?id=1279553
 eap649-payload=https://bugzilla.redhat.com/show_bug.cgi?id=1324262
 eap634-payload=https://bugzilla.redhat.com/show_bug.cgi?id=1301630
-eap701-payload=???
+eap701-payload=7.0.1.GA
