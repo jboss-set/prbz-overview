@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -36,6 +38,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
+import javax.ejb.AccessTimeout;
 
 import org.jboss.set.aphrodite.Aphrodite;
 import org.jboss.set.aphrodite.config.TrackerType;
@@ -92,13 +96,15 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
 
         try {
             List<Future<ProcessorData>> results = this.service
-                    .invokeAll(dependencyIssues.stream().map(e -> new PayloadrocessingTask(e, issue, TrackerType.BUGZILLA)).collect(Collectors.toList()));
+                    .invokeAll(dependencyIssues.stream().map(e -> new PayloadrocessingTask(e, issue, TrackerType.BUGZILLA)).collect(Collectors.toList()), 20, TimeUnit.MINUTES);
 
             List<ProcessorData> data = new ArrayList<>();
             for (Future<ProcessorData> result : results) {
                 try {
-                    data.add(result.get(120, TimeUnit.SECONDS));
-                } catch (Exception ex) {
+                    data.add(result.get());
+                } catch (CancellationException e) {
+                    logger.log(Level.WARNING, "unfinished task is cancelled due to timeout", e);
+                } catch (ExecutionException ex) {
                     logger.log(Level.SEVERE, "ouch !" + ex.getCause());
                 }
             }
@@ -111,6 +117,7 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
         }
     }
 
+    @AccessTimeout(value = 15, unit = TimeUnit.MINUTES)
     @Override
     public List<ProcessorData> process(String fixVersion) throws ProcessorException {
         logger.info("PayloadProcessor process is started for " + fixVersion);
@@ -123,13 +130,15 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
 
         try {
             List<Future<ProcessorData>> results = this.service
-                    .invokeAll(dependencyIssues.stream().map(e -> new PayloadrocessingTask(e, fixVersion, TrackerType.JIRA)).collect(Collectors.toList()));
+                    .invokeAll(dependencyIssues.stream().map(e -> new PayloadrocessingTask(e, fixVersion, TrackerType.JIRA)).collect(Collectors.toList()), 20, TimeUnit.MINUTES);
 
             List<ProcessorData> data = new ArrayList<>();
             for (Future<ProcessorData> result : results) {
                 try {
-                    data.add(result.get(120, TimeUnit.SECONDS));
-                } catch (Exception ex) {
+                    data.add(result.get());
+                } catch (CancellationException e) {
+                    logger.log(Level.WARNING, "unfinished task is cancelled due to timeout", e);
+                } catch (ExecutionException ex) {
                     logger.log(Level.SEVERE, "ouch !" + ex.getCause());
                 }
             }
