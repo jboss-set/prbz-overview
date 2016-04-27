@@ -46,6 +46,7 @@ import org.jboss.set.aphrodite.config.TrackerType;
 import org.jboss.set.aphrodite.domain.Issue;
 import org.jboss.set.aphrodite.domain.Release;
 import org.jboss.set.aphrodite.domain.SearchCriteria;
+import org.jboss.set.aphrodite.domain.Stream;
 import org.jboss.set.aphrodite.spi.NotFoundException;
 import org.jboss.set.assistant.data.ProcessorData;
 import org.jboss.set.assistant.evaluator.PayloadEvaluator;
@@ -75,7 +76,7 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
     }
 
     @Override
-    public List<ProcessorData> process(Issue issue) throws ProcessorException {
+    public List<ProcessorData> process(Issue issue, Stream stream) throws ProcessorException {
         logger.info("PayloadProcessor process is started for " + issue.getURL());
 
         List<Issue> dependencyIssues = new ArrayList<>();
@@ -89,14 +90,14 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
                 i = aphrodite.getIssue(url);
                 dependencyIssues.add(i);
             } catch (NotFoundException e) {
-                logger.log(Level.WARNING, "failed to find depends on issue from " + url, e);
+                logger.log(Level.FINE, "failed to find depends on issue from " + url, e);
             }
 
         }
 
         try {
             List<Future<ProcessorData>> results = this.service
-                    .invokeAll(dependencyIssues.stream().map(e -> new PayloadrocessingTask(e, issue, TrackerType.BUGZILLA)).collect(Collectors.toList()), 20, TimeUnit.MINUTES);
+                    .invokeAll(dependencyIssues.stream().map(e -> new PayloadrocessingTask(e, issue, TrackerType.BUGZILLA, stream)).collect(Collectors.toList()), 20, TimeUnit.MINUTES);
 
             List<ProcessorData> data = new ArrayList<>();
             for (Future<ProcessorData> result : results) {
@@ -119,7 +120,7 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
 
     @AccessTimeout(value = 15, unit = TimeUnit.MINUTES)
     @Override
-    public List<ProcessorData> process(String fixVersion) throws ProcessorException {
+    public List<ProcessorData> process(String fixVersion, Stream stream) throws ProcessorException {
         logger.info("PayloadProcessor process is started for " + fixVersion);
 
         SearchCriteria sc = new SearchCriteria.Builder().setRelease(new Release(fixVersion.trim()))
@@ -130,7 +131,7 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
 
         try {
             List<Future<ProcessorData>> results = this.service
-                    .invokeAll(dependencyIssues.stream().map(e -> new PayloadrocessingTask(e, fixVersion, TrackerType.JIRA)).collect(Collectors.toList()), 20, TimeUnit.MINUTES);
+                    .invokeAll(dependencyIssues.stream().map(e -> new PayloadrocessingTask(e, fixVersion, TrackerType.JIRA, stream)).collect(Collectors.toList()), 20, TimeUnit.MINUTES);
 
             List<ProcessorData> data = new ArrayList<>();
             for (Future<ProcessorData> result : results) {
@@ -157,19 +158,22 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
         private Issue payloadTracker;
         private String fixVersion;
         private TrackerType trackerType;
+        private Stream stream;
 
-        PayloadrocessingTask(Issue dependencyIssue, Issue payloadTracker, TrackerType trackerType) {
+        PayloadrocessingTask(Issue dependencyIssue, Issue payloadTracker, TrackerType trackerType, Stream stream) {
             this.dependencyIssue = dependencyIssue;
             this.payloadTracker = payloadTracker;
             this.fixVersion = null;
             this.trackerType = trackerType;
+            this.stream = stream;
         }
 
-        PayloadrocessingTask(Issue dependencyIssue, String fixVersion, TrackerType trackerType) {
+        PayloadrocessingTask(Issue dependencyIssue, String fixVersion, TrackerType trackerType, Stream stream) {
             this.dependencyIssue = dependencyIssue;
             this.payloadTracker = null;
             this.fixVersion = fixVersion;
             this.trackerType = trackerType;
+            this.stream = stream;
         }
 
         @Override
@@ -179,9 +183,9 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
                 Map<String, Object> data = new HashMap<>();
                 PayloadEvaluatorContext context;
                 if (trackerType.equals(TrackerType.BUGZILLA)) {
-                    context = new PayloadEvaluatorContext(aphrodite, dependencyIssue, payloadTracker, trackerType);
+                    context = new PayloadEvaluatorContext(aphrodite, dependencyIssue, payloadTracker, trackerType, stream);
                 } else {
-                    context = new PayloadEvaluatorContext(aphrodite, dependencyIssue, fixVersion, trackerType);
+                    context = new PayloadEvaluatorContext(aphrodite, dependencyIssue, fixVersion, trackerType, stream);
                 }
                 for (PayloadEvaluator evaluator : evaluators) {
                     logger.fine("issue " + dependencyIssue.getURL() + " is applying evaluator " + evaluator.name());

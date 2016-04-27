@@ -69,6 +69,7 @@ public class Aider {
     public static final String PAYLOAD_LIST = "payloadlist";
 
     private static Aphrodite aphrodite;
+    private static List<Stream> streams;
     private static Map<String, String> payloadMap = new HashMap<>();
     private static List<ProcessorData> pullRequestData = new ArrayList<>();
     private static Map<String, List<ProcessorData>> payloadData = new HashMap<>();
@@ -82,6 +83,7 @@ public class Aider {
         try {
             aphrodite = AssistantClient.getAphrodite();
             payloadMap = loadPayloadMap();
+            streams = aphrodite.getAllStreams();
             initProcessors();
         } catch (AphroditeException e) {
             throw new IllegalStateException("Failed to get aphrodite instance", e);
@@ -146,7 +148,9 @@ public class Aider {
     }
 
     public void initAllPayloadData() {
+        logger.info("payload data initialization is started.");
         payloadMap.keySet().stream().forEach(e -> generatePayloadData(e));
+        logger.info("payload data initialization is finished.");
     }
 
     private void initProcessors() {
@@ -162,20 +166,25 @@ public class Aider {
         try {
             boolean eap6 = payloadName.toLowerCase().contains("eap6");
             logger.info(payloadName + " data genearation is started...");
-            String payloadValue = payloadMap.get(payloadName);
+            String payloadInfo = payloadMap.get(payloadName);
+            String[] payloadArray = payloadInfo.split(",");
+            Stream stream = getCurrentStream(payloadArray[1].trim());
+            if (payloadArray.length != 2)
+                throw new IllegalArgumentException("payload metadata defined in payload.properties is incorrect.");
             if (eap6) {
                 // EAP 6 based on Bugzilla tracker bug
-                URL payloadURL = new URL(payloadValue);
+                URL payloadURL = new URL(payloadArray[0]);
                 Issue payloadTracker = aphrodite.getIssue(payloadURL);
                 for (PayloadProcessor processor : payloadProcessors) {
                     logger.info("executing processor: " + processor.getClass().getName());
-                    dataList.addAll(processor.process(payloadTracker));
+                    dataList.addAll(processor.process(payloadTracker, stream));
                 }
             } else {
                 // EAP 7 based on Jira fix version e.g. 7.0.1.GA
                 for (PayloadProcessor processor : payloadProcessors) {
                     logger.info("executing processor: " + processor.getClass().getName());
-                    dataList.addAll(processor.process(payloadValue));
+                    String fixVersion = payloadArray[0];
+                    dataList.addAll(processor.process(fixVersion, stream));
                 }
             }
             logger.info(payloadName + " data genearation is finished...");
@@ -225,10 +234,15 @@ public class Aider {
         Map<String, String> payloadMap = new HashMap<>();
         while (tokenizer.hasMoreElements()) {
             String payloadName = (String) tokenizer.nextElement();
-            String payloadValue = Util.require(props, payloadName);
-            payloadMap.put(payloadName, payloadValue);
+            String payloadInfo = Util.require(props, payloadName);
+            payloadMap.put(payloadName, payloadInfo);
         }
         return payloadMap;
+    }
+
+    private Stream getCurrentStream(String streamName) {
+        return streams.stream().filter(e -> e.getName().equalsIgnoreCase(streamName)).findFirst()
+                .orElseThrow(() -> new IllegalArgumentException(streamName + " is not defined in streamConfigs json file"));
     }
 
     public static Map<String, String> getPayloadMap() {

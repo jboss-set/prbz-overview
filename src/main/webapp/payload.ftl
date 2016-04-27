@@ -76,6 +76,28 @@
 				  							</ul>
 										</#list>
 									</#if>
+									<#if data.associatedUnrelatedPullRequest?has_content>
+										<#list data.associatedUnrelatedPullRequest>
+											<ul>
+											<#items as patch>
+												<li>
+													<a href="${patch.link}">#${patch.label}</a> - ${patch.codebase} -
+														<#switch patch.commitStatus>
+														<#case "success"> <span class="label label-success">success</span><#break>
+														<#case "failure"> <span class="label label-warning">failure</span><#break>
+														<#case "error"> <span class="label label-danger">error</span><#break>
+														<#case "pending"> <span class="label label-default">pending</span><#break>
+														<#case "unknown"> <span class="label label-primary">unknown</span><#break>
+													</#switch>
+													<span class="label label-info">other stream</span>
+													<#if patch.noUpstreamRequired?? && (patch.noUpstreamRequired==true)>
+														<span class="label label-success">No Upstream Required</span><#break>
+													</#if>
+												</li>
+											</#items>
+											</ul>
+										</#list>
+									</#if>
 							    </td>
 							    <td>
 								<#if data.dependsOn?has_content>
