@@ -59,6 +59,7 @@ public class PayloadOverviewServlet extends HttpServlet {
                 request.getRequestDispatcher("/error.html").forward(request, response);
             } else {
                 request.setAttribute("rows", payloadData);
+                request.setAttribute("payloadName", payloadName);
                 request.getRequestDispatcher("/payload.ftl").forward(request, response);
             }
         } else {

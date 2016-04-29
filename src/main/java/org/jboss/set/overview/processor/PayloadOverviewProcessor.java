@@ -96,7 +96,10 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
         }
 
         try {
-            List<Future<ProcessorData>> results = this.service
+            if (service.isShutdown()) {
+                service = Executors.newFixedThreadPool(10);
+            }
+            List<Future<ProcessorData>> results = service
                     .invokeAll(dependencyIssues.stream().map(e -> new PayloadrocessingTask(e, issue, TrackerType.BUGZILLA, stream)).collect(Collectors.toList()), 20, TimeUnit.MINUTES);
 
             List<ProcessorData> data = new ArrayList<>();
@@ -111,6 +114,7 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
             }
 
             logger.info("PayloadProcessor process is finished...");
+            service.shutdown();
             return data;
 
         } catch (InterruptedException ex) {
@@ -130,7 +134,10 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
         List<Issue> dependencyIssues = aphrodite.searchIssues(sc);
 
         try {
-            List<Future<ProcessorData>> results = this.service
+            if (service.isShutdown()) {
+                service = Executors.newFixedThreadPool(10);
+            }
+            List<Future<ProcessorData>> results = service
                     .invokeAll(dependencyIssues.stream().map(e -> new PayloadrocessingTask(e, fixVersion, TrackerType.JIRA, stream)).collect(Collectors.toList()), 20, TimeUnit.MINUTES);
 
             List<ProcessorData> data = new ArrayList<>();
@@ -145,6 +152,7 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
             }
 
             logger.info("PayloadProcessor process is finished...");
+            service.shutdown();
             return data;
 
         } catch (InterruptedException ex) {

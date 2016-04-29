@@ -25,7 +25,7 @@
   <body>
      <div class="container">
 		<div class="row">
-		  <div class="col-md-12"><h1>EAP Cumulative Patch Releases Payload Tracker Issue List</h1></div>
+		  <div class="col-md-12"><h1>EAP Cumulative Patch Releases ${Request.payloadName} Issue List</h1></div>
 		</div>
 		<div class="row">
 		  <div class="col-md-12">
@@ -35,7 +35,6 @@
 			  				<th>Dendency Issue - Status - Type</th>
 							<th>Pull Requests - Branch - Build Result</th>
 							<th>Depends On - Status - Type</th>
-							<th>Blocks - Status - Type</th>
 			  			</tr>
 			  		</thead>
 			  		<tbody id="eventTableBody">
@@ -60,6 +59,11 @@
 								    		<#items as patch>
 				  								<li>
 													<a href="${patch.link}">#${patch.label}</a> - ${patch.codebase} -
+													<#switch patch.patchState>
+														<#case "OPEN"> <span class="label label-success">open</span><#break>
+														<#case "CLOSED"> <span class="label label-danger">closed</span><#break>
+														<#case "UNDEFINED"> <span class="label label-default">undefined</span><#break>
+													</#switch>
 													<#switch patch.commitStatus>
 														<#case "success"> <span class="label label-success">success</span><#break>
 														<#case "failure"> <span class="label label-warning">failure</span><#break>
@@ -67,7 +71,6 @@
 														<#case "pending"> <span class="label label-default">pending</span><#break>
 														<#case "unknown"> <span class="label label-primary">unknown</span><#break>
 													</#switch>
-
 													<#if patch.noUpstreamRequired?? && (patch.noUpstreamRequired==true)>
 														<span class="label label-success">No Upstream Required</span><#break>
 													</#if>
@@ -82,7 +85,12 @@
 											<#items as patch>
 												<li>
 													<a href="${patch.link}">#${patch.label}</a> - ${patch.codebase} -
-														<#switch patch.commitStatus>
+													<#switch patch.patchState>
+														<#case "OPEN"> <span class="label label-success">open</span><#break>
+														<#case "CLOSED"> <span class="label label-danger">closed</span><#break>
+														<#case "UNDEFINED"> <span class="label label-default">undefined</span><#break>
+													</#switch>
+													<#switch patch.commitStatus>
 														<#case "success"> <span class="label label-success">success</span><#break>
 														<#case "failure"> <span class="label label-warning">failure</span><#break>
 														<#case "error"> <span class="label label-danger">error</span><#break>
@@ -91,7 +99,7 @@
 													</#switch>
 													<span class="label label-info">other stream</span>
 													<#if patch.noUpstreamRequired?? && (patch.noUpstreamRequired==true)>
-														<span class="label label-success">No Upstream Required</span><#break>
+														<span class="label label-success">No Upstream Required</span>
 													</#if>
 												</li>
 											</#items>
@@ -107,7 +115,7 @@
 												<li>
 													<a href="${issue.link}">#${issue.label}</a> - ${issue.status} - ${issue.type}
 														<#if issue.inPayload?? && (issue.inPayload==false)>
-															<span class="label label-warning">Not in Payload</span><#break>
+															<span class="label label-warning">Not in Payload</span>
 														</#if>
 												</li>
 											</#items>
