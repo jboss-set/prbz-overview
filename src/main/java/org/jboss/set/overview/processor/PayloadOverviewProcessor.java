@@ -35,11 +35,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import javax.ejb.AccessTimeout;
+import javax.ejb.Lock;
+import javax.ejb.LockType;
 
 import org.jboss.set.aphrodite.Aphrodite;
 import org.jboss.set.aphrodite.config.TrackerType;
@@ -68,61 +71,73 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
 
     private ExecutorService service;
 
+    private ExecutorService singleExecutorService;
+
     @Override
     public void init(Aphrodite aphrodite){
         this.aphrodite = aphrodite;
         this.evaluators = getPayloadEvaluators();
         this.service = Executors.newFixedThreadPool(10);
+        this.singleExecutorService = Executors.newSingleThreadExecutor();
     }
 
+    @AccessTimeout(value = 15, unit = TimeUnit.MINUTES)
+    @Lock(LockType.READ)
     @Override
     public List<ProcessorData> process(Issue issue, Stream stream) throws ProcessorException {
         logger.info("PayloadProcessor process is started for " + issue.getURL());
 
-        List<Issue> dependencyIssues = new ArrayList<>();
-
-        // Bugzilla payload tracker for EAP 6
-        List<URL> dependencyURLs = issue.getDependsOn();
-
-        for (URL url : dependencyURLs) {
-            Issue i;
-            try {
-                i = aphrodite.getIssue(url);
-                dependencyIssues.add(i);
-            } catch (NotFoundException e) {
-                logger.log(Level.FINE, "failed to find depends on issue from " + url, e);
-            }
-
-        }
-
         try {
-            if (service.isShutdown()) {
-                service = Executors.newFixedThreadPool(10);
+            if(singleExecutorService.isShutdown()){
+                singleExecutorService = Executors.newSingleThreadExecutor();
             }
-            List<Future<ProcessorData>> results = service
-                    .invokeAll(dependencyIssues.stream().map(e -> new PayloadrocessingTask(e, issue, TrackerType.BUGZILLA, stream)).collect(Collectors.toList()), 20, TimeUnit.MINUTES);
-
-            List<ProcessorData> data = new ArrayList<>();
-            for (Future<ProcessorData> result : results) {
+            Future<List<Issue>> future = singleExecutorService.submit(new DependecyRetrieveTask(issue));
+            List<Issue> dependencyIssues = new ArrayList<>();
+            boolean listen = true;
+            while (listen) {
                 try {
-                    data.add(result.get());
-                } catch (CancellationException e) {
-                    logger.log(Level.WARNING, "unfinished task is cancelled due to timeout", e);
-                } catch (ExecutionException ex) {
-                    logger.log(Level.SEVERE, "ouch !" + ex.getCause());
+                    dependencyIssues = future.get(10, TimeUnit.MINUTES);
+                } catch (ExecutionException | TimeoutException e) {
+                    listen = false;
+                    future.cancel(true);
+                    logger.log(Level.SEVERE, "Failed to retrieve dependency issues due to " + e.getMessage());
+                } finally {
+                    listen = false;
                 }
             }
 
-            logger.info("PayloadProcessor process is finished...");
-            service.shutdown();
-            return data;
+            List<ProcessorData> data = new ArrayList<>();
+            if (!dependencyIssues.isEmpty()) {
+                if (service.isShutdown()) {
+                    service = Executors.newFixedThreadPool(10);
+                }
+                List<Future<ProcessorData>> results = service
+                        .invokeAll(dependencyIssues.stream()
+                                .map(e -> new PayloadrocessingTask(e, issue, TrackerType.BUGZILLA, stream))
+                                .collect(Collectors.toList()), 20, TimeUnit.MINUTES);
 
+                for (Future<ProcessorData> result : results) {
+                    try {
+                        data.add(result.get());
+                    } catch (CancellationException e) {
+                        logger.log(Level.WARNING, "unfinished task is cancelled due to timeout", e);
+                    } catch (ExecutionException ex) {
+                        logger.log(Level.SEVERE, "ouch !" + ex.getCause());
+                    }
+                }
+
+                logger.info("PayloadProcessor process is finished...");
+                singleExecutorService.shutdown();
+                service.shutdown();
+            }
+            return data;
         } catch (InterruptedException ex) {
             throw new ProcessorException("processor execution failed", ex);
         }
     }
 
     @AccessTimeout(value = 15, unit = TimeUnit.MINUTES)
+    @Lock(LockType.READ)
     @Override
     public List<ProcessorData> process(String fixVersion, Stream stream) throws ProcessorException {
         logger.info("PayloadProcessor process is started for " + fixVersion);
@@ -131,34 +146,52 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
                 .setProduct("JBEAP")
                 .setMaxResults(100)
                 .build();
-        List<Issue> dependencyIssues = aphrodite.searchIssues(sc);
-
         try {
-            if (service.isShutdown()) {
-                service = Executors.newFixedThreadPool(10);
+            if (singleExecutorService.isShutdown()) {
+                singleExecutorService = Executors.newSingleThreadExecutor();
             }
-            List<Future<ProcessorData>> results = service
-                    .invokeAll(dependencyIssues.stream().map(e -> new PayloadrocessingTask(e, fixVersion, TrackerType.JIRA, stream)).collect(Collectors.toList()), 20, TimeUnit.MINUTES);
-
-            List<ProcessorData> data = new ArrayList<>();
-            for (Future<ProcessorData> result : results) {
+            Future<List<Issue>> future = singleExecutorService.submit(new DependecyRetrieveTask(sc));
+            List<Issue> dependencyIssues = new ArrayList<>();
+            boolean listen = true;
+            while (listen) {
                 try {
-                    data.add(result.get());
-                } catch (CancellationException e) {
-                    logger.log(Level.WARNING, "unfinished task is cancelled due to timeout", e);
-                } catch (ExecutionException ex) {
-                    logger.log(Level.SEVERE, "ouch !" + ex.getCause());
+                    dependencyIssues = future.get(10, TimeUnit.MINUTES);
+                } catch (ExecutionException | TimeoutException e) {
+                    listen = false;
+                    future.cancel(true);
+                    logger.log(Level.SEVERE, "Failed to retrieve dependency issues due to " + e.getMessage());
+                } finally {
+                    listen = false;
                 }
             }
 
-            logger.info("PayloadProcessor process is finished...");
-            service.shutdown();
-            return data;
+            List<ProcessorData> data = new ArrayList<>();
+            if (!dependencyIssues.isEmpty()) {
+                if (service.isShutdown()) {
+                    service = Executors.newFixedThreadPool(10);
+                }
+                List<Future<ProcessorData>> results = service
+                        .invokeAll(dependencyIssues.stream()
+                                .map(e -> new PayloadrocessingTask(e, fixVersion, TrackerType.JIRA, stream))
+                                .collect(Collectors.toList()), 20, TimeUnit.MINUTES);
 
+                for (Future<ProcessorData> result : results) {
+                    try {
+                        data.add(result.get());
+                    } catch (CancellationException e) {
+                        logger.log(Level.WARNING, "unfinished task is cancelled due to timeout", e);
+                    } catch (ExecutionException ex) {
+                        logger.log(Level.SEVERE, "ouch !" + ex.getCause());
+                    }
+                }
+
+                logger.info("PayloadProcessor process is finished...");
+                service.shutdown();
+            }
+            return data;
         } catch (InterruptedException ex) {
             throw new ProcessorException("processor execution failed", ex);
         }
-
     }
 
     private class PayloadrocessingTask implements Callable<ProcessorData> {
@@ -204,6 +237,43 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
                 logger.log(Level.SEVERE, "failed to read" + dependencyIssue.getURL(), th);
                 throw new Exception(th);
             }
+        }
+    }
+
+    private class DependecyRetrieveTask implements Callable<List<Issue>> {
+
+        private Issue issue;
+        private SearchCriteria sc;
+
+        DependecyRetrieveTask(Issue issue) {
+            this.issue = issue;
+            this.sc = null;
+        }
+
+        DependecyRetrieveTask(SearchCriteria sc) {
+            this.issue = null;
+            this.sc = sc;
+        }
+
+        @Override
+        public List<Issue> call() throws Exception {
+            List<Issue> dependencyIssues = new ArrayList<>();
+            // Bugzilla payload tracker for EAP 6
+            if (issue != null) {
+                List<URL> dependencyURLs = issue.getDependsOn();
+                for (URL url : dependencyURLs) {
+                    Issue i;
+                    try {
+                        i = aphrodite.getIssue(url);
+                        dependencyIssues.add(i);
+                    } catch (NotFoundException e) {
+                        logger.log(Level.WARNING, "failed to find depends on issue from " + url, e);
+                    }
+                }
+            } else {
+                dependencyIssues = aphrodite.searchIssues(sc);
+            }
+            return dependencyIssues;
         }
     }
 
