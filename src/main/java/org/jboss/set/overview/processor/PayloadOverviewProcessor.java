@@ -120,8 +120,10 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
                     try {
                         data.add(result.get());
                     } catch (CancellationException e) {
+                        result.cancel(true);
                         logger.log(Level.WARNING, "unfinished task is cancelled due to timeout", e);
                     } catch (ExecutionException ex) {
+                        result.cancel(true);
                         logger.log(Level.SEVERE, "ouch !" + ex.getCause());
                     }
                 }
@@ -179,13 +181,16 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
                     try {
                         data.add(result.get());
                     } catch (CancellationException e) {
+                        result.cancel(true);
                         logger.log(Level.WARNING, "unfinished task is cancelled due to timeout", e);
                     } catch (ExecutionException ex) {
+                        result.cancel(true);
                         logger.log(Level.SEVERE, "ouch !" + ex.getCause());
                     }
                 }
 
                 logger.info("PayloadProcessor process is finished...");
+                singleExecutorService.shutdown();
                 service.shutdown();
             }
             return data;
