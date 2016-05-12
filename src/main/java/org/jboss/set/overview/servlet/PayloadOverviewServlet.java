@@ -51,7 +51,7 @@ public class PayloadOverviewServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String payloadName = request.getParameter("payloadName");
-        if (payloadName != null) {
+        if (payloadName != null && Aider.getPayloadMap().containsKey(payloadName)) {
             // Put the data list in request and let Freemarker paint it.
             payloadData = Aider.getPayloadData(payloadName);
             if (payloadData == null || payloadData.isEmpty()) {
@@ -63,7 +63,7 @@ public class PayloadOverviewServlet extends HttpServlet {
                 request.getRequestDispatcher("/payload.ftl").forward(request, response);
             }
         } else {
-            logger.log(Level.WARNING, "payloadName is not specified in request parameter");
+            logger.log(Level.WARNING, "payloadName " + payloadName + " is not specified in request parameter or is not defined in payload.properties");
         }
     }
 

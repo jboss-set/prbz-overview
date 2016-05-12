@@ -215,6 +215,11 @@ public class Aider {
     @Schedule(hour = "*")
     public void updatePayloadData() {
         logger.info("schedule payload data update is started ...");
+        try {
+            payloadMap = loadPayloadMap();
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Failed to load payload.properties File", e);
+        }
         payloadMap.keySet().stream().forEach(e -> generatePayloadData(e));
         logger.info("schedule payload data update is finished ...");
     }
