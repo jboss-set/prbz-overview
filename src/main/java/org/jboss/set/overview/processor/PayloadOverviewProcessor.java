@@ -100,7 +100,8 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
                 } catch (ExecutionException | TimeoutException e) {
                     listen = false;
                     future.cancel(true);
-                    logger.log(Level.SEVERE, "Failed to retrieve dependency issues due to " + e.getMessage());
+                    singleExecutorService.shutdown();
+                    logger.log(Level.SEVERE, "Failed to retrieve dependency issues due to " + e);
                 } finally {
                     listen = false;
                 }
@@ -114,7 +115,7 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
                 List<Future<ProcessorData>> results = service
                         .invokeAll(dependencyIssues.stream()
                                 .map(e -> new PayloadrocessingTask(e, issue, TrackerType.BUGZILLA, stream))
-                                .collect(Collectors.toList()), 20, TimeUnit.MINUTES);
+                                .collect(Collectors.toList()), 15, TimeUnit.MINUTES);
 
                 for (Future<ProcessorData> result : results) {
                     try {
@@ -129,7 +130,8 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
                 }
 
                 logger.info("PayloadProcessor process is finished...");
-                singleExecutorService.shutdown();
+                if(!singleExecutorService.isShutdown())
+                    singleExecutorService.shutdown();
                 service.shutdown();
             }
             return data;
@@ -161,7 +163,8 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
                 } catch (ExecutionException | TimeoutException e) {
                     listen = false;
                     future.cancel(true);
-                    logger.log(Level.SEVERE, "Failed to retrieve dependency issues due to " + e.getMessage());
+                    singleExecutorService.shutdown();
+                    logger.log(Level.SEVERE, "Failed to retrieve dependency issues due to " + e);
                 } finally {
                     listen = false;
                 }
@@ -175,7 +178,7 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
                 List<Future<ProcessorData>> results = service
                         .invokeAll(dependencyIssues.stream()
                                 .map(e -> new PayloadrocessingTask(e, fixVersion, TrackerType.JIRA, stream))
-                                .collect(Collectors.toList()), 20, TimeUnit.MINUTES);
+                                .collect(Collectors.toList()), 15, TimeUnit.MINUTES);
 
                 for (Future<ProcessorData> result : results) {
                     try {
@@ -190,7 +193,8 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
                 }
 
                 logger.info("PayloadProcessor process is finished...");
-                singleExecutorService.shutdown();
+                if (!singleExecutorService.isShutdown())
+                    singleExecutorService.shutdown();
                 service.shutdown();
             }
             return data;
