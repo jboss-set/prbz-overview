@@ -38,7 +38,7 @@ import org.jboss.set.overview.ejb.Aider;
  * @author wangc
  *
  */
-@WebServlet(name = "DefaultServlet", loadOnStartup = 1, urlPatterns = { "/index" })
+@WebServlet(name = "DefaultServlet", loadOnStartup = 1, urlPatterns = { "/view" })
 public class DefaultServlet extends HttpServlet {
 
     private static final long serialVersionUID = 7093806444898357238L;

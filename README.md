@@ -20,6 +20,14 @@ Or, You can also use -Daphrodite.config=/path/to/aphrodite.properties.json and -
 
 Make sure you have also provide streams.json and its file path inside aphrodite.properties.json.
 
+Since one payload update can sometimes take several minutes due to server side network latency. It's required to increase default timeout value in transactions subsystem.
+
+	<coordinator-environment default-timeout="300"/>
+
+Replace protocol "HTTP/1.1" by "Http11NioProtocol" in web subsystem to avoid possible java.net.socketinputstream.socketread0 hangs thread due to a high processing time or unhealthy state of remote service provider.
+
+	protocol="org.apache.coyote.http11.Http11NioProtocol"
+
 Note： Unfortunately，it depends on a SNAPSHOT version of [assistant](https://github.com/soul2zimate/assistant) by the moment. Therefore, it needs a pre-build assistant into your local maven repository.
 
 #Deployment
@@ -29,4 +37,4 @@ Note： Unfortunately，it depends on a SNAPSHOT version of [assistant](https://
 mvn clean package
 ```
 
-Copy generated war file to $JBOSS_HOME/standalone/deployments/ and visit http://localhost:8080/prbz-overview-${version}/index. Normally, it takes a few minutes to collect and display all information from GitHub and issue tracker systems.
+Copy generated war file to $JBOSS_HOME/standalone/deployments/ and visit http://localhost:8080/prbz-overview-${version}/view. Normally, it takes a few minutes to collect and display all information from GitHub and issue tracker systems.
