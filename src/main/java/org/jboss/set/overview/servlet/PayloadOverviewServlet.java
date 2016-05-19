@@ -60,6 +60,7 @@ public class PayloadOverviewServlet extends HttpServlet {
             } else {
                 request.setAttribute("rows", payloadData);
                 request.setAttribute("payloadName", payloadName);
+                request.setAttribute("payloadSize", payloadData.size());
                 request.getRequestDispatcher("/payload.ftl").forward(request, response);
             }
         } else {

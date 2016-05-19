@@ -28,6 +28,9 @@
 		  <div class="col-md-12"><h1>EAP Cumulative Patch Releases ${Request.payloadName} Issue List</h1></div>
 		</div>
 		<div class="row">
+		  <div class="col-md-12"><h4>${Request.payloadSize} issues in payload</h4></div>
+		</div>
+		<div class="row">
 		  <div class="col-md-12">
 			  	<table id="eventTable" class="table table-striped">
 			  		<thead>
