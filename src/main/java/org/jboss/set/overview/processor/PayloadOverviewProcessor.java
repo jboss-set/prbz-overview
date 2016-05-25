@@ -148,7 +148,7 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
 
         SearchCriteria sc = new SearchCriteria.Builder().setRelease(new Release(fixVersion.trim()))
                 .setProduct("JBEAP")
-                .setMaxResults(100)
+                .setMaxResults(200)
                 .build();
         try {
             if (singleExecutorService.isShutdown()) {
