@@ -18,7 +18,23 @@ Before deploying the war file,  please provide required properties in the config
 
 Or, You can also use -Daphrodite.config=/path/to/aphrodite.properties.json and -Dpayload.properties=/path/to/payload.properties in your server start-up command as parameter.
 
-Make sure you have also provide streams.json and its file path inside aphrodite.properties.json.
+Make sure you have also provide streams.json and its file path inside aphrodite.properties.json as:
+
+	"streamConfigs": [
+        {
+            "file": "/path/to/streams.json.example",
+            "type": "JSON"
+        }
+    ]
+
+If you need to obtain online streams.json from [jboss-streams](https://github.com/jboss-set/jboss-streams), it needs to change to:
+
+	"streamConfigs": [
+        {
+            "url": "https://raw.githubusercontent.com/jboss-set/jboss-streams/master/streams.json",
+            "type": "JSON"
+        }
+    ]
 
 Since one payload update can sometimes take several minutes due to server side network latency. It's required to increase default timeout value in transactions subsystem.
 
