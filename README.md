@@ -53,4 +53,4 @@ Note： Unfortunately，it depends on a SNAPSHOT version of [assistant](https://
 mvn clean package
 ```
 
-Copy generated war file to $JBOSS_HOME/standalone/deployments/ and visit http://localhost:8080/prbz-overview-${version}/view. Normally, it takes a few minutes to collect and display all information from GitHub and issue tracker systems.
+Copy generated war file to $JBOSS_HOME/standalone/deployments/ and visit http://localhost:8080/prbz-overview-${version}/payloadview for payload overview and http://localhost:8080/prbz-overview-${version}/streamview for stream pull requests overview. Normally, it takes a few minutes to collect and display all information from GitHub and issue tracker systems.

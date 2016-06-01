@@ -75,7 +75,7 @@
 														<#case "unknown"> <span class="label label-primary">unknown</span><#break>
 													</#switch>
 													<#if patch.noUpstreamRequired?? && (patch.noUpstreamRequired==true)>
-														<span class="label label-success">No Upstream Required</span><#break>
+														<span class="label label-success">No Upstream Required</span>
 													</#if>
 				  								</li>
 				  							</#items>
