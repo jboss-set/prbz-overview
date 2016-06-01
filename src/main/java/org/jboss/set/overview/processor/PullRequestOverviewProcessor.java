@@ -22,33 +22,38 @@
 
 package org.jboss.set.overview.processor;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.jboss.set.aphrodite.Aphrodite;
+import org.jboss.set.aphrodite.domain.Codebase;
 import org.jboss.set.aphrodite.domain.Issue;
 import org.jboss.set.aphrodite.domain.Patch;
 import org.jboss.set.aphrodite.domain.PatchState;
 import org.jboss.set.aphrodite.domain.Repository;
-import org.jboss.set.aphrodite.spi.NotFoundException;
+import org.jboss.set.aphrodite.domain.Stream;
 import org.jboss.set.assistant.data.ProcessorData;
 import org.jboss.set.assistant.evaluator.Evaluator;
 import org.jboss.set.assistant.evaluator.EvaluatorContext;
-import org.jboss.set.assistant.processor.Processor;
 import org.jboss.set.assistant.processor.ProcessorException;
+import org.jboss.set.assistant.processor.PullRequestProcessor;
 
-public class PullRequestOverviewProcessor implements Processor {
+public class PullRequestOverviewProcessor implements PullRequestProcessor {
 
     private static Logger logger = Logger.getLogger(PullRequestOverviewProcessor.class.getCanonicalName());
 
@@ -58,36 +63,72 @@ public class PullRequestOverviewProcessor implements Processor {
 
     private ExecutorService service;
 
+    private ExecutorService singleExecutorService;
+
     @Override
-    public void init(Aphrodite aphrodite) throws Exception {
+    public void init(Aphrodite aphrodite) {
         this.aphrodite = aphrodite;
         this.evaluators = getEvaluators();
         this.service = Executors.newFixedThreadPool(10);
+        this.singleExecutorService = Executors.newSingleThreadExecutor();
     }
 
     @Override
-    public List<ProcessorData> process(Repository repository) throws ProcessorException {
-        logger.info("PullRequestOverviewProcessor process is started...");
+    public List<ProcessorData> process(Repository repository, Stream stream) throws ProcessorException {
+        logger.info("PullRequestOverviewProcessor process is started for " + repository.getURL());
         try {
-            List<Patch> patches = aphrodite.getPatchesByState(repository, PatchState.OPEN);
+            if (singleExecutorService.isShutdown()) {
+                singleExecutorService = Executors.newSingleThreadExecutor();
+            }
 
-            List<Future<ProcessorData>> results = this.service
-                    .invokeAll(patches.stream().map(e -> new PatchProcessingTask(repository, e)).collect(Collectors.toList()));
+            Future<List<Patch>> future = singleExecutorService.submit(new PatchesRetrieveTask(repository, stream));
 
-            List<ProcessorData> data = new ArrayList<>();
-            for (Future<ProcessorData> result : results) {
+            List<Patch> patches = new ArrayList<>();
+            boolean listen = true;
+            while (listen) {
                 try {
-                    data.add(result.get(120, TimeUnit.SECONDS));
-                } catch (Exception ex) {
-                    logger.log(Level.SEVERE, "ouch !" + ex.getCause());
+                    patches = future.get(10, TimeUnit.MINUTES);
+                } catch (ExecutionException | TimeoutException e) {
+                    listen = false;
+                    future.cancel(true);
+                    singleExecutorService.shutdown();
+                    logger.log(Level.SEVERE, "Failed to retrieve patches due to " + e);
+                } finally {
+                    listen = false;
                 }
             }
 
-            this.service.shutdown();
-            logger.info("PullRequestOverviewProcessor process is finished...");
+            List<ProcessorData> data = new ArrayList<>();
+            if (!patches.isEmpty()) {
+                if (service.isShutdown()) {
+                    service = Executors.newFixedThreadPool(10);
+                }
+                List<Future<ProcessorData>> results = service
+                        .invokeAll(
+                                patches.stream().map(e -> new PatchProcessingTask(repository, e, stream)).collect(Collectors.toList()), 15, TimeUnit.MINUTES);
+
+                for (Future<ProcessorData> result : results) {
+                    try {
+                        data.add(result.get());
+                    } catch (CancellationException e) {
+                        result.cancel(true);
+                        logger.log(Level.WARNING, "unfinished task is cancelled due to timeout", e);
+                    } catch (ExecutionException ex) {
+                        result.cancel(true);
+                        logger.log(Level.SEVERE, "ouch !" + ex.getCause());
+                    }
+                }
+
+                logger.info("PullRequestProcessor process is finished...");
+                if (!singleExecutorService.isShutdown())
+                    singleExecutorService.shutdown();
+                service.shutdown();
+
+                service.shutdown();
+            }
             return data;
 
-        } catch (NotFoundException | InterruptedException ex) {
+        } catch (InterruptedException ex) {
             throw new ProcessorException("processor execution failed", ex);
         }
     }
@@ -95,10 +136,12 @@ public class PullRequestOverviewProcessor implements Processor {
     private class PatchProcessingTask implements Callable<ProcessorData> {
         private Repository repository;
         private Patch patch;
+        private Stream stream;
 
-        public PatchProcessingTask(Repository repository, Patch patch) {
+        PatchProcessingTask(Repository repository, Patch patch, Stream stream) {
             this.repository = repository;
             this.patch = patch;
+            this.stream = stream;
         }
 
         @Override
@@ -109,8 +152,7 @@ public class PullRequestOverviewProcessor implements Processor {
 
                 List<Patch> relatedPatches = aphrodite.findPatchesRelatedTo(patch);
                 Map<String, Object> data = new HashMap<>();
-                EvaluatorContext context = new EvaluatorContext(aphrodite, repository, patch, issues,
-                        relatedPatches);
+                EvaluatorContext context = new EvaluatorContext(aphrodite, repository, patch, issues, relatedPatches, stream);
                 for (Evaluator evaluator : evaluators) {
                     logger.fine(
                             "repository " + repository.getURL() + "applying evaluator " + evaluator.name() + " to "
@@ -119,9 +161,27 @@ public class PullRequestOverviewProcessor implements Processor {
                 }
                 return new ProcessorData(data);
             } catch (Throwable th) {
-                logger.log(Level.SEVERE, "failed to read" + patch.getURL(), th);
+                logger.log(Level.SEVERE, "failed to read " + patch.getURL(), th);
                 throw new Exception(th);
             }
+        }
+    }
+
+    private class PatchesRetrieveTask implements Callable<List<Patch>> {
+
+        private Repository repository;
+        private Stream stream;
+
+        PatchesRetrieveTask(Repository repository, Stream stream) {
+            this.repository = repository;
+            this.stream = stream;
+        }
+
+        @Override
+        public List<Patch> call() throws Exception {
+            List<Patch> patches = new ArrayList<>();
+            patches = aphrodite.getPatchesByState(repository, PatchState.OPEN);
+            return patches.stream().filter(e -> checkPullRequestBranch(e, stream)).collect(Collectors.toList());
         }
     }
 
@@ -132,5 +192,13 @@ public class PullRequestOverviewProcessor implements Processor {
             evaluators.add(rule);
         }
         return evaluators;
+    }
+
+    private boolean checkPullRequestBranch(Patch patch, Stream stream) {
+        Codebase codeBase = patch.getCodebase();
+        URL patchURL = patch.getRepository().getURL();
+        return stream.getAllComponents().stream().filter(
+                e -> (e.getRepository().getURL().toString().equals(patchURL.toString()) && e.getCodebase().equals(codeBase)))
+                .findAny().isPresent();
     }
 }

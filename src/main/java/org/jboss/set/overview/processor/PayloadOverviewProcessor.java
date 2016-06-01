@@ -243,7 +243,7 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
                 }
                 return new ProcessorData(data);
             } catch (Throwable th) {
-                logger.log(Level.SEVERE, "failed to read" + dependencyIssue.getURL(), th);
+                logger.log(Level.SEVERE, "failed to read " + dependencyIssue.getURL(), th);
                 throw new Exception(th);
             }
         }

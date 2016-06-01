@@ -5,10 +5,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.ejb.EJB;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -16,7 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.jboss.set.assistant.data.ProcessorData;
 import org.jboss.set.overview.ejb.Aider;
 
-//@WebServlet(name = "PullRequestOverviewServlet", loadOnStartup = 1, urlPatterns = { "/pullrequestoverview" })
+@WebServlet(name = "PullRequestOverviewServlet", loadOnStartup = 1, urlPatterns = { "/streamview/pullrequestoverview" })
 public class PullRequestOverviewServlet extends HttpServlet {
 
     public static Logger logger = Logger.getLogger(PullRequestOverviewServlet.class.getCanonicalName());
@@ -36,27 +38,38 @@ public class PullRequestOverviewServlet extends HttpServlet {
 
     @Override
     public void init() {
-//        executorService.submit(new Runnable() {
-//            @Override
-//            public void run() {
-//                logger.log(Level.INFO, "pull request data initialisation in Servlet init()");
-//                aiderService.generatePullRequestData();
-//            }
-//        });
-//        executorService.shutdown();
+        executorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                logger.log(Level.INFO, "pull request data initialisation in Servlet init()");
+                aiderService.initAllPullRequestData();
+            }
+        });
+        executorService.shutdown();
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Put the data list in request and let Freemarker paint it.
-        pullRequestData = Aider.getPullRequestData();
-        if (pullRequestData == null || pullRequestData.isEmpty()) {
-            response.addHeader("Refresh", "5");
-            request.getRequestDispatcher("/error.html").forward(request, response);
+        String streamName = request.getParameter("streamName");
+        String componentName = request.getParameter("componentName");
+
+        if (streamName != null && componentName != null) {
+            pullRequestData = Aider.getPullRequestData(streamName, componentName);
+            if (pullRequestData == null || pullRequestData.isEmpty()) {
+                response.addHeader("Refresh", "5");
+                request.getRequestDispatcher("/error.html").forward(request, response);
+            } else {
+                request.setAttribute("rows", pullRequestData);
+                request.setAttribute("streamName", streamName);
+                request.setAttribute("componentName", componentName);
+                request.setAttribute("pullRequestSize", pullRequestData.size());
+                request.getRequestDispatcher("/pullrequest.ftl").forward(request, response);
+            }
         } else {
-            request.setAttribute("rows", pullRequestData);
-            request.getRequestDispatcher("/pullrequest.ftl").forward(request, response);
+            logger.log(Level.WARNING, "streamName " + streamName + " and " + "componentName " + componentName
+                    + " must be specified in request parameter");
         }
+
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

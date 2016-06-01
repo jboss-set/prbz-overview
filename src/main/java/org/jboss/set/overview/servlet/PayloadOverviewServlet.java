@@ -18,7 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.jboss.set.assistant.data.ProcessorData;
 import org.jboss.set.overview.ejb.Aider;
 
-@WebServlet(name = "PayloadOverviewServlet", loadOnStartup = 1, urlPatterns = { "/view/payloadoverview" })
+@WebServlet(name = "PayloadOverviewServlet", loadOnStartup = 1, urlPatterns = { "/payloadview/overview" })
 public class PayloadOverviewServlet extends HttpServlet {
 
     private static final long serialVersionUID = 8833071859201802046L;

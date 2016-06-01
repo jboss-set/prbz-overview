@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.ServiceLoader;
 import java.util.StringTokenizer;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -54,8 +55,9 @@ import org.jboss.set.assistant.AssistantClient;
 import org.jboss.set.assistant.Util;
 import org.jboss.set.assistant.data.ProcessorData;
 import org.jboss.set.assistant.processor.PayloadProcessor;
-import org.jboss.set.assistant.processor.Processor;
 import org.jboss.set.assistant.processor.ProcessorException;
+import org.jboss.set.assistant.processor.PullRequestProcessor;
+import org.jboss.set.overview.Constants;
 
 /**
  * @author wangc
@@ -71,8 +73,9 @@ public class Aider {
     private static Aphrodite aphrodite;
     private static List<Stream> streams;
     private static Map<String, String> payloadMap = new HashMap<>();
-    private static List<ProcessorData> pullRequestData = new ArrayList<>();
+    private static Map<String, List<ProcessorData>> pullRequestData = new HashMap<>();
     private static Map<String, List<ProcessorData>> payloadData = new HashMap<>();
+    private static ServiceLoader<PullRequestProcessor> pullRequestProcessors;
     private static ServiceLoader<PayloadProcessor> payloadProcessors;
 
     private static final Object pullRequestDataLock = new Object();
@@ -94,8 +97,8 @@ public class Aider {
         }
     }
 
-    public static List<ProcessorData> getPullRequestData() {
-        return pullRequestData;
+    public static List<ProcessorData> getPullRequestData(String streamName, String componentName) {
+        return pullRequestData.get(streamName + componentName);
     }
 
     public static List<ProcessorData> getPayloadData(String payloadName) {
@@ -111,40 +114,20 @@ public class Aider {
         }
     }
 
-    public void generatePullRequestData() {
-        // FIXME hard-coded stream name
-        String streamName = "jboss-eap-6.4.z";
-        // use -Daphrodite.config=/path/to/aphrodite.properties.json
-        List<ProcessorData> dataList = new ArrayList<>();
+    public void initAllPullRequestData() {
+        logger.info("pull rqquest data initialization is started.");
         try {
-            logger.info("new pull request data values genearation is started...");
-            Stream stream;
-            stream = aphrodite.getStream(streamName);
-            StreamComponent streamComponent = stream.getComponent("Application Server");
-            Repository repository = streamComponent.getRepository();
-
-            logger.info("found component for : " + streamComponent.getName());
-            ServiceLoader<Processor> processors = ServiceLoader.load(Processor.class);
-
-            for (Processor processor : processors) {
-                logger.info("executing processor: " + processor.getClass().getName());
-                processor.init(aphrodite);
-                dataList.addAll(processor.process(repository));
-            }
-            logger.info("new pull request data values genearation is finished...");
-        } catch (NotFoundException e) {
-            logger.log(Level.FINE, e.getMessage(), e);
-        } catch (ProcessorException e) {
-            logger.log(Level.WARNING, e.getMessage(), e);
-        } catch (Exception e) {
-            logger.log(Level.WARNING, e.getMessage(), e);
-            Thread.currentThread().interrupt();
+            TimeUnit.MINUTES.sleep(1);// wait for streams loading
+        } catch (InterruptedException e1) {
+            // ignored
         }
-        if (!dataList.isEmpty()) {
-            synchronized (pullRequestDataLock) {
-                pullRequestData = dataList;
-            }
+        for (Stream s : streams) {
+            String streamName = s.getName();
+            s.getAllComponents().stream().filter(e -> e.getName().trim().equalsIgnoreCase(Constants.APPLICATION_SERVER)
+                    || e.getName().trim().equalsIgnoreCase(Constants.APPLICATION_SERVER_CORE))
+                    .forEach(e -> generatePullRequestData(streamName, e.getName()));
         }
+        logger.info("pull request data initialization is finished.");
     }
 
     public void initAllPayloadData() {
@@ -156,8 +139,42 @@ public class Aider {
     private void initProcessors() {
         payloadProcessors = ServiceLoader.load(PayloadProcessor.class);
         for (PayloadProcessor processor : payloadProcessors) {
-            logger.info("init processor: " + processor.getClass().getName());
+            logger.info("init payload processor: " + processor.getClass().getName());
             processor.init(aphrodite);
+        }
+        pullRequestProcessors = ServiceLoader.load(PullRequestProcessor.class);
+        for (PullRequestProcessor processor : pullRequestProcessors) {
+            logger.info("init pull request processor: " + processor.getClass().getName());
+            processor.init(aphrodite);
+        }
+    }
+
+    public void generatePullRequestData(String streamName, String componentName) {
+        List<ProcessorData> dataList = new ArrayList<>();
+        try {
+            logger.info("stream " + streamName + " component " + componentName + " pull request data genearation is started...");
+
+            Stream stream = aphrodite.getStream(streamName);
+            StreamComponent streamComponent = stream.getComponent(componentName);
+            Repository repository = streamComponent.getRepository();
+
+            for (PullRequestProcessor processor : pullRequestProcessors) {
+                logger.info("executing processor: " + processor.getClass().getName());
+                dataList.addAll(processor.process(repository, stream));
+            }
+            logger.info("stream " + streamName + " component " + componentName + " pull request data genearation is finished...");
+        } catch (NotFoundException e) {
+            logger.log(Level.FINE, e.getMessage(), e);
+        } catch (ProcessorException e) {
+            logger.log(Level.WARNING, e.getMessage(), e);
+        } catch (Exception e) {
+            logger.log(Level.WARNING, e.getMessage(), e);
+            Thread.currentThread().interrupt();
+        }
+        if (!dataList.isEmpty()) {
+            synchronized (pullRequestDataLock) {
+                pullRequestData.put(streamName + componentName, dataList);
+            }
         }
     }
 
@@ -204,13 +221,18 @@ public class Aider {
         }
     }
 
-    // Scheduled task timer to update data values every hour
-    // @Schedule(hour = "*")
-    // public void updatePullRequestData() {
-    // logger.info("schedule pull request data update is started ...");
-    // generatePullRequestData();
-    // logger.info("schedule pull request data update is finished ...");
-    // }
+    @Schedule(hour = "*")
+    public void updatePullRequestData() {
+        logger.info("schedule pull request data update is started ...");
+        // TODO load new streams
+        for (Stream s : streams) {
+            String streamName = s.getName();
+            s.getAllComponents().stream().filter(e -> e.getName().trim().equalsIgnoreCase(Constants.APPLICATION_SERVER)
+                    || e.getName().trim().equalsIgnoreCase(Constants.APPLICATION_SERVER_CORE))
+                    .forEach(e -> generatePullRequestData(streamName, e.getName()));
+        }
+        logger.info("schedule pull request data update is finished ...");
+    }
 
     @Schedule(hour = "*")
     public void updatePayloadData() {
@@ -245,7 +267,7 @@ public class Aider {
         return payloadMap;
     }
 
-    private Stream getCurrentStream(String streamName) {
+    public Stream getCurrentStream(String streamName) {
         return streams.stream().filter(e -> e.getName().equalsIgnoreCase(streamName)).findFirst()
                 .orElseThrow(() -> new IllegalArgumentException(streamName + " is not defined in streamConfigs json file"));
     }
@@ -253,4 +275,9 @@ public class Aider {
     public static Map<String, String> getPayloadMap() {
         return payloadMap;
     }
+
+    public static List<Stream> getStreams() {
+        return streams;
+    }
+
 }

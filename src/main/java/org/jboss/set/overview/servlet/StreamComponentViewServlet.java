@@ -23,7 +23,8 @@
 package org.jboss.set.overview.servlet;
 
 import java.io.IOException;
-import java.util.TreeSet;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.ejb.EJB;
 import javax.servlet.ServletException;
@@ -32,29 +33,39 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.jboss.set.aphrodite.domain.Stream;
+import org.jboss.set.aphrodite.domain.StreamComponent;
+import org.jboss.set.overview.Constants;
 import org.jboss.set.overview.ejb.Aider;
 
 /**
  * @author wangc
  *
  */
-@WebServlet(name = "DefaultServlet", loadOnStartup = 1, urlPatterns = { "/view" })
-public class DefaultServlet extends HttpServlet {
+@WebServlet(name = "StreamComponentViewServlet", loadOnStartup = 1, urlPatterns = { "/streamview/overview" })
+public class StreamComponentViewServlet extends HttpServlet {
 
-    private static final long serialVersionUID = 7093806444898357238L;
+    private static final long serialVersionUID = -7121305620456598691L;
 
     @EJB
     private Aider aiderService;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        TreeSet<String> payloadSet = new TreeSet<String>(aiderService.getPayloadMap().keySet());
-        if (payloadSet.isEmpty()) {
+        String streamName = request.getParameter("streamName");
+        List<Stream> streams = aiderService.getStreams();
+        if (streams == null) {
             response.addHeader("Refresh", "5");
             request.getRequestDispatcher("/error.html").forward(request, response);
         } else {
-            request.setAttribute("payloadSet", payloadSet);
-            request.getRequestDispatcher("/index.jsp").forward(request, response);
+            Stream stream = aiderService.getCurrentStream(streamName);
+            List<StreamComponent> filteredstreams = stream.getAllComponents().stream()
+                    .filter(e -> e.getName().trim().equalsIgnoreCase(Constants.APPLICATION_SERVER)
+                            || e.getName().trim().equalsIgnoreCase(Constants.APPLICATION_SERVER_CORE))
+                    .collect(Collectors.toList());
+            request.setAttribute("streamName", streamName);
+            request.setAttribute("components", filteredstreams);
+            request.getRequestDispatcher("/component.jsp").forward(request, response);
         }
     }
 
