@@ -30,6 +30,7 @@
 		<version.org.jboss.set.assistant>0.1-SNAPSHOT</version.org.jboss.set.assistant>
 		<version.org.wildfly.checkstyle-config>1.0.4.Final</version.org.wildfly.checkstyle-config>
 		<version.org.wildfly.wildfly.build.config>8.0.0.Final</version.org.wildfly.wildfly.build.config>
+		<version.rpm.plugin>2.1.5</version.rpm.plugin>
 		<version.war.plugin>2.1.1</version.war.plugin>
 	</properties>
 
@@ -38,6 +39,32 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>rpm-maven-plugin</artifactId>
+				<version>${version.rpm.plugin}</version>
+				<executions>
+					<execution>
+						<id>generate-rpm</id>
+						<goals>
+							<goal>rpm</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<group>JBoss SET/Tools</group>
+					<packager>JBoss SET</packager>
+					<mappings>
+						<mapping>
+							<directory>/usr/share</directory>
+							<filemode>644</filemode>
+							<username>jboss</username>
+							<groupname>jboss</groupname>
+							<artifact />
+						</mapping>
+					</mappings>
+				</configuration>
 			</plugin>
 		</plugins>
 		<pluginManagement>
@@ -189,6 +216,30 @@
 									<packagingExcludes>WEB-INF/lib/javax.faces*</packagingExcludes>
 									<warSourceExcludes>WEB-INF/lib/javax.faces*</warSourceExcludes>
 								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+		<!-- disable RPM creation -->
+		<profile>
+			<id>norpm</id>
+			<activation>
+				<property>
+					<name>norpm</name>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>rpm-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>generate-rpm</id>
+								<phase>none</phase>
 							</execution>
 						</executions>
 					</plugin>
