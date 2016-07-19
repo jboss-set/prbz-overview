@@ -114,7 +114,7 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
                 }
                 List<Future<ProcessorData>> results = service
                         .invokeAll(dependencyIssues.stream()
-                                .map(e -> new PayloadrocessingTask(e, issue, TrackerType.BUGZILLA, stream))
+                                .map(e -> new PayloadProcessingTask(e, issue, TrackerType.BUGZILLA, stream))
                                 .collect(Collectors.toList()), 15, TimeUnit.MINUTES);
 
                 for (Future<ProcessorData> result : results) {
@@ -177,7 +177,7 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
                 }
                 List<Future<ProcessorData>> results = service
                         .invokeAll(dependencyIssues.stream()
-                                .map(e -> new PayloadrocessingTask(e, fixVersion, TrackerType.JIRA, stream))
+                                .map(e -> new PayloadProcessingTask(e, fixVersion, TrackerType.JIRA, stream))
                                 .collect(Collectors.toList()), 15, TimeUnit.MINUTES);
 
                 for (Future<ProcessorData> result : results) {
@@ -203,14 +203,14 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
         }
     }
 
-    private class PayloadrocessingTask implements Callable<ProcessorData> {
+    private class PayloadProcessingTask implements Callable<ProcessorData> {
         private Issue dependencyIssue;
         private Issue payloadTracker;
         private String fixVersion;
         private TrackerType trackerType;
         private Stream stream;
 
-        PayloadrocessingTask(Issue dependencyIssue, Issue payloadTracker, TrackerType trackerType, Stream stream) {
+        PayloadProcessingTask(Issue dependencyIssue, Issue payloadTracker, TrackerType trackerType, Stream stream) {
             this.dependencyIssue = dependencyIssue;
             this.payloadTracker = payloadTracker;
             this.fixVersion = null;
@@ -218,7 +218,7 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
             this.stream = stream;
         }
 
-        PayloadrocessingTask(Issue dependencyIssue, String fixVersion, TrackerType trackerType, Stream stream) {
+        PayloadProcessingTask(Issue dependencyIssue, String fixVersion, TrackerType trackerType, Stream stream) {
             this.dependencyIssue = dependencyIssue;
             this.payloadTracker = null;
             this.fixVersion = fixVersion;

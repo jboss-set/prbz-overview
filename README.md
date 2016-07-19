@@ -10,7 +10,7 @@ Before deploying the war file,  please provide required properties in the config
     </extensions>
 
     <system-properties>
-        <property name="aphrodite.confige" value="/path/to/aphrodite.properties.json"/>
+        <property name="aphrodite.config" value="/path/to/aphrodite.properties.json"/>
         <property name="payload.properties" value="/path/to/payload.properties"/>
     </system-properties>
 
