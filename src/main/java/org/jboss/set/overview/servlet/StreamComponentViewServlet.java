@@ -53,7 +53,7 @@ public class StreamComponentViewServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         String streamName = request.getParameter("streamName");
-        List<Stream> streams = aiderService.getStreams();
+        List<Stream> streams = aiderService.getAllStreams();
         if (streams == null) {
             response.addHeader("Refresh", "5");
             request.getRequestDispatcher("/error.html").forward(request, response);

@@ -51,13 +51,13 @@ public class DefaultStreamViewServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        List<Stream> streams = aiderService.getStreams();
+        List<Stream> streams = aiderService.getAllStreams();
         if (streams == null) {
             response.addHeader("Refresh", "5");
             request.getRequestDispatcher("/error.html").forward(request, response);
         } else {
             TreeSet<String> streamSet = new TreeSet<String>(
-                    aiderService.getStreams().stream().map(e -> e.getName()).collect((Collectors.toList())));
+                    aiderService.getAllStreams().stream().map(e -> e.getName()).collect((Collectors.toList())));
             request.setAttribute("streamSet", streamSet);
             request.getRequestDispatcher("/stream_index.jsp").forward(request, response);
         }

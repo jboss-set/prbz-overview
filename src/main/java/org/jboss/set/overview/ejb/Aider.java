@@ -37,6 +37,7 @@ import java.util.StringTokenizer;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -69,10 +70,15 @@ public class Aider {
     public static Logger logger = Logger.getLogger(Aider.class.getCanonicalName());
     public static final String PAYLOAD_PROPERTIES = "payload.properties";
     public static final String PAYLOAD_LIST = "payloadlist";
+    public static final String WILDFLY_STREAM = "wildfly"; // ignored upstream in streams view
 
     private static Aphrodite aphrodite;
-    private static List<Stream> streams;
+    private static Stream stream;
+    private static List<Stream> allStreams = new ArrayList<>();
+    private static List<Stream> shadowStreams = new ArrayList<>();
+    private static String payload;
     private static Map<String, String> payloadMap = new HashMap<>();
+    private static List<String> shadowPayloadSet = new ArrayList<>();
     private static Map<String, List<ProcessorData>> pullRequestData = new HashMap<>();
     private static Map<String, List<ProcessorData>> payloadData = new HashMap<>();
     private static ServiceLoader<PullRequestProcessor> pullRequestProcessors;
@@ -85,8 +91,20 @@ public class Aider {
     public void init() {
         try {
             aphrodite = AssistantClient.getAphrodite();
+
             payloadMap = loadPayloadMap();
-            streams = aphrodite.getAllStreams();
+            shadowPayloadSet.addAll(payloadMap.keySet());
+            if (!shadowPayloadSet.isEmpty()) {
+                payload = shadowPayloadSet.remove(0);
+            }
+
+            // reduce traffic, filter out irrespective wildfly stream defined in streans.json
+            allStreams = aphrodite.getAllStreams().stream().filter(e -> !e.getName().equals(WILDFLY_STREAM)).collect(Collectors.toList());
+            // avoid Github API rate limitation, process one stream per update.
+            shadowStreams.addAll(allStreams);
+            if (!allStreams.isEmpty()) {
+                stream = shadowStreams.remove(0);
+            }
             initProcessors();
         } catch (AphroditeException e) {
             throw new IllegalStateException("Failed to get aphrodite instance", e);
@@ -121,18 +139,18 @@ public class Aider {
         } catch (InterruptedException e1) {
             // ignored
         }
-        for (Stream s : streams) {
-            String streamName = s.getName();
-            s.getAllComponents().stream().filter(e -> e.getName().trim().equalsIgnoreCase(Constants.APPLICATION_SERVER)
+        if (stream != null) {
+            String streamName = stream.getName();
+            stream.getAllComponents().stream().filter(e -> e.getName().trim().equalsIgnoreCase(Constants.APPLICATION_SERVER)
                     || e.getName().trim().equalsIgnoreCase(Constants.APPLICATION_SERVER_CORE))
                     .forEach(e -> generatePullRequestData(streamName, e.getName()));
+            logger.info("stream " + streamName + " pull request data initialization is finished.");
         }
-        logger.info("pull request data initialization is finished.");
     }
 
     public void initAllPayloadData() {
         logger.info("payload data initialization is started.");
-        payloadMap.keySet().stream().forEach(e -> generatePayloadData(e));
+        generatePayloadData(payload);
         logger.info("payload data initialization is finished.");
     }
 
@@ -224,26 +242,33 @@ public class Aider {
     @Schedule(hour = "*")
     public void updatePullRequestData() {
         logger.info("schedule pull request data update is started ...");
-        // TODO load new streams
-        for (Stream s : streams) {
-            String streamName = s.getName();
-            s.getAllComponents().stream().filter(e -> e.getName().trim().equalsIgnoreCase(Constants.APPLICATION_SERVER)
-                    || e.getName().trim().equalsIgnoreCase(Constants.APPLICATION_SERVER_CORE))
-                    .forEach(e -> generatePullRequestData(streamName, e.getName()));
+        if (shadowStreams.isEmpty()) {
+            // TOOD load new streams, although it's not often.
+            shadowStreams.addAll(allStreams);
         }
-        logger.info("schedule pull request data update is finished ...");
+        // avoid Github API rate limitation, process one stream per update.
+        stream = shadowStreams.remove(0);
+        String streamName = stream.getName();
+        stream.getAllComponents().stream().filter(e -> e.getName().trim().equalsIgnoreCase(Constants.APPLICATION_SERVER)
+                || e.getName().trim().equalsIgnoreCase(Constants.APPLICATION_SERVER_CORE))
+                .forEach(e -> generatePullRequestData(streamName, e.getName()));
+        logger.info("stream " + streamName + " scheduled pull request data update is finished.");
     }
 
     @Schedule(hour = "*")
     public void updatePayloadData() {
         logger.info("schedule payload data update is started ...");
         try {
-            payloadMap = loadPayloadMap();
+            if (shadowPayloadSet.isEmpty()) {
+                payloadMap = loadPayloadMap();
+                shadowPayloadSet.addAll(payloadMap.keySet());
+            }
         } catch (IOException e) {
             throw new IllegalArgumentException("Failed to load payload.properties File", e);
         }
-        payloadMap.keySet().stream().forEach(e -> generatePayloadData(e));
-        logger.info("schedule payload data update is finished ...");
+        payload = shadowPayloadSet.remove(0);
+        generatePayloadData(payload);
+        logger.info("payload " + payload + " schedule payload data update is finished.");
     }
 
     // load payload list from payload.properties file
@@ -268,7 +293,7 @@ public class Aider {
     }
 
     public Stream getCurrentStream(String streamName) {
-        return streams.stream().filter(e -> e.getName().equalsIgnoreCase(streamName)).findFirst()
+        return allStreams.stream().filter(e -> e.getName().equalsIgnoreCase(streamName)).findFirst()
                 .orElseThrow(() -> new IllegalArgumentException(streamName + " is not defined in streamConfigs json file"));
     }
 
@@ -276,8 +301,7 @@ public class Aider {
         return payloadMap;
     }
 
-    public static List<Stream> getStreams() {
-        return streams;
+    public static List<Stream> getAllStreams() {
+        return allStreams;
     }
-
 }
