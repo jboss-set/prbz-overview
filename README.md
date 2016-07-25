@@ -36,15 +36,9 @@ If you need to obtain online streams.json from [jboss-streams](https://github.co
         }
     ]
 
-Since one payload update can sometimes take several minutes due to server side network latency. It's required to increase default timeout value in transactions subsystem.
+Since one payload update can sometimes takes several minutes due to server side network latency. It's required to increase default timeout value in transactions subsystem to a bigger value depends on the network condition.
 
 	<coordinator-environment default-timeout="300"/>
-
-Replace protocol "HTTP/1.1" by "Http11NioProtocol" in web subsystem to avoid possible java.net.socketinputstream.socketread0 hangs thread due to a high processing time or unhealthy state of remote service provider.
-
-	protocol="org.apache.coyote.http11.Http11NioProtocol"
-
-Note： Unfortunately，it depends on a SNAPSHOT version of [assistant](https://github.com/soul2zimate/assistant) by the moment. Therefore, it needs a pre-build assistant into your local maven repository.
 
 #Deployment
 ------------
@@ -53,4 +47,7 @@ Note： Unfortunately，it depends on a SNAPSHOT version of [assistant](https://
 mvn clean package
 ```
 
-Copy generated war file to $JBOSS_HOME/standalone/deployments/ and visit http://localhost:8080/prbz-overview-${version}/payloadview for payload overview and http://localhost:8080/prbz-overview-${version}/streamview for stream pull requests overview. Normally, it takes a few minutes to collect and display all information from GitHub and issue tracker systems.
+Copy generated war file to $JBOSS_HOME/standalone/deployments/ and visit http://localhost:8080/prbz-overview-${version}/prbz-overview.
+For instance on thunder: [OverviewPage](https://thunder.sin2.redhat.com/prbz-overview)
+
+In order to avoid potential Github API rate limitation, the scheduled update task updates one payload and one stream Github repositories per hour. Therefore, it may take a bit longer to see all streams / payloads information for the first deployment.
