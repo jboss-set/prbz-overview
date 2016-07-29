@@ -22,8 +22,14 @@
 
 package org.jboss.set.overview;
 
-
 public class Constants {
     public static final String APPLICATION_SERVER = "Application Server";
     public static final String APPLICATION_SERVER_CORE = "Application Server Core";
+
+    public static final String GITHUB = "Github";
+    public static final String BUGZILLA = "Bugzilla";
+    public static final String JIRA = "Jira";
+
+    public static final String SUCCESS = "Success";
+    public static final String FAILURE = "Failure";
 }

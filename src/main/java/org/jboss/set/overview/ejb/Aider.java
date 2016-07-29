@@ -50,6 +50,7 @@ import org.jboss.set.aphrodite.domain.Issue;
 import org.jboss.set.aphrodite.domain.Repository;
 import org.jboss.set.aphrodite.domain.Stream;
 import org.jboss.set.aphrodite.domain.StreamComponent;
+import org.jboss.set.aphrodite.repository.services.common.RepositoryType;
 import org.jboss.set.aphrodite.spi.AphroditeException;
 import org.jboss.set.aphrodite.spi.NotFoundException;
 import org.jboss.set.assistant.AssistantClient;
@@ -303,5 +304,13 @@ public class Aider {
 
     public static List<Stream> getAllStreams() {
         return allStreams;
+    }
+
+    public Map<RepositoryType, Integer> getRequestLimit() {
+        return aphrodite.getRequestLimit();
+    }
+
+    public Map<RepositoryType, Integer> getRemainingRequests() {
+        return aphrodite.getRemainingRequests();
     }
 }
