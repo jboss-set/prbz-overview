@@ -117,6 +117,11 @@
 											<#items as issue>
 												<li>
 													<a href="${issue.link}">#${issue.label}</a> - ${issue.status} - ${issue.type}
+														<#if issue.streamStatus??>
+															<#list issue.streamStatus?keys as key>
+																<span class="label label-primary">${key}</span>
+															</#list>
+														</#if>
 														<#if issue.inPayload?? && (issue.inPayload==false)>
 															<span class="label label-warning">Not in Payload</span>
 														</#if>
