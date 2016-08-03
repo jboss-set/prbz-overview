@@ -34,15 +34,13 @@
 			  <div class="col-md-12"><h1>EAP Cumulative Patch Releases Stream Components List</h1></div>
 			</div>
 			<div class="payload">
-				<ul>
-					<c:forEach var="i" items="${components}">
-						<h4>
-							<li>
-								<a href="pullrequestoverview?streamName=${streamName}&componentName=${i.name}" id=${i}}> <c:out value="${i.name}" /></a>
-							</li>
-						</h4>
-					</c:forEach>
-				</ul>
+				<c:forEach var="i" items="${components}">
+					<h4>
+						<li>
+							<a href="pullrequestoverview?streamName=${streamName}&componentName=${i.name}" id=${i}}> <c:out value="${i.name}" /></a>
+						</li>
+					</h4>
+				</c:forEach>
 			</div>
 		</div>
 

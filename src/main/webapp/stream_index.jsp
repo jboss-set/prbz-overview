@@ -34,15 +34,13 @@
 			  <div class="col-md-12"><h1>EAP Cumulative Patch Releases Stream Repositories List</h1></div>
 			</div>
 			<div class="stream">
-				<ul>
-					<c:forEach var="i" items="${streamSet}">
-						<h4>
-							<li>
-								<a href="streamview/overview?streamName=${i}" id=${i}}> <c:out value="${i}" /></a>
-							</li>
-						</h4>
-					</c:forEach>
-				</ul>
+				<c:forEach var="i" items="${streamSet}">
+					<h4>
+						<li>
+							<a href="streamview/overview?streamName=${i}" id=${i}}> <c:out value="${i}" /></a>
+						</li>
+					</h4>
+				</c:forEach>
 			</div>
 		</div>
 

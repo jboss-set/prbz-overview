@@ -34,15 +34,13 @@
 			  <div class="col-md-12"><h1>EAP Cumulative Patch Releases Payload Tracker Issue List</h1></div>
 			</div>
 			<div class="payload">
-				<ul>
-					<c:forEach var="i" items="${payloadSet}">
-						<h4>
-							<li>
-								<a href="payloadview/overview?payloadName=${i}" id=${i}}> <c:out value="${i}" /></a>
-							</li>
-						</h4>
-					</c:forEach>
-				</ul>
+				<c:forEach var="i" items="${payloadSet}">
+					<h4>
+						<li>
+							<a href="payloadview/overview?payloadName=${i}" id=${i}}> <c:out value="${i}" /></a>
+						</li>
+					</h4>
+				</c:forEach>
 			</div>
 		</div>
 
