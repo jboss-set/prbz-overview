@@ -249,11 +249,13 @@ public class Aider {
         }
         // avoid Github API rate limitation, process one stream per update.
         stream = shadowStreams.remove(0);
-        String streamName = stream.getName();
-        stream.getAllComponents().stream().filter(e -> e.getName().trim().equalsIgnoreCase(Constants.APPLICATION_SERVER)
-                || e.getName().trim().equalsIgnoreCase(Constants.APPLICATION_SERVER_CORE))
-                .forEach(e -> generatePullRequestData(streamName, e.getName()));
-        logger.info("stream " + streamName + " scheduled pull request data update is finished.");
+        if (stream != null) {
+            String streamName = stream.getName();
+            stream.getAllComponents().stream().filter(e -> e.getName().trim().equalsIgnoreCase(Constants.APPLICATION_SERVER)
+                    || e.getName().trim().equalsIgnoreCase(Constants.APPLICATION_SERVER_CORE))
+                    .forEach(e -> generatePullRequestData(streamName, e.getName()));
+            logger.info("stream " + streamName + " scheduled pull request data update is finished.");
+        }
     }
 
     @Schedule(hour = "*")
@@ -268,8 +270,10 @@ public class Aider {
             throw new IllegalArgumentException("Failed to load payload.properties File", e);
         }
         payload = shadowPayloadSet.remove(0);
-        generatePayloadData(payload);
-        logger.info("payload " + payload + " schedule payload data update is finished.");
+        if (payload != null) {
+            generatePayloadData(payload);
+            logger.info("payload " + payload + " schedule payload data update is finished.");
+        }
     }
 
     // load payload list from payload.properties file
