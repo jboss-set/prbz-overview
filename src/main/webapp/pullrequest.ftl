@@ -131,6 +131,11 @@
 							    		<#items as issue>
 							    		   <li>
 												<a href="${issue.link}">#${issue.label}</a> - ${issue.status} - ${issue.type}
+												<#if issue.streamStatus??>
+													<#list issue.streamStatus?keys as key>
+														<span class="label label-primary">${key}</span>
+													</#list>
+												</#if>
 							    		   		<#assign status = data.status>
 							    		   		<#switch status[issue.label]>
 													  <#case 1> <span class="label label-success">ready to go</span><#break>

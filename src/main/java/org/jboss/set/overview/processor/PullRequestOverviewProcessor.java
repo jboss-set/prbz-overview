@@ -25,9 +25,11 @@ package org.jboss.set.overview.processor;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -148,9 +150,9 @@ public class PullRequestOverviewProcessor implements PullRequestProcessor {
         public ProcessorData call() throws Exception {
             try {
                 logger.info("processing " + patch.getURL().toString());
-                List<Issue> issues = aphrodite.getIssuesAssociatedWith(patch);
+                Set<Issue> issues = new HashSet<>(aphrodite.getIssuesAssociatedWith(patch));
 
-                List<Patch> relatedPatches = aphrodite.findPatchesRelatedTo(patch);
+                Set<Patch> relatedPatches = new HashSet<>(aphrodite.findPatchesRelatedTo(patch));
                 Map<String, Object> data = new HashMap<>();
                 EvaluatorContext context = new EvaluatorContext(aphrodite, repository, patch, issues, relatedPatches, stream);
                 for (Evaluator evaluator : evaluators) {
