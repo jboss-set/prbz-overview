@@ -39,6 +39,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.jboss.set.aphrodite.repository.services.common.RepositoryType;
 import org.jboss.set.overview.Constants;
 import org.jboss.set.overview.ejb.Aider;
+import org.kohsuke.github.GHRateLimit;
 
 /**
  * @author wangc
@@ -53,8 +54,7 @@ public class StatusServlet extends HttpServlet {
     private static final String BUGZILLA_HOST = "https://bugzilla.redhat.com/";
     private static final String GITHUB_HOST = "https://github.com/";
 
-    private static Map<RepositoryType, Integer> remainingRequests;
-    private static Map<RepositoryType, Integer> requestLimit;
+    private static Map<RepositoryType, GHRateLimit> rateLimits;
     @EJB
     private Aider aiderService;
 
@@ -71,21 +71,17 @@ public class StatusServlet extends HttpServlet {
             // ignored
         }
 
-        // check Github Api limitation by querying RequestLimits and RemainingRequests
-        requestLimit = aiderService.getRequestLimit();
-        remainingRequests = aiderService.getRemainingRequests();
-
-        Set<RepositoryType> keys = requestLimit.keySet();
-        for (RepositoryType key : keys) {
-            response.getWriter().println(key.toString() + " RequestLimit : " + "<b>" + requestLimit.get(key) + "</b>");
-            response.getWriter().println("</br>");
-        }
-
-        keys = remainingRequests.keySet();
-        for (RepositoryType key : keys) {
-            response.getWriter()
-                    .println(key.toString() + " RemainingRequests : " + "<b>" + remainingRequests.get(key) + "</b>");
-            response.getWriter().println("</br>");
+        // check Github Api rate limit
+        rateLimits = aiderService.getRateLimits();
+        if (rateLimits != null) {
+            Set<RepositoryType> keys = rateLimits.keySet();
+            for (RepositoryType key : keys) {
+                GHRateLimit rateLimit = rateLimits.get(key);
+                response.getWriter().println(key.toString() + " RequestLimit : " + "<b>" + rateLimit.limit + "</b>");
+                response.getWriter().println("</br>");
+                response.getWriter().println(key.toString() + " RemainingRequests : " + "<b>" + rateLimit.remaining + "</b>");
+                response.getWriter().println("</br>");
+            }
         }
     }
 

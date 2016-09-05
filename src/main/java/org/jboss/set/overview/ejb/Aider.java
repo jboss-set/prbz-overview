@@ -60,6 +60,7 @@ import org.jboss.set.assistant.processor.PayloadProcessor;
 import org.jboss.set.assistant.processor.ProcessorException;
 import org.jboss.set.assistant.processor.PullRequestProcessor;
 import org.jboss.set.overview.Constants;
+import org.kohsuke.github.GHRateLimit;
 
 /**
  * @author wangc
@@ -310,11 +311,12 @@ public class Aider {
         return allStreams;
     }
 
-    public Map<RepositoryType, Integer> getRequestLimit() {
-        return aphrodite.getRequestLimit();
-    }
-
-    public Map<RepositoryType, Integer> getRemainingRequests() {
-        return aphrodite.getRemainingRequests();
+    public Map<RepositoryType, GHRateLimit> getRateLimits() {
+        try {
+            return aphrodite.getRateLimits();
+        } catch (NotFoundException e) {
+            logger.log(Level.WARNING, e.getMessage(), e);
+        }
+        return null;
     }
 }
