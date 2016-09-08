@@ -107,7 +107,7 @@ public class PullRequestOverviewProcessor implements PullRequestProcessor {
                 }
                 List<Future<ProcessorData>> results = service
                         .invokeAll(
-                                patches.stream().map(e -> new PatchProcessingTask(repository, e, stream)).collect(Collectors.toList()), 15, TimeUnit.MINUTES);
+                                patches.stream().map(e -> new PatchProcessingTask(repository, e, stream)).collect(Collectors.toList()), 10, TimeUnit.MINUTES);
 
                 for (Future<ProcessorData> result : results) {
                     try {

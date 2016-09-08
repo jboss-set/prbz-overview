@@ -81,7 +81,7 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
         this.singleExecutorService = Executors.newSingleThreadExecutor();
     }
 
-    @AccessTimeout(value = 15, unit = TimeUnit.MINUTES)
+    @AccessTimeout(value = 10, unit = TimeUnit.MINUTES)
     @Lock(LockType.READ)
     @Override
     public List<ProcessorData> process(Issue issue, Stream stream) throws ProcessorException {
@@ -115,7 +115,7 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
                 List<Future<ProcessorData>> results = service
                         .invokeAll(dependencyIssues.stream()
                                 .map(e -> new PayloadProcessingTask(e, issue, TrackerType.BUGZILLA, stream))
-                                .collect(Collectors.toList()), 15, TimeUnit.MINUTES);
+                                .collect(Collectors.toList()), 10, TimeUnit.MINUTES);
 
                 for (Future<ProcessorData> result : results) {
                     try {
@@ -140,7 +140,7 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
         }
     }
 
-    @AccessTimeout(value = 15, unit = TimeUnit.MINUTES)
+    @AccessTimeout(value = 10, unit = TimeUnit.MINUTES)
     @Lock(LockType.READ)
     @Override
     public List<ProcessorData> process(String fixVersion, Stream stream) throws ProcessorException {
@@ -178,7 +178,7 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
                 List<Future<ProcessorData>> results = service
                         .invokeAll(dependencyIssues.stream()
                                 .map(e -> new PayloadProcessingTask(e, fixVersion, TrackerType.JIRA, stream))
-                                .collect(Collectors.toList()), 15, TimeUnit.MINUTES);
+                                .collect(Collectors.toList()), 10, TimeUnit.MINUTES);
 
                 for (Future<ProcessorData> result : results) {
                     try {

@@ -75,12 +75,8 @@ public class Aider {
     public static final String WILDFLY_STREAM = "wildfly"; // ignored upstream in streams view
 
     private static Aphrodite aphrodite;
-    private static Stream stream;
     private static List<Stream> allStreams = new ArrayList<>();
-    private static List<Stream> shadowStreams = new ArrayList<>();
-    private static String payload;
     private static Map<String, String> payloadMap = new HashMap<>();
-    private static List<String> shadowPayloadSet = new ArrayList<>();
     private static Map<String, List<ProcessorData>> pullRequestData = new HashMap<>();
     private static Map<String, List<ProcessorData>> payloadData = new HashMap<>();
     private static ServiceLoader<PullRequestProcessor> pullRequestProcessors;
@@ -95,18 +91,9 @@ public class Aider {
             aphrodite = AssistantClient.getAphrodite();
 
             payloadMap = loadPayloadMap();
-            shadowPayloadSet.addAll(payloadMap.keySet());
-            if (!shadowPayloadSet.isEmpty()) {
-                payload = shadowPayloadSet.remove(0);
-            }
 
-            // reduce traffic, filter out irrespective wildfly stream defined in streans.json
             allStreams = aphrodite.getAllStreams().stream().filter(e -> !e.getName().equals(WILDFLY_STREAM)).collect(Collectors.toList());
-            // avoid Github API rate limitation, process one stream per update.
-            shadowStreams.addAll(allStreams);
-            if (!allStreams.isEmpty()) {
-                stream = shadowStreams.remove(0);
-            }
+
             initProcessors();
         } catch (AphroditeException e) {
             throw new IllegalStateException("Failed to get aphrodite instance", e);
@@ -137,13 +124,13 @@ public class Aider {
     public void initAllPullRequestData() {
         logger.info("pull rqquest data initialization is started.");
         try {
-            TimeUnit.MINUTES.sleep(1);// wait for streams loading
+            TimeUnit.MINUTES.sleep(2);// wait for streams loading
         } catch (InterruptedException e1) {
             // ignored
         }
-        if (stream != null) {
-            String streamName = stream.getName();
-            stream.getAllComponents().stream().filter(e -> e.getName().trim().equalsIgnoreCase(Constants.APPLICATION_SERVER)
+        for (Stream s : allStreams) {
+            String streamName = s.getName();
+            s.getAllComponents().stream().filter(e -> e.getName().trim().equalsIgnoreCase(Constants.APPLICATION_SERVER)
                     || e.getName().trim().equalsIgnoreCase(Constants.APPLICATION_SERVER_CORE))
                     .forEach(e -> generatePullRequestData(streamName, e.getName()));
             logger.info("stream " + streamName + " pull request data initialization is finished.");
@@ -152,7 +139,7 @@ public class Aider {
 
     public void initAllPayloadData() {
         logger.info("payload data initialization is started.");
-        generatePayloadData(payload);
+        payloadMap.keySet().stream().forEach(e -> generatePayloadData(e));
         logger.info("payload data initialization is finished.");
     }
 
@@ -241,40 +228,31 @@ public class Aider {
         }
     }
 
-    @Schedule(hour = "*")
+    @Schedule(minute = "*/15", hour = "*")
     public void updatePullRequestData() {
         logger.info("schedule pull request data update is started ...");
-        if (shadowStreams.isEmpty()) {
-            // TOOD load new streams, although it's not often.
-            shadowStreams.addAll(allStreams);
-        }
-        // avoid Github API rate limitation, process one stream per update.
-        stream = shadowStreams.remove(0);
-        if (stream != null) {
-            String streamName = stream.getName();
-            stream.getAllComponents().stream().filter(e -> e.getName().trim().equalsIgnoreCase(Constants.APPLICATION_SERVER)
+        // TOOD load new streams, although it's not often.
+        for (Stream s : allStreams) {
+            String streamName = s.getName();
+            s.getAllComponents().stream().filter(e -> e.getName().trim().equalsIgnoreCase(Constants.APPLICATION_SERVER)
                     || e.getName().trim().equalsIgnoreCase(Constants.APPLICATION_SERVER_CORE))
                     .forEach(e -> generatePullRequestData(streamName, e.getName()));
             logger.info("stream " + streamName + " scheduled pull request data update is finished.");
+
         }
     }
 
-    @Schedule(hour = "*")
+    @Schedule(minute = "*/15", hour = "*")
     public void updatePayloadData() {
         logger.info("schedule payload data update is started ...");
         try {
-            if (shadowPayloadSet.isEmpty()) {
-                payloadMap = loadPayloadMap();
-                shadowPayloadSet.addAll(payloadMap.keySet());
-            }
+            payloadMap = loadPayloadMap();
         } catch (IOException e) {
             throw new IllegalArgumentException("Failed to load payload.properties File", e);
         }
-        payload = shadowPayloadSet.remove(0);
-        if (payload != null) {
-            generatePayloadData(payload);
-            logger.info("payload " + payload + " schedule payload data update is finished.");
-        }
+        payloadMap.keySet().stream().forEach(e -> generatePayloadData(e));
+        logger.info("schedule payload data update is finished ...");
+
     }
 
     // load payload list from payload.properties file
