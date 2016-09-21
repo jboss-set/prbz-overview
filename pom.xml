@@ -34,7 +34,8 @@
 		<version.war.plugin>2.1.1</version.war.plugin>
 	</properties>
 
-	<build>
+    <build>
+        <finalName>${project.name}</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -134,7 +135,7 @@
 			<artifactId>assistant</artifactId>
 			<version>${version.org.jboss.set.assistant}</version>
 		</dependency>
-		<!-- Import the CDI API, we use provided scope as the API is included in 
+		<!-- Import the CDI API, we use provided scope as the API is included in
 			WildFly -->
 		<dependency>
 			<groupId>javax.enterprise</groupId>
@@ -142,7 +143,7 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- Import the Servlet API, we use provided scope as the API is included 
+		<!-- Import the Servlet API, we use provided scope as the API is included
 			in WildFly -->
 		<dependency>
 			<groupId>org.jboss.spec.javax.servlet</groupId>
