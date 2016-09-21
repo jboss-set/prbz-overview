@@ -57,7 +57,7 @@
 					<packager>JBoss SET</packager>
 					<mappings>
 						<mapping>
-							<directory>/usr/share</directory>
+							<directory>/usr/share/${project.name}</directory>
 							<filemode>644</filemode>
 							<username>jboss</username>
 							<groupname>jboss</groupname>
