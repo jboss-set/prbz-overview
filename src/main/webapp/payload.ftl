@@ -64,7 +64,7 @@
 													<a href="${patch.link}">#${patch.label}</a> - ${patch.codebase} -
 													<#switch patch.patchState>
 														<#case "OPEN"> <span class="label label-success">open</span><#break>
-														<#case "CLOSED"> <span class="label label-danger">closed</span><#break>
+														<#case "CLOSED"> <span class="label label-default">closed</span><#break>
 														<#case "UNDEFINED"> <span class="label label-default">undefined</span><#break>
 													</#switch>
 													<#switch patch.commitStatus>
@@ -90,7 +90,7 @@
 													<a href="${patch.link}">#${patch.label}</a> - ${patch.codebase} -
 													<#switch patch.patchState>
 														<#case "OPEN"> <span class="label label-success">open</span><#break>
-														<#case "CLOSED"> <span class="label label-danger">closed</span><#break>
+														<#case "CLOSED"> <span class="label label-default">closed</span><#break>
 														<#case "UNDEFINED"> <span class="label label-default">undefined</span><#break>
 													</#switch>
 													<#switch patch.commitStatus>
@@ -119,7 +119,7 @@
 													<a href="${issue.link}">#${issue.label}</a> - ${issue.status} - ${issue.type}
 														<#if issue.streamStatus??>
 															<#list issue.streamStatus?keys as key>
-																<span class="label label-primary">${key}</span>
+																<span class="label label-primary">${key} stream </span>
 															</#list>
 														</#if>
 														<#if issue.inPayload?? && (issue.inPayload==false)>

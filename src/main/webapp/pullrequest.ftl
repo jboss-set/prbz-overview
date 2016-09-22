@@ -32,7 +32,6 @@
 			  	<table id="eventTable" class="table table-striped">
 			  		<thead>
 			  			<tr>
-			  				<th>Repository</th>
 			  				<th>Pull Request</th>
 							<th>Branch</th>
 							<th>Streams</th>
@@ -45,13 +44,11 @@
 						<#list rows as row>
 							<#assign data = row.data>
 							<tr>
-								<td><a href="${data.repository.link}">${data.repository.label}</a></td>
-
 								<td>
 									<a href="${data.pullRequest.link}">#${data.pullRequest.label}</a>
 									<#switch data.pullRequest.patchState>
 										<#case "OPEN"> <span class="label label-success">open</span><#break>
-										<#case "CLOSED"> <span class="label label-danger">closed</span><#break>
+										<#case "CLOSED"> <span class="label label-default">closed</span><#break>
 										<#case "UNDEFINED"> <span class="label label-default">undefined</span><#break>
 									</#switch>
 									<#switch data.pullRequest.commitStatus>
@@ -106,7 +103,7 @@
 											<a href="${patch.link}">#${patch.label}</a> - ${patch.codebase} -
 											<#switch patch.patchState>
 													<#case "OPEN"> <span class="label label-success">open</span><#break>
-													<#case "CLOSED"> <span class="label label-danger">closed</span><#break>
+													<#case "CLOSED"> <span class="label label-default">closed</span><#break>
 													<#case "UNDEFINED"> <span class="label label-default">undefined</span><#break>
 												</#switch>
 												<#switch patch.commitStatus>

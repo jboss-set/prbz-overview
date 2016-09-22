@@ -3,6 +3,5 @@ org.jboss.set.assistant.evaluator.impl.pullrequest.IssuesRelatedEvaluator
 org.jboss.set.assistant.evaluator.impl.pullrequest.LabelsEvaluator
 org.jboss.set.assistant.evaluator.impl.pullrequest.PullRequestEvaluator
 org.jboss.set.assistant.evaluator.impl.pullrequest.PullRequestRelatedEvaluator
-org.jboss.set.assistant.evaluator.impl.pullrequest.RepositoryEvaluator
 org.jboss.set.assistant.evaluator.impl.pullrequest.StreamsEvaluator
 org.jboss.set.assistant.evaluator.impl.pullrequest.UpstreamEvaluator

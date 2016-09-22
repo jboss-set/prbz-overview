@@ -96,7 +96,7 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
             boolean listen = true;
             while (listen) {
                 try {
-                    dependencyIssues = future.get(10, TimeUnit.MINUTES);
+                    dependencyIssues = future.get(5, TimeUnit.MINUTES);
                 } catch (ExecutionException | TimeoutException e) {
                     listen = false;
                     future.cancel(true);
@@ -115,7 +115,7 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
                 List<Future<ProcessorData>> results = service
                         .invokeAll(dependencyIssues.stream()
                                 .map(e -> new PayloadProcessingTask(e, issue, TrackerType.BUGZILLA, stream))
-                                .collect(Collectors.toList()), 10, TimeUnit.MINUTES);
+                                .collect(Collectors.toList()), 5, TimeUnit.MINUTES);
 
                 for (Future<ProcessorData> result : results) {
                     try {
@@ -140,7 +140,7 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
         }
     }
 
-    @AccessTimeout(value = 10, unit = TimeUnit.MINUTES)
+    @AccessTimeout(value = 5, unit = TimeUnit.MINUTES)
     @Lock(LockType.READ)
     @Override
     public List<ProcessorData> process(String fixVersion, Stream stream) throws ProcessorException {
@@ -159,7 +159,7 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
             boolean listen = true;
             while (listen) {
                 try {
-                    dependencyIssues = future.get(10, TimeUnit.MINUTES);
+                    dependencyIssues = future.get(5, TimeUnit.MINUTES);
                 } catch (ExecutionException | TimeoutException e) {
                     listen = false;
                     future.cancel(true);
@@ -178,7 +178,7 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
                 List<Future<ProcessorData>> results = service
                         .invokeAll(dependencyIssues.stream()
                                 .map(e -> new PayloadProcessingTask(e, fixVersion, TrackerType.JIRA, stream))
-                                .collect(Collectors.toList()), 10, TimeUnit.MINUTES);
+                                .collect(Collectors.toList()), 5, TimeUnit.MINUTES);
 
                 for (Future<ProcessorData> result : results) {
                     try {
