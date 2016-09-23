@@ -117,6 +117,10 @@
 											<#items as issue>
 												<li>
 													<a href="${issue.link}">#${issue.label}</a> - ${issue.status} - ${issue.type}
+														<#if issue.fixVersions?has_content>
+															- Fix Version:
+															<#list issue.fixVersions as fixVersion> ${fixVersion} </#list>
+														</#if>
 														<#if issue.streamStatus??>
 															<#list issue.streamStatus?keys as key>
 																<span class="label label-primary">${key} stream </span>
