@@ -60,9 +60,15 @@
 						<mapping>
 							<directory>/usr/share/${project.name}</directory>
 							<filemode>644</filemode>
-							<username>jboss</username>
-							<groupname>jboss</groupname>
+							<username>root</username>
+							<groupname>root</groupname>
 							<artifact />
+						</mapping>
+						<mapping>
+							<directory>/usr/share/${project.name}</directory>
+							<filemode>755</filemode>
+							<username>root</username>
+							<groupname>root</groupname>
 						</mapping>
 					</mappings>
 				</configuration>
