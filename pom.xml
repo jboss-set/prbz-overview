@@ -126,11 +126,6 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.freemarker</groupId>
-			<artifactId>freemarker</artifactId>
-			<version>${version.org.freemarker}</version>
-		</dependency>
-		<dependency>
 			<groupId>org.jboss.set</groupId>
 			<artifactId>assistant</artifactId>
 			<version>${version.org.jboss.set.assistant}</version>
