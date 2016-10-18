@@ -78,7 +78,7 @@ public class PayloadOverviewServlet extends HttpServlet {
             payloadData = Aider.getPayloadData(payloadName);
             if (payloadData == null || payloadData.isEmpty()) {
                 response.addHeader("Refresh", "5");
-                request.getRequestDispatcher("/error.html").forward(request, response);
+                request.getRequestDispatcher("/error-wait.html").forward(request, response);
             } else {
                 request.setAttribute("rows", payloadData);
                 request.setAttribute("payloadName", payloadName);
@@ -87,6 +87,7 @@ public class PayloadOverviewServlet extends HttpServlet {
             }
         } else {
             logger.log(Level.WARNING, "payloadName " + payloadName + " is not specified in request parameter or is not defined in payload.properties");
+            request.getRequestDispatcher("/error-wait.html").forward(request, response);
         }
     }
 

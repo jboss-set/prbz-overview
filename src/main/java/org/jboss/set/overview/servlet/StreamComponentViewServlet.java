@@ -24,6 +24,9 @@ package org.jboss.set.overview.servlet;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import javax.ejb.EJB;
@@ -46,6 +49,7 @@ import org.jboss.set.overview.ejb.Aider;
 public class StreamComponentViewServlet extends HttpServlet {
 
     private static final long serialVersionUID = -7121305620456598691L;
+    private static Logger logger = Logger.getLogger(StreamComponentViewServlet.class.getCanonicalName());
 
     @EJB
     private Aider aiderService;
@@ -53,19 +57,24 @@ public class StreamComponentViewServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         String streamName = request.getParameter("streamName");
-        List<Stream> streams = aiderService.getAllStreams();
+        List<Stream> streams = Aider.getAllStreams();
         if (streams == null) {
             response.addHeader("Refresh", "5");
-            request.getRequestDispatcher("/error.html").forward(request, response);
+            request.getRequestDispatcher("/error-wait.html").forward(request, response);
         } else {
-            Stream stream = aiderService.getCurrentStream(streamName);
-            List<StreamComponent> filteredstreams = stream.getAllComponents().stream()
-                    .filter(e -> e.getName().trim().equalsIgnoreCase(Constants.APPLICATION_SERVER)
-                            || e.getName().trim().equalsIgnoreCase(Constants.APPLICATION_SERVER_CORE))
-                    .collect(Collectors.toList());
-            request.setAttribute("streamName", streamName);
-            request.setAttribute("components", filteredstreams);
-            request.getRequestDispatcher("/component.jsp").forward(request, response);
+            Optional<Stream> stream = aiderService.getCurrentStream(streamName);
+            if (stream.isPresent()) {
+                List<StreamComponent> filteredstreams = stream.get().getAllComponents().stream()
+                        .filter(e -> e.getName().trim().equalsIgnoreCase(Constants.APPLICATION_SERVER)
+                                || e.getName().trim().equalsIgnoreCase(Constants.APPLICATION_SERVER_CORE))
+                        .collect(Collectors.toList());
+                request.setAttribute("streamName", streamName);
+                request.setAttribute("components", filteredstreams);
+                request.getRequestDispatcher("/component.jsp").forward(request, response);
+            } else {
+                logger.log(Level.WARNING, "stream is an invalid");
+                request.getRequestDispatcher("/error.html").forward(request, response);
+            }
         }
     }
 

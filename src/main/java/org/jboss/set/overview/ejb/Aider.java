@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.ServiceLoader;
 import java.util.StringTokenizer;
@@ -192,24 +193,28 @@ public class Aider {
             logger.info(payloadName + " data genearation is started...");
             String payloadInfo = payloadMap.get(payloadName);
             String[] payloadArray = payloadInfo.split(",");
-            Stream stream = getCurrentStream(payloadArray[1].trim());
+            Optional<Stream> stream = getCurrentStream(payloadArray[1].trim());
             if (payloadArray.length != 2)
                 throw new IllegalArgumentException("payload metadata defined in payload.properties is incorrect.");
-            if (eap6) {
-                // EAP 6 based on Bugzilla tracker bug
-                URL payloadURL = new URL(payloadArray[0]);
-                Issue payloadTracker = aphrodite.getIssue(payloadURL);
-                for (PayloadProcessor processor : payloadProcessors) {
-                    logger.info("executing processor: " + processor.getClass().getName());
-                    dataList.addAll(processor.process(payloadTracker, stream));
+            if (stream.isPresent()) {
+                if (eap6) {
+                    // EAP 6 based on Bugzilla tracker bug
+                    URL payloadURL = new URL(payloadArray[0]);
+                    Issue payloadTracker = aphrodite.getIssue(payloadURL);
+                    for (PayloadProcessor processor : payloadProcessors) {
+                        logger.info("executing processor: " + processor.getClass().getName());
+                        dataList.addAll(processor.process(payloadTracker, stream.get()));
+                    }
+                } else {
+                    // EAP 7 based on Jira fix version e.g. 7.0.1.GA
+                    for (PayloadProcessor processor : payloadProcessors) {
+                        logger.info("executing processor: " + processor.getClass().getName());
+                        String fixVersion = payloadArray[0];
+                        dataList.addAll(processor.process(fixVersion, stream.get()));
+                    }
                 }
             } else {
-                // EAP 7 based on Jira fix version e.g. 7.0.1.GA
-                for (PayloadProcessor processor : payloadProcessors) {
-                    logger.info("executing processor: " + processor.getClass().getName());
-                    String fixVersion = payloadArray[0];
-                    dataList.addAll(processor.process(fixVersion, stream));
-                }
+                logger.log(Level.WARNING, "Empty stream name");
             }
             logger.info(payloadName + " data genearation is finished...");
         } catch (NotFoundException e) {
@@ -276,9 +281,8 @@ public class Aider {
         return payloadMap;
     }
 
-    public Stream getCurrentStream(String streamName) {
-        return allStreams.stream().filter(e -> e.getName().equalsIgnoreCase(streamName)).findFirst()
-                .orElseThrow(() -> new IllegalArgumentException(streamName + " is not defined in streamConfigs json file"));
+    public Optional<Stream> getCurrentStream(String streamName) {
+        return allStreams.stream().filter(e -> e.getName().equalsIgnoreCase(streamName)).findFirst();
     }
 
     public static Map<String, String> getPayloadMap() {

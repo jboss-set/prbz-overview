@@ -79,7 +79,7 @@ public class PullRequestOverviewServlet extends HttpServlet {
             pullRequestData = Aider.getPullRequestData(streamName, componentName);
             if (pullRequestData == null || pullRequestData.isEmpty()) {
                 response.addHeader("Refresh", "5");
-                request.getRequestDispatcher("/error.html").forward(request, response);
+                request.getRequestDispatcher("/error-wait.html").forward(request, response);
             } else {
                 request.setAttribute("rows", pullRequestData);
                 request.setAttribute("streamName", streamName);

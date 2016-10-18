@@ -50,7 +50,7 @@ public class DefaultPayloadViewServlet extends HttpServlet {
         TreeSet<String> payloadSet = new TreeSet<String>(aiderService.getPayloadMap().keySet());
         if (payloadSet.isEmpty()) {
             response.addHeader("Refresh", "5");
-            request.getRequestDispatcher("/error.html").forward(request, response);
+            request.getRequestDispatcher("/error-wait.html").forward(request, response);
         } else {
             request.setAttribute("payloadSet", payloadSet);
             request.getRequestDispatcher("/payload_index.jsp").forward(request, response);

@@ -54,7 +54,7 @@ public class DefaultStreamViewServlet extends HttpServlet {
         List<Stream> streams = aiderService.getAllStreams();
         if (streams == null) {
             response.addHeader("Refresh", "5");
-            request.getRequestDispatcher("/error.html").forward(request, response);
+            request.getRequestDispatcher("/error-wait.html").forward(request, response);
         } else {
             TreeSet<String> streamSet = new TreeSet<String>(
                     aiderService.getAllStreams().stream().map(e -> e.getName()).collect((Collectors.toList())));
