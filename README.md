@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/jboss-set/prbz-overview.svg?branch=master)](https://travis-ci.org/jboss-set/prbz-overview)
 prbz-overview
 =============
 
