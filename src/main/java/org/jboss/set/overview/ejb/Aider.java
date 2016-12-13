@@ -52,15 +52,13 @@ import org.jboss.set.aphrodite.domain.Repository;
 import org.jboss.set.aphrodite.domain.Stream;
 import org.jboss.set.aphrodite.domain.StreamComponent;
 import org.jboss.set.aphrodite.repository.services.common.RepositoryType;
-import org.jboss.set.aphrodite.spi.AphroditeException;
 import org.jboss.set.aphrodite.spi.NotFoundException;
-import org.jboss.set.assistant.AssistantClient;
-import org.jboss.set.assistant.Util;
-import org.jboss.set.assistant.data.ProcessorData;
-import org.jboss.set.assistant.processor.PayloadProcessor;
-import org.jboss.set.assistant.processor.ProcessorException;
-import org.jboss.set.assistant.processor.PullRequestProcessor;
 import org.jboss.set.overview.Constants;
+import org.jboss.set.overview.Util;
+import org.jboss.set.overview.assistant.data.ProcessorData;
+import org.jboss.set.overview.assistant.processor.PayloadProcessor;
+import org.jboss.set.overview.assistant.processor.ProcessorException;
+import org.jboss.set.overview.assistant.processor.PullRequestProcessor;
 import org.kohsuke.github.GHRateLimit;
 
 /**
@@ -89,15 +87,13 @@ public class Aider {
     @PostConstruct
     public void init() {
         try {
-            aphrodite = AssistantClient.getAphrodite();
+            aphrodite = Util.unchecked(() -> Aphrodite.instance());
 
             payloadMap = loadPayloadMap();
 
             allStreams = aphrodite.getAllStreams().stream().filter(e -> !e.getName().equals(WILDFLY_STREAM)).collect(Collectors.toList());
 
             initProcessors();
-        } catch (AphroditeException e) {
-            throw new IllegalStateException("Failed to get aphrodite instance", e);
         } catch (FileNotFoundException e) {
             throw new IllegalArgumentException("Failed to find payload.properties File", e);
         } catch (IOException e) {

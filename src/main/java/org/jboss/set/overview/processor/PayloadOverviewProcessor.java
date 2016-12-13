@@ -51,11 +51,11 @@ import org.jboss.set.aphrodite.domain.Release;
 import org.jboss.set.aphrodite.domain.SearchCriteria;
 import org.jboss.set.aphrodite.domain.Stream;
 import org.jboss.set.aphrodite.spi.NotFoundException;
-import org.jboss.set.assistant.data.ProcessorData;
-import org.jboss.set.assistant.evaluator.PayloadEvaluator;
-import org.jboss.set.assistant.evaluator.PayloadEvaluatorContext;
-import org.jboss.set.assistant.processor.PayloadProcessor;
-import org.jboss.set.assistant.processor.ProcessorException;
+import org.jboss.set.overview.assistant.data.ProcessorData;
+import org.jboss.set.overview.assistant.evaluator.PayloadEvaluator;
+import org.jboss.set.overview.assistant.evaluator.PayloadEvaluatorContext;
+import org.jboss.set.overview.assistant.processor.PayloadProcessor;
+import org.jboss.set.overview.assistant.processor.ProcessorException;
 
 /**
  * @author wangc

@@ -49,11 +49,11 @@ import org.jboss.set.aphrodite.domain.Patch;
 import org.jboss.set.aphrodite.domain.PatchState;
 import org.jboss.set.aphrodite.domain.Repository;
 import org.jboss.set.aphrodite.domain.Stream;
-import org.jboss.set.assistant.data.ProcessorData;
-import org.jboss.set.assistant.evaluator.Evaluator;
-import org.jboss.set.assistant.evaluator.EvaluatorContext;
-import org.jboss.set.assistant.processor.ProcessorException;
-import org.jboss.set.assistant.processor.PullRequestProcessor;
+import org.jboss.set.overview.assistant.data.ProcessorData;
+import org.jboss.set.overview.assistant.evaluator.PullRequestEvaluator;
+import org.jboss.set.overview.assistant.evaluator.PullRequestEvaluatorContext;
+import org.jboss.set.overview.assistant.processor.ProcessorException;
+import org.jboss.set.overview.assistant.processor.PullRequestProcessor;
 
 public class PullRequestOverviewProcessor implements PullRequestProcessor {
 
@@ -61,7 +61,7 @@ public class PullRequestOverviewProcessor implements PullRequestProcessor {
 
     private Aphrodite aphrodite;
 
-    private List<Evaluator> evaluators;
+    private List<PullRequestEvaluator> PullRequestEvaluators;
 
     private ExecutorService service;
 
@@ -70,7 +70,7 @@ public class PullRequestOverviewProcessor implements PullRequestProcessor {
     @Override
     public void init(Aphrodite aphrodite) {
         this.aphrodite = aphrodite;
-        this.evaluators = getEvaluators();
+        this.PullRequestEvaluators = getPullRequestEvaluators();
         this.service = Executors.newFixedThreadPool(10);
         this.singleExecutorService = Executors.newSingleThreadExecutor();
     }
@@ -154,12 +154,12 @@ public class PullRequestOverviewProcessor implements PullRequestProcessor {
 
                 Set<Patch> relatedPatches = new HashSet<>(aphrodite.findPatchesRelatedTo(patch));
                 Map<String, Object> data = new HashMap<>();
-                EvaluatorContext context = new EvaluatorContext(aphrodite, repository, patch, issues, relatedPatches, stream);
-                for (Evaluator evaluator : evaluators) {
+                PullRequestEvaluatorContext context = new PullRequestEvaluatorContext(aphrodite, repository, patch, issues, relatedPatches, stream);
+                for (PullRequestEvaluator PullRequestEvaluator : PullRequestEvaluators) {
                     logger.fine(
-                            "repository " + repository.getURL() + "applying evaluator " + evaluator.name() + " to "
+                            "repository " + repository.getURL() + "applying PullRequestEvaluator " + PullRequestEvaluator.name() + " to "
                                     + patch.getId());
-                    evaluator.eval(context, data);
+                    PullRequestEvaluator.eval(context, data);
                 }
                 return new ProcessorData(data);
             } catch (Throwable th) {
@@ -187,13 +187,13 @@ public class PullRequestOverviewProcessor implements PullRequestProcessor {
         }
     }
 
-    private List<Evaluator> getEvaluators() {
-        ServiceLoader<Evaluator> rules = ServiceLoader.load(Evaluator.class);
-        List<Evaluator> evaluators = new ArrayList<Evaluator>();
-        for (Evaluator rule : rules) {
-            evaluators.add(rule);
+    private List<PullRequestEvaluator> getPullRequestEvaluators() {
+        ServiceLoader<PullRequestEvaluator> rules = ServiceLoader.load(PullRequestEvaluator.class);
+        List<PullRequestEvaluator> PullRequestEvaluators = new ArrayList<PullRequestEvaluator>();
+        for (PullRequestEvaluator rule : rules) {
+            PullRequestEvaluators.add(rule);
         }
-        return evaluators;
+        return PullRequestEvaluators;
     }
 
     private boolean checkPullRequestBranch(Patch patch, Stream stream) {

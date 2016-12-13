@@ -37,7 +37,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.jboss.set.assistant.data.ProcessorData;
+import org.jboss.set.overview.assistant.data.ProcessorData;
 import org.jboss.set.overview.ejb.Aider;
 
 @WebServlet(name = "PayloadOverviewServlet", loadOnStartup = 1, urlPatterns = { "/payloadview/overview" })
