@@ -1,7 +1,0 @@
-org.jboss.set.overview.assistant.evaluator.impl.pullrequest.BranchEvaluator
-org.jboss.set.overview.assistant.evaluator.impl.pullrequest.IssuesRelatedEvaluator
-org.jboss.set.overview.assistant.evaluator.impl.pullrequest.LabelsEvaluator
-org.jboss.set.overview.assistant.evaluator.impl.pullrequest.GHPullRequestEvaluator
-org.jboss.set.overview.assistant.evaluator.impl.pullrequest.PullRequestRelatedEvaluator
-org.jboss.set.overview.assistant.evaluator.impl.pullrequest.StreamsEvaluator
-org.jboss.set.overview.assistant.evaluator.impl.pullrequest.UpstreamEvaluator

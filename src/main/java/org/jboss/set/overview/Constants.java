@@ -22,8 +22,6 @@
 
 package org.jboss.set.overview;
 
-import java.util.regex.Pattern;
-
 public class Constants {
     public static final String APPLICATION_SERVER = "Application Server";
     public static final String APPLICATION_SERVER_CORE = "Application Server Core";
@@ -34,21 +32,4 @@ public class Constants {
 
     public static final String SUCCESS = "Success";
     public static final String FAILURE = "Failure";
-
-    public static final Pattern UPSTREAM_NOT_REQUIRED = Pattern.compile(".*no.*upstream.*required.*", Pattern.CASE_INSENSITIVE);
-    public static final Pattern RELATED_PR_PATTERN = Pattern
-            .compile(".*github\\.com.*?/([a-zA-Z_0-9-]*)/([a-zA-Z_0-9-]*)/pull.?/(\\d+)", Pattern.CASE_INSENSITIVE);
-
-    public static final Pattern BZ_ID_PARAM_PATTERN = Pattern.compile("id=([^&]+)");
-
-    public static final String API_BASE_PATH = "/rest/api/2/";
-    public static final String API_ISSUE_PATH = API_BASE_PATH + "issue/";
-    public static final String BROWSE_ISSUE_PATH = "/browse/";
-
-    public static final String EAP7_STREAM_TARGET_RELEASE_70ZGA = "7.0.z.GA";
-    public static final String EAP7_STREAM_TARGET_RELEASE_7BACKLOGGA = "7.backlog.GA";
-    public static final String EAP7_STREAM_TARGET_RELEASE_710GA = "7.1.0.GA";
-
-    public static final String EAP70ZSTREAM = "jboss-eap-7.0.z";
-    public static final String EAP7Z0STREAM = "jboss-eap-7.z.0";
 }

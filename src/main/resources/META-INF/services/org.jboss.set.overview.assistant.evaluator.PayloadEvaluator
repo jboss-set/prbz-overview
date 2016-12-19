@@ -1,3 +1,0 @@
-org.jboss.set.overview.assistant.evaluator.impl.payload.PayloadIssueEvaluator
-org.jboss.set.overview.assistant.evaluator.impl.payload.AssociatedPullRequestEvaluator
-org.jboss.set.overview.assistant.evaluator.impl.payload.DependsOnEvaluator
