@@ -45,7 +45,7 @@
 							<#assign data = row.data>
 							<tr>
 								<td>
-									<a href="${data.payloadDependency.link}">#${data.payloadDependency.label}</a> - ${data.payloadDependency.status} - ${data.payloadDependency.type}
+									<a href="${data.payloadDependency.link}" title="${data.payloadDependency.summary}">#${data.payloadDependency.label}</a> - ${data.payloadDependency.status} - ${data.payloadDependency.type}
 									</br>
 									<#list data.payloadDependency.flags?keys as key>
 										<#switch data.payloadDependency.flags[key]>
@@ -116,7 +116,7 @@
 										<ul>
 											<#items as issue>
 												<li>
-													<a href="${issue.link}">#${issue.label}</a> - ${issue.status} - ${issue.type}
+													<a href="${issue.link}" title="${issue.summary}">#${issue.label}</a> - ${issue.status} - ${issue.type}
 														<#if issue.fixVersions?has_content>
 															- Fix Version:
 															<#list issue.fixVersions as fixVersion> ${fixVersion} </#list>
