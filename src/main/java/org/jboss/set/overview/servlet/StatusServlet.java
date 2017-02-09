@@ -36,10 +36,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.jboss.set.aphrodite.domain.RateLimit;
 import org.jboss.set.aphrodite.repository.services.common.RepositoryType;
 import org.jboss.set.overview.Constants;
 import org.jboss.set.overview.ejb.Aider;
-import org.kohsuke.github.GHRateLimit;
 
 /**
  * @author wangc
@@ -54,7 +54,7 @@ public class StatusServlet extends HttpServlet {
     private static final String BUGZILLA_HOST = "https://bugzilla.redhat.com/";
     private static final String GITHUB_HOST = "https://github.com/";
 
-    private static Map<RepositoryType, GHRateLimit> rateLimits;
+    private static Map<RepositoryType, RateLimit> rateLimits;
     @EJB
     private Aider aiderService;
 
@@ -76,7 +76,7 @@ public class StatusServlet extends HttpServlet {
         if (rateLimits != null) {
             Set<RepositoryType> keys = rateLimits.keySet();
             for (RepositoryType key : keys) {
-                GHRateLimit rateLimit = rateLimits.get(key);
+                RateLimit rateLimit = rateLimits.get(key);
                 response.getWriter().println(key.toString() + " RequestLimit : " + "<b>" + rateLimit.limit + "</b>");
                 response.getWriter().println("</br>");
                 response.getWriter().println(key.toString() + " RemainingRequests : " + "<b>" + rateLimit.remaining + "</b>");

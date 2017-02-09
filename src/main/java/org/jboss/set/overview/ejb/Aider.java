@@ -22,10 +22,13 @@
 
 package org.jboss.set.overview.ejb;
 
+import static org.jboss.set.overview.Util.filterComponent;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,6 +51,7 @@ import javax.ejb.Stateless;
 
 import org.jboss.set.aphrodite.Aphrodite;
 import org.jboss.set.aphrodite.domain.Issue;
+import org.jboss.set.aphrodite.domain.RateLimit;
 import org.jboss.set.aphrodite.domain.Repository;
 import org.jboss.set.aphrodite.domain.Stream;
 import org.jboss.set.aphrodite.domain.StreamComponent;
@@ -60,8 +64,6 @@ import org.jboss.set.assistant.data.ProcessorData;
 import org.jboss.set.assistant.processor.PayloadProcessor;
 import org.jboss.set.assistant.processor.ProcessorException;
 import org.jboss.set.assistant.processor.PullRequestProcessor;
-import org.jboss.set.overview.Constants;
-import org.kohsuke.github.GHRateLimit;
 
 /**
  * @author wangc
@@ -131,8 +133,7 @@ public class Aider {
         }
         for (Stream s : allStreams) {
             String streamName = s.getName();
-            s.getAllComponents().stream().filter(e -> e.getName().trim().equalsIgnoreCase(Constants.APPLICATION_SERVER)
-                    || e.getName().trim().equalsIgnoreCase(Constants.APPLICATION_SERVER_CORE))
+            s.getAllComponents().stream().filter(e -> filterComponent(e))
                     .forEach(e -> generatePullRequestData(streamName, e.getName()));
             logger.info("stream " + streamName + " pull request data initialization is finished.");
         }
@@ -164,11 +165,15 @@ public class Aider {
 
             Stream stream = aphrodite.getStream(streamName);
             StreamComponent streamComponent = stream.getComponent(componentName);
-            Repository repository = streamComponent.getRepository();
+            URI uri = streamComponent.getRepositoryURL();
+            if (uri != null) {
+                URL repositoryURL = uri.toURL();
+                Repository repository = aphrodite.getRepository(repositoryURL);
 
-            for (PullRequestProcessor processor : pullRequestProcessors) {
-                logger.info("executing processor: " + processor.getClass().getName());
-                dataList.addAll(processor.process(repository, stream));
+                for (PullRequestProcessor processor : pullRequestProcessors) {
+                    logger.info("executing processor: " + processor.getClass().getName());
+                    dataList.addAll(processor.process(repository, stream));
+                }
             }
             logger.info("stream " + streamName + " component " + componentName + " pull request data genearation is finished...");
         } catch (NotFoundException e) {
@@ -239,8 +244,7 @@ public class Aider {
         // TOOD load new streams, although it's not often.
         for (Stream s : allStreams) {
             String streamName = s.getName();
-            s.getAllComponents().stream().filter(e -> e.getName().trim().equalsIgnoreCase(Constants.APPLICATION_SERVER)
-                    || e.getName().trim().equalsIgnoreCase(Constants.APPLICATION_SERVER_CORE))
+            s.getAllComponents().stream().filter(e -> filterComponent(e))
                     .forEach(e -> generatePullRequestData(streamName, e.getName()));
             logger.info("stream " + streamName + " scheduled pull request data update is finished.");
 
@@ -293,7 +297,7 @@ public class Aider {
         return allStreams;
     }
 
-    public Map<RepositoryType, GHRateLimit> getRateLimits() {
+    public Map<RepositoryType, RateLimit> getRateLimits() {
         try {
             return aphrodite.getRateLimits();
         } catch (NotFoundException e) {

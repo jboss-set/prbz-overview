@@ -1,6 +1,6 @@
 /*
  * JBoss, Home of Professional Open Source.
- * Copyright 2016, Red Hat, Inc., and individual contributors
+ * Copyright 2017, Red Hat, Inc., and individual contributors
  * as indicated by the @author tags. See the copyright.txt file in the
  * distribution for a full listing of individual contributors.
  *
@@ -22,17 +22,21 @@
 
 package org.jboss.set.overview;
 
-public class Constants {
-    public static final String WILDFLY_WILDFLY = "wildfly-wildfly";
-    public static final String WILDFLY_WILDFLY_CORE = "wildfly-wildfly-core";
-    public static final String JBOSSAS_JBOSS_EAP7 = "jbossas-jboss-eap7";
-    public static final String JBOSSAS_WILDFLY_CORE_EAP = "jbossas-wildfly-core-eap";
-    public static final String JBOSSAS_JBOSS_EAP = "jbossas-jboss-eap";
+import org.jboss.set.aphrodite.domain.StreamComponent;
 
-    public static final String GITHUB = "Github";
-    public static final String BUGZILLA = "Bugzilla";
-    public static final String JIRA = "Jira";
+/**
+ * @author wangc
+ *
+ */
+public class Util {
 
-    public static final String SUCCESS = "Success";
-    public static final String FAILURE = "Failure";
+    public static boolean filterComponent(StreamComponent component) {
+        String name = component.getName().trim();
+        return name.equalsIgnoreCase(Constants.WILDFLY_WILDFLY)
+                || name.equalsIgnoreCase(Constants.WILDFLY_WILDFLY_CORE)
+                || name.equalsIgnoreCase(Constants.JBOSSAS_JBOSS_EAP7)
+                || name.equalsIgnoreCase(Constants.JBOSSAS_WILDFLY_CORE_EAP)
+                || name.equalsIgnoreCase(Constants.JBOSSAS_JBOSS_EAP);
+    }
+
 }

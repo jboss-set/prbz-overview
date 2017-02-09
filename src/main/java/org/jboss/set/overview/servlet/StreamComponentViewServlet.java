@@ -22,6 +22,8 @@
 
 package org.jboss.set.overview.servlet;
 
+import static org.jboss.set.overview.Util.filterComponent;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -38,7 +40,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.jboss.set.aphrodite.domain.Stream;
 import org.jboss.set.aphrodite.domain.StreamComponent;
-import org.jboss.set.overview.Constants;
 import org.jboss.set.overview.ejb.Aider;
 
 /**
@@ -64,10 +65,7 @@ public class StreamComponentViewServlet extends HttpServlet {
         } else {
             Optional<Stream> stream = aiderService.getCurrentStream(streamName);
             if (stream.isPresent()) {
-                List<StreamComponent> filteredstreams = stream.get().getAllComponents().stream()
-                        .filter(e -> e.getName().trim().equalsIgnoreCase(Constants.APPLICATION_SERVER)
-                                || e.getName().trim().equalsIgnoreCase(Constants.APPLICATION_SERVER_CORE))
-                        .collect(Collectors.toList());
+                List<StreamComponent> filteredstreams = stream.get().getAllComponents().stream().filter(e -> filterComponent(e)).collect(Collectors.toList());
                 request.setAttribute("streamName", streamName);
                 request.setAttribute("components", filteredstreams);
                 request.getRequestDispatcher("/component.jsp").forward(request, response);
