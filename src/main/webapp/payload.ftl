@@ -28,7 +28,17 @@
 		  <div class="col-md-12"><h1>EAP Cumulative Patch Releases ${Request.payloadName} Issue List</h1></div>
 		</div>
 		<div class="row">
-		  <div class="col-md-12"><h4>${Request.payloadSize} issues in payload</h4></div>
+		  <div class="col-md-12">
+		  <h4>${Request.payloadSize} issues in payload</h4>
+		  <ul>
+				<li><img src="../images/red-blocker.png" alt="red-blocker" title="blocker">Issue in Red status, an immediate call to triage.</li>
+				<li><img src="../images/orange-critical.png" alt="orange-critical" title="critical">Issue in Orange status, attention is needed until progress can no longer be made.</li>
+				<li><img src="../images/yellow-major.png" alt="yellow-major" title="major">Issue in Yellow status, a pending condition to triage.</li>
+				<li><img src="../images/blue-minor.png" alt="blue-minor" title="minor">Issue in Blue status, attention is needed, forward progress can be made.</li>
+				<li><img src="../images/grey-trivial.png" alt="grey-trivial" title="trivial">Issue in Grey status, process is moving forward as planned with trivial obstacle.</li>
+				<li><img src="../images/green-good.png" alt="good green light" title="good">Issue is Good, process is moving forward as planned with no visible obstacle.</li>
+		  </ul>
+		  </div>
 		</div>
 		<div class="row">
 		  <div class="col-md-12">
@@ -45,6 +55,17 @@
 							<#assign data = row.data>
 							<tr>
 								<td>
+									<#if data.payloadDependency.maxSeverity?has_content>
+										<#switch data.payloadDependency.maxSeverity>
+											<#case "BLOCKER"><img src="../images/red-blocker.png" alt="red-blocker" title="blocker"><#break>
+											<#case "CRITICAL"><img src="../images/orange-critical.png" alt="orange-critical" title="critical"><#break>
+											<#case "MAJOR"><img src="../images/yellow-major.png" alt="yellow-major" title="major"><#break>
+											<#case "MINOR"><img src="../images/blue-minor.png" alt="blue-minor" title="minor"><#break>
+											<#case "TRIVIAL"><img src="../images/grey-trivial.png" alt="grey-trivial" title="trivial"><#break>
+										</#switch>
+									<#else>
+										<img src="../images/green-good.png" alt="good green light" title="good">
+									</#if>
 									<a href="${data.payloadDependency.link}" title="${data.payloadDependency.summary}">#${data.payloadDependency.label}</a> - ${data.payloadDependency.status} - ${data.payloadDependency.type}
 									</br>
 									<#list data.payloadDependency.flags?keys as key>
@@ -54,6 +75,24 @@
 											<#case "REJECTED"> <span class="label label-danger">${key} -</span><#break>
 										</#switch>
 									</#list>
+									<#if data.payloadDependency.maxSeverity?has_content>
+										<#list data.payloadDependency.violations>
+											<ul>
+												<#items as violation>
+													<li>
+														<#switch violation.level>
+																<#case "BLOCKER"><img src="../images/red-blocker.png" alt="red-blocker" title="blocker"><#break>
+																<#case "CRITICAL"><img src="../images/orange-critical.png" alt="orange-critical" title="critical"><#break>
+																<#case "MAJOR"><img src="../images/yellow-major.png" alt="yellow-major" title="major"><#break>
+																<#case "MINOR"><img src="../images/blue-minor.png" alt="blue-minor" title="minor"><#break>
+																<#case "TRIVIAL"><img src="../images/grey-trivial.png" alt="grey-trivial" title="trivial"><#break>
+														</#switch>
+														${violation.level} Violation ${violation.checkName} : ${violation.message}
+													</li>
+												</#items>
+											</ul>
+										</#list>
+									</#if>
 								</td>
 								 <td>
 								 	<#if data.associatedPullRequest?has_content>
