@@ -29,14 +29,27 @@
 		</div>
 		<div class="row">
 		  <div class="col-md-12">
-		  <h4>${Request.payloadSize} issues in payload</h4>
+		  <h4>
+			${Request.payloadSize} issues in payload in overall status
+			<#if Request.payloadStatus?has_content>
+				<#switch Request.payloadStatus>
+					<#case "BLOCKER"><img src="../images/red-blocker.png" alt="red-blocker" title="blocker"><#break>
+					<#case "CRITICAL"><img src="../images/orange-critical.png" alt="orange-critical" title="critical"><#break>
+					<#case "MAJOR"><img src="../images/yellow-major.png" alt="yellow-major" title="major"><#break>
+					<#case "MINOR"><img src="../images/blue-minor.png" alt="blue-minor" title="minor"><#break>
+					<#case "TRIVIAL"><img src="../images/grey-trivial.png" alt="grey-trivial" title="trivial"><#break>
+				</#switch>
+			<#else>
+				<img src="../images/green-good.png" alt="good green light" title="good">
+			</#if>
+		  </h4>
 		  <ul>
-				<li><img src="../images/red-blocker.png" alt="red-blocker" title="blocker">Issue in Red status, an immediate call to triage.</li>
-				<li><img src="../images/orange-critical.png" alt="orange-critical" title="critical">Issue in Orange status, attention is needed until progress can no longer be made.</li>
-				<li><img src="../images/yellow-major.png" alt="yellow-major" title="major">Issue in Yellow status, a pending condition to triage.</li>
-				<li><img src="../images/blue-minor.png" alt="blue-minor" title="minor">Issue in Blue status, attention is needed, forward progress can be made.</li>
-				<li><img src="../images/grey-trivial.png" alt="grey-trivial" title="trivial">Issue in Grey status, process is moving forward as planned with trivial obstacle.</li>
-				<li><img src="../images/green-good.png" alt="good green light" title="good">Issue is Good, process is moving forward as planned with no visible obstacle.</li>
+				<li><img src="../images/red-blocker.png" alt="red-blocker" title="blocker"> Red status with blocker issue(s), an immediate call to triage.</li>
+				<li><img src="../images/orange-critical.png" alt="orange-critical" title="critical"> Orange status with critical issue(s), attention is needed until progress can no longer be made.</li>
+				<li><img src="../images/yellow-major.png" alt="yellow-major" title="major"> Yellow status with major issue(s), a pending condition to triage.</li>
+				<li><img src="../images/blue-minor.png" alt="blue-minor" title="minor"> Blue status with minor issue(s), attention is needed, forward progress can be made.</li>
+				<li><img src="../images/grey-trivial.png" alt="grey-trivial" title="trivial"> Grey status with trivial issue(s), process is moving forward as planned with trivial obstacle.</li>
+				<li><img src="../images/green-good.png" alt="good green light" title="good"> Green status without notable issue(s), process is moving forward as planned with no visible obstacle.</li>
 		  </ul>
 		  </div>
 		</div>

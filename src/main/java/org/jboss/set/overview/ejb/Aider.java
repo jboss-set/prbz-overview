@@ -238,7 +238,7 @@ public class Aider {
         }
     }
 
-    @Schedule(minute = "*/15", hour = "*")
+    @Schedule(minute = "*/30", hour = "*")
     public void updatePullRequestData() {
         logger.info("schedule pull request data update is started ...");
         // TOOD load new streams, although it's not often.
@@ -251,7 +251,7 @@ public class Aider {
         }
     }
 
-    @Schedule(minute = "*/15", hour = "*")
+    @Schedule(minute = "*/30", hour = "*")
     public void updatePayloadData() {
         logger.info("schedule payload data update is started ...");
         try {

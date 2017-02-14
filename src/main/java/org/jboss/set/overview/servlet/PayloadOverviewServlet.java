@@ -22,6 +22,8 @@
 
 package org.jboss.set.overview.servlet;
 
+import static org.jboss.set.assistant.Util.maxSeverity;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -83,6 +85,7 @@ public class PayloadOverviewServlet extends HttpServlet {
                 request.setAttribute("rows", payloadData);
                 request.setAttribute("payloadName", payloadName);
                 request.setAttribute("payloadSize", payloadData.size());
+                request.setAttribute("payloadStatus", maxSeverity(payloadData));
                 request.getRequestDispatcher("/payload.ftl").forward(request, response);
             }
         } else {
