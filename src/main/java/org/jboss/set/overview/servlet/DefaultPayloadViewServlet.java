@@ -47,7 +47,9 @@ public class DefaultPayloadViewServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        TreeSet<String> payloadSet = new TreeSet<String>(aiderService.getPayloadMap().keySet());
+        TreeSet<String> payloadSet = new TreeSet<String>();
+        payloadSet.addAll(Aider.getBzPayloadStore().keySet());
+        payloadSet.addAll(Aider.getJiraPayloadStore().keySet());
         if (payloadSet.isEmpty()) {
             response.addHeader("Refresh", "5");
             request.getRequestDispatcher("/error-wait.html").forward(request, response);

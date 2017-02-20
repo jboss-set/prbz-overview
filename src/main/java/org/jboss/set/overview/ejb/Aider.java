@@ -23,21 +23,21 @@
 package org.jboss.set.overview.ejb;
 
 import static org.jboss.set.overview.Util.filterComponent;
+import static org.jboss.set.overview.Util.findAllBugzillaPayloads;
+import static org.jboss.set.overview.Util.findAllJiraPayloads;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import static org.jboss.set.assistant.Constants.EAP70ZSTREAM;
+import static org.jboss.set.assistant.Constants.EAP64ZSTREAM;
+
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Properties;
 import java.util.ServiceLoader;
-import java.util.StringTokenizer;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -51,6 +51,7 @@ import javax.ejb.Stateless;
 
 import org.jboss.set.aphrodite.Aphrodite;
 import org.jboss.set.aphrodite.domain.Issue;
+import org.jboss.set.aphrodite.domain.IssueStatus;
 import org.jboss.set.aphrodite.domain.RateLimit;
 import org.jboss.set.aphrodite.domain.Repository;
 import org.jboss.set.aphrodite.domain.Stream;
@@ -59,11 +60,11 @@ import org.jboss.set.aphrodite.repository.services.common.RepositoryType;
 import org.jboss.set.aphrodite.spi.AphroditeException;
 import org.jboss.set.aphrodite.spi.NotFoundException;
 import org.jboss.set.assistant.AssistantClient;
-import org.jboss.set.assistant.Util;
 import org.jboss.set.assistant.data.ProcessorData;
 import org.jboss.set.assistant.processor.PayloadProcessor;
 import org.jboss.set.assistant.processor.ProcessorException;
 import org.jboss.set.assistant.processor.PullRequestProcessor;
+import org.jboss.set.overview.Util;
 
 /**
  * @author wangc
@@ -79,7 +80,6 @@ public class Aider {
 
     private static Aphrodite aphrodite;
     private static List<Stream> allStreams = new ArrayList<>();
-    private static Map<String, String> payloadMap = new HashMap<>();
     private static Map<String, List<ProcessorData>> pullRequestData = new HashMap<>();
     private static Map<String, List<ProcessorData>> payloadData = new HashMap<>();
     private static ServiceLoader<PullRequestProcessor> pullRequestProcessors;
@@ -93,17 +93,14 @@ public class Aider {
         try {
             aphrodite = AssistantClient.getAphrodite();
 
-            payloadMap = loadPayloadMap();
+            findAllJiraPayloads(aphrodite, true);
+            findAllBugzillaPayloads(aphrodite, true);
 
             allStreams = aphrodite.getAllStreams().stream().filter(e -> !e.getName().equals(WILDFLY_STREAM)).collect(Collectors.toList());
 
             initProcessors();
         } catch (AphroditeException e) {
             throw new IllegalStateException("Failed to get aphrodite instance", e);
-        } catch (FileNotFoundException e) {
-            throw new IllegalArgumentException("Failed to find payload.properties File", e);
-        } catch (IOException e) {
-            throw new IllegalArgumentException("Failed to load payload.properties File", e);
         }
     }
 
@@ -125,7 +122,7 @@ public class Aider {
     }
 
     public void initAllPullRequestData() {
-        logger.info("pull rqquest data initialization is started.");
+        logger.info("pull request data initialization is started.");
         try {
             TimeUnit.MINUTES.sleep(2);// wait for streams loading
         } catch (InterruptedException e1) {
@@ -141,7 +138,8 @@ public class Aider {
 
     public void initAllPayloadData() {
         logger.info("payload data initialization is started.");
-        payloadMap.keySet().stream().forEach(e -> generatePayloadData(e));
+        generatePayloadDataForJira(Util.jiraPayloadStore);
+        generatePayloadDataForBz(Util.bzPayloadStore, true);
         logger.info("payload data initialization is finished.");
     }
 
@@ -191,51 +189,68 @@ public class Aider {
         }
     }
 
-    public void generatePayloadData(String payloadName) {
-        List<ProcessorData> dataList = new ArrayList<>();
-        try {
-            boolean eap6 = payloadName.toLowerCase().contains("eap6");
-            logger.info(payloadName + " data genearation is started...");
-            String payloadInfo = payloadMap.get(payloadName);
-            String[] payloadArray = payloadInfo.split(",");
-            Optional<Stream> stream = getCurrentStream(payloadArray[1].trim());
-            if (payloadArray.length != 2)
-                throw new IllegalArgumentException("payload metadata defined in payload.properties is incorrect.");
+    public void generatePayloadDataForJira(Map<String, List<Issue>> payloads) {
+        payloads.keySet().forEach(payload -> {
+            List<ProcessorData> dataList = new ArrayList<>();
+            logger.info(payload + " data genearation is started...");
+            Optional<Stream> stream = getCurrentStream(EAP70ZSTREAM);
             if (stream.isPresent()) {
-                if (eap6) {
-                    // EAP 6 based on Bugzilla tracker bug
-                    URL payloadURL = new URL(payloadArray[0]);
-                    Issue payloadTracker = aphrodite.getIssue(payloadURL);
-                    for (PayloadProcessor processor : payloadProcessors) {
-                        logger.info("executing processor: " + processor.getClass().getName());
-                        dataList.addAll(processor.process(payloadTracker, stream.get()));
-                    }
-                } else {
-                    // EAP 7 based on Jira fix version e.g. 7.0.1.GA
-                    for (PayloadProcessor processor : payloadProcessors) {
-                        logger.info("executing processor: " + processor.getClass().getName());
-                        String fixVersion = payloadArray[0];
-                        dataList.addAll(processor.process(fixVersion, stream.get()));
+                for (PayloadProcessor processor : payloadProcessors) {
+                    logger.info("executing processor: " + processor.getClass().getName());
+                    try {
+                        dataList.addAll(processor.process(payload, payloads.get(payload), stream.get()));
+                    } catch (ProcessorException ex1) {
+                        logger.log(Level.WARNING, ex1.getMessage(), ex1);
+                    } catch (Exception ex2) {
+                        logger.log(Level.WARNING, ex2.getMessage(), ex2);
+                        Thread.currentThread().interrupt();
                     }
                 }
             } else {
-                logger.log(Level.WARNING, "Empty stream name");
+                logger.log(Level.WARNING, "Empty stream name for payload " + payload);
             }
-            logger.info(payloadName + " data genearation is finished...");
-        } catch (NotFoundException e) {
-            logger.log(Level.FINE, e.getMessage(), e);
-        } catch (ProcessorException e) {
-            logger.log(Level.WARNING, e.getMessage(), e);
-        } catch (Exception e) {
-            logger.log(Level.WARNING, e.getMessage(), e);
-            Thread.currentThread().interrupt();
-        }
+            if (!dataList.isEmpty()) {
+                synchronized (payloadDataLock) {
+                    payloadData.put(payload, dataList);
+                }
+            }
+            logger.info(payload + " data genearation is finished...");
+        });
+    }
 
-        if (!dataList.isEmpty()) {
-            synchronized (payloadDataLock) {
-                payloadData.put(payloadName, dataList);
+    public void generatePayloadDataForBz(Map<String, Issue> payloads, boolean firstInit) {
+        payloads.keySet().forEach(payload -> {
+            List<ProcessorData> dataList = new ArrayList<>();
+            logger.info(payload + " data genearation is started...");
+            Optional<Stream> stream = getCurrentStream(EAP64ZSTREAM);
+            if (stream.isPresent()) {
+                for (PayloadProcessor processor : payloadProcessors) {
+                    logger.info("executing processor: " + processor.getClass().getName());
+                    try {
+                        Issue trackerIssue = payloads.get(payload);
+                        if (firstInit || !(trackerIssue.getStatus().equals(IssueStatus.CLOSED) || trackerIssue.getStatus().equals(IssueStatus.VERIFIED))) {
+                            // only add data in first initialization, or later schedule update if tracker is neither closed nor verified.
+                            dataList.addAll(processor.process(payloads.get(payload), stream.get()));
+                        } else{
+                            logger.log(Level.INFO, "Released payload " + payload + " is skipped.");
+                        }
+                    } catch (ProcessorException ex1) {
+                        logger.log(Level.WARNING, ex1.getMessage(), ex1);
+                    } catch (Exception ex2) {
+                        logger.log(Level.WARNING, ex2.getMessage(), ex2);
+                        Thread.currentThread().interrupt();
+                    }
+                }
+            } else {
+                logger.log(Level.WARNING, "Empty stream name for payload " + payload);
             }
-        }
+            if (!dataList.isEmpty()) {
+                synchronized (payloadDataLock) {
+                    payloadData.put(payload, dataList);
+                }
+            }
+            logger.info(payload + " data genearation is finished...");
+        });
     }
 
     @Schedule(minute = "*/30", hour = "*")
@@ -254,47 +269,28 @@ public class Aider {
     @Schedule(minute = "*/30", hour = "*")
     public void updatePayloadData() {
         logger.info("schedule payload data update is started ...");
-        try {
-            payloadMap = loadPayloadMap();
-        } catch (IOException e) {
-            throw new IllegalArgumentException("Failed to load payload.properties File", e);
-        }
-        payloadMap.keySet().stream().forEach(e -> generatePayloadData(e));
+        findAllBugzillaPayloads(aphrodite, false);
+        findAllJiraPayloads(aphrodite, false);
+        generatePayloadDataForJira(Util.jiraPayloadStore);
+        generatePayloadDataForBz(Util.bzPayloadStore, false);
         logger.info("schedule payload data update is finished ...");
 
-    }
-
-    // load payload list from payload.properties file
-    public Map<String, String> loadPayloadMap() throws FileNotFoundException, IOException {
-        String payloadProperiesFilePath = System.getProperty(PAYLOAD_PROPERTIES);
-        if (payloadProperiesFilePath == null)
-            throw new IllegalArgumentException("Unable to find payload properties file path with property name : " + PAYLOAD_PROPERTIES);
-        Properties props = new Properties();
-        File file = new File(payloadProperiesFilePath);
-        try (FileReader reader = new FileReader(file)) {
-            props.load(reader);
-        }
-        String payloads = Util.require(props, PAYLOAD_LIST);
-        StringTokenizer tokenizer = new StringTokenizer(payloads, ",");
-        Map<String, String> payloadMap = new HashMap<>();
-        while (tokenizer.hasMoreElements()) {
-            String payloadName = (String) tokenizer.nextElement();
-            String payloadInfo = Util.require(props, payloadName);
-            payloadMap.put(payloadName, payloadInfo);
-        }
-        return payloadMap;
     }
 
     public Optional<Stream> getCurrentStream(String streamName) {
         return allStreams.stream().filter(e -> e.getName().equalsIgnoreCase(streamName)).findFirst();
     }
 
-    public static Map<String, String> getPayloadMap() {
-        return payloadMap;
-    }
-
     public static List<Stream> getAllStreams() {
         return allStreams;
+    }
+
+    public static LinkedHashMap<String, Issue> getBzPayloadStore() {
+        return Util.bzPayloadStore;
+    }
+
+    public static LinkedHashMap<String, List<Issue>> getJiraPayloadStore() {
+        return Util.jiraPayloadStore;
     }
 
     public Map<RepositoryType, RateLimit> getRateLimits() {

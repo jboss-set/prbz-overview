@@ -47,8 +47,6 @@ import javax.ejb.LockType;
 import org.jboss.set.aphrodite.Aphrodite;
 import org.jboss.set.aphrodite.config.TrackerType;
 import org.jboss.set.aphrodite.domain.Issue;
-import org.jboss.set.aphrodite.domain.Release;
-import org.jboss.set.aphrodite.domain.SearchCriteria;
 import org.jboss.set.aphrodite.domain.Stream;
 import org.jboss.set.aphrodite.spi.NotFoundException;
 import org.jboss.set.assistant.data.ProcessorData;
@@ -86,7 +84,6 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
     @Override
     public List<ProcessorData> process(Issue issue, Stream stream) throws ProcessorException {
         logger.info("PayloadProcessor process is started for " + issue.getURL());
-
         try {
             if(singleExecutorService.isShutdown()){
                 singleExecutorService = Executors.newSingleThreadExecutor();
@@ -129,7 +126,7 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
                     }
                 }
 
-                logger.info("PayloadProcessor process is finished...");
+                logger.info("PayloadProcessor process is finished for " + issue.getURL());
                 if(!singleExecutorService.isShutdown())
                     singleExecutorService.shutdown();
                 service.shutdown();
@@ -143,33 +140,9 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
     @AccessTimeout(value = 5, unit = TimeUnit.MINUTES)
     @Lock(LockType.READ)
     @Override
-    public List<ProcessorData> process(String fixVersion, Stream stream) throws ProcessorException {
+    public List<ProcessorData> process(String fixVersion, List<Issue> dependencyIssues, Stream stream) throws ProcessorException {
         logger.info("PayloadProcessor process is started for " + fixVersion);
-
-        SearchCriteria sc = new SearchCriteria.Builder().setRelease(new Release(fixVersion.trim()))
-                .setProduct("JBEAP")
-                .setMaxResults(200)
-                .build();
         try {
-            if (singleExecutorService.isShutdown()) {
-                singleExecutorService = Executors.newSingleThreadExecutor();
-            }
-            Future<List<Issue>> future = singleExecutorService.submit(new DependecyRetrieveTask(sc));
-            List<Issue> dependencyIssues = new ArrayList<>();
-            boolean listen = true;
-            while (listen) {
-                try {
-                    dependencyIssues = future.get(5, TimeUnit.MINUTES);
-                } catch (ExecutionException | TimeoutException e) {
-                    listen = false;
-                    future.cancel(true);
-                    singleExecutorService.shutdown();
-                    logger.log(Level.SEVERE, "Failed to retrieve dependency issues due to " + e);
-                } finally {
-                    listen = false;
-                }
-            }
-
             List<ProcessorData> data = new ArrayList<>();
             if (!dependencyIssues.isEmpty()) {
                 if (service.isShutdown()) {
@@ -192,9 +165,7 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
                     }
                 }
 
-                logger.info("PayloadProcessor process is finished...");
-                if (!singleExecutorService.isShutdown())
-                    singleExecutorService.shutdown();
+                logger.info("PayloadProcessor process is finished for " + fixVersion);
                 service.shutdown();
             }
             return data;
@@ -252,35 +223,24 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
     private class DependecyRetrieveTask implements Callable<List<Issue>> {
 
         private Issue issue;
-        private SearchCriteria sc;
 
         DependecyRetrieveTask(Issue issue) {
             this.issue = issue;
-            this.sc = null;
-        }
-
-        DependecyRetrieveTask(SearchCriteria sc) {
-            this.issue = null;
-            this.sc = sc;
         }
 
         @Override
         public List<Issue> call() throws Exception {
             List<Issue> dependencyIssues = new ArrayList<>();
             // Bugzilla payload tracker for EAP 6
-            if (issue != null) {
-                List<URL> dependencyURLs = issue.getDependsOn();
-                for (URL url : dependencyURLs) {
-                    Issue i;
-                    try {
-                        i = aphrodite.getIssue(url);
-                        dependencyIssues.add(i);
-                    } catch (NotFoundException e) {
-                        logger.log(Level.WARNING, "failed to find depends on issue from " + url, e);
-                    }
+            List<URL> dependencyURLs = issue.getDependsOn();
+            for (URL url : dependencyURLs) {
+                Issue i;
+                try {
+                    i = aphrodite.getIssue(url);
+                    dependencyIssues.add(i);
+                } catch (NotFoundException e) {
+                    logger.log(Level.WARNING, "failed to find depends on issue from " + url, e);
                 }
-            } else {
-                dependencyIssues = aphrodite.searchIssues(sc);
             }
             return dependencyIssues;
         }

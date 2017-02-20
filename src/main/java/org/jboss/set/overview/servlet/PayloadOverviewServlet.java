@@ -75,7 +75,7 @@ public class PayloadOverviewServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String payloadName = request.getParameter("payloadName");
-        if (payloadName != null && Aider.getPayloadMap().containsKey(payloadName)) {
+        if (payloadName != null && (Aider.getBzPayloadStore().containsKey(payloadName) || Aider.getJiraPayloadStore().containsKey(payloadName))) {
             // Put the data list in request and let Freemarker paint it.
             payloadData = Aider.getPayloadData(payloadName);
             if (payloadData == null || payloadData.isEmpty()) {
