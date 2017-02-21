@@ -173,6 +173,9 @@
 															- Fix Version:
 															<#list issue.fixVersions as fixVersion> ${fixVersion} </#list>
 														</#if>
+														<#if issue.payload?has_content && (issue.payload != "N/A")>
+															<span class="label label-success">${issue.payload} payload</span>
+														</#if>
 														<#if issue.streamStatus??>
 															<#list issue.streamStatus?keys as key>
 																<span class="label label-primary">${key} stream </span>
