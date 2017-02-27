@@ -230,7 +230,7 @@ public class Aider {
                         Issue trackerIssue = payloads.get(payload);
                         if (firstInit || !(trackerIssue.getStatus().equals(IssueStatus.CLOSED) || trackerIssue.getStatus().equals(IssueStatus.VERIFIED))) {
                             // only add data in first initialization, or later schedule update if tracker is neither closed nor verified.
-                            dataList.addAll(processor.process(payloads.get(payload), stream.get()));
+                            dataList.addAll(processor.process(trackerIssue, stream.get()));
                         } else{
                             logger.log(Level.INFO, "Released payload " + payload + " is skipped.");
                         }

@@ -65,8 +65,8 @@ public class Util {
                 // first time run, search from eap6411-payload to eap6420-payload
                 Issue payloadCandidate = testBzPayloadExistence(aphrodite, i);
                 if (payloadCandidate != null) {
-                    bzPayloadStore.put(Constants.EAP64XPAYLOAD_ALIAS_PREFIX + i, payloadCandidate);
-                    logger.log(Level.INFO, "Found Bugzilla Payloads : " + Constants.EAP64XPAYLOAD_ALIAS_PREFIX + i);
+                    bzPayloadStore.put(Constants.EAP64XPAYLOAD_ALIAS_PREFIX + i + Constants.EAP64XPAYLOAD_ALIAS_SUFFIX, payloadCandidate);
+                    logger.log(Level.INFO, "Found Bugzilla Payload : " + Constants.EAP64XPAYLOAD_ALIAS_PREFIX + i);
                 }
             }
         } else {
@@ -75,10 +75,17 @@ public class Util {
             Matcher matcher = EAP64XPAYLOADPATTERN.matcher(lastKey);
             if (matcher.find()) {
                 int index = Integer.parseInt(matcher.group(1));
+                for (int i = 6411; i <= index; i++) {
+                    Issue payloadCandidate = testBzPayloadExistence(aphrodite, i);
+                    if (payloadCandidate != null) {
+                        bzPayloadStore.put(Constants.EAP64XPAYLOAD_ALIAS_PREFIX + i + Constants.EAP64XPAYLOAD_ALIAS_SUFFIX, payloadCandidate);
+                        logger.log(Level.INFO, "Reload Bugzilla Payload : " + Constants.EAP64XPAYLOAD_ALIAS_PREFIX + i);
+                    }
+                }
                 index++;
                 Issue payloadCandidate = testBzPayloadExistence(aphrodite, index);
                 while (payloadCandidate != null) {
-                    bzPayloadStore.put(Constants.EAP64XPAYLOAD_ALIAS_PREFIX + index, payloadCandidate);
+                    bzPayloadStore.put(Constants.EAP64XPAYLOAD_ALIAS_PREFIX + index + Constants.EAP64XPAYLOAD_ALIAS_SUFFIX, payloadCandidate);
                     logger.log(Level.INFO, "Found new Bugzilla Payloads : " + Constants.EAP64XPAYLOAD_ALIAS_PREFIX + index);
                     index++;
                     payloadCandidate = testBzPayloadExistence(aphrodite, index);
@@ -110,7 +117,7 @@ public class Util {
                 List<Issue> issues = testJiraPayloadExistence(aphrodite, fixVersion);
                 if (!issues.isEmpty()){
                     jiraPayloadStore.put(fixVersion, issues);
-                    logger.log(Level.INFO, "Found Jira Payloads : " + fixVersion);
+                    logger.log(Level.INFO, "Found Jira Payload : " + fixVersion);
                 }
             }
         } else {
@@ -118,6 +125,17 @@ public class Util {
             Matcher matcher = EAP70XPAYLOADPATTERN.matcher(lastKey);
             if (matcher.find()) {
                 int index = Integer.parseInt(matcher.group(1));
+
+                for (int i = 1; i <= index; i++) {
+                    // update from 7.0.1.GA to index, add to list if result is not empty.
+                    String fixVersion = Constants.EAP70XPAYLOAD_ALIAS_PREFIX + i + Constants.EAP70XPAYLOAD_ALIAS_SUFFIX;
+                    List<Issue> issues = testJiraPayloadExistence(aphrodite, fixVersion);
+                    if (!issues.isEmpty()) {
+                        jiraPayloadStore.put(fixVersion, issues);
+                        logger.log(Level.INFO, "Reload Jira Payload : " + fixVersion);
+                    }
+                }
+
                 index++;
                 String fixVersion = Constants.EAP70XPAYLOAD_ALIAS_PREFIX + index + Constants.EAP70XPAYLOAD_ALIAS_SUFFIX;
                 List<Issue> issues = testJiraPayloadExistence(aphrodite, fixVersion);
