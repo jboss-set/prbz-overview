@@ -37,7 +37,7 @@
 					<#case "CRITICAL"><img src="../images/orange-critical.png" alt="orange-critical" title="critical"><#break>
 					<#case "MAJOR"><img src="../images/yellow-major.png" alt="yellow-major" title="major"><#break>
 					<#case "MINOR"><img src="../images/blue-minor.png" alt="blue-minor" title="minor"><#break>
-					<#case "TRIVIAL"><img src="../images/grey-trivial.png" alt="grey-trivial" title="trivial"><#break>
+					<#case "TRIVIAL"><img src="../images/gray-trivial.png" alt="gray-trivial" title="trivial"><#break>
 				</#switch>
 			<#else>
 				<img src="../images/green-good.png" alt="good green light" title="good">
@@ -48,7 +48,7 @@
 				<li><img src="../images/orange-critical.png" alt="orange-critical" title="critical"> Orange status with critical issue(s), attention is needed until progress can no longer be made.</li>
 				<li><img src="../images/yellow-major.png" alt="yellow-major" title="major"> Yellow status with major issue(s), a pending condition to triage.</li>
 				<li><img src="../images/blue-minor.png" alt="blue-minor" title="minor"> Blue status with minor issue(s), attention is needed, forward progress can be made.</li>
-				<li><img src="../images/grey-trivial.png" alt="grey-trivial" title="trivial"> Grey status with trivial issue(s), process is moving forward as planned with trivial obstacle.</li>
+				<li><img src="../images/gray-trivial.png" alt="gray-trivial" title="trivial"> gray status with trivial issue(s), process is moving forward as planned with trivial obstacle.</li>
 				<li><img src="../images/green-good.png" alt="good green light" title="good"> Green status without notable issue(s), process is moving forward as planned with no visible obstacle.</li>
 		  </ul>
 		  </div>
@@ -74,7 +74,7 @@
 											<#case "CRITICAL"><img src="../images/orange-critical.png" alt="orange-critical" title="critical"><#break>
 											<#case "MAJOR"><img src="../images/yellow-major.png" alt="yellow-major" title="major"><#break>
 											<#case "MINOR"><img src="../images/blue-minor.png" alt="blue-minor" title="minor"><#break>
-											<#case "TRIVIAL"><img src="../images/grey-trivial.png" alt="grey-trivial" title="trivial"><#break>
+											<#case "TRIVIAL"><img src="../images/gray-trivial.png" alt="gray-trivial" title="trivial"><#break>
 										</#switch>
 									<#else>
 										<img src="../images/green-good.png" alt="good green light" title="good">
@@ -98,7 +98,7 @@
 																<#case "CRITICAL"><img src="../images/orange-critical.png" alt="orange-critical" title="critical"><#break>
 																<#case "MAJOR"><img src="../images/yellow-major.png" alt="yellow-major" title="major"><#break>
 																<#case "MINOR"><img src="../images/blue-minor.png" alt="blue-minor" title="minor"><#break>
-																<#case "TRIVIAL"><img src="../images/grey-trivial.png" alt="grey-trivial" title="trivial"><#break>
+																<#case "TRIVIAL"><img src="../images/gray-trivial.png" alt="gray-trivial" title="trivial"><#break>
 														</#switch>
 														${violation.level} Violation ${violation.checkName} : ${violation.message}
 													</li>
