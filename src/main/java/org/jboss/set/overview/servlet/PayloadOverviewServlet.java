@@ -23,9 +23,12 @@
 package org.jboss.set.overview.servlet;
 
 import static org.jboss.set.assistant.Util.maxSeverity;
+import static org.jboss.set.assistant.Util.filterBySelectedStatus;
+import static org.jboss.set.assistant.Util.filterByMissedFlags;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -77,11 +80,19 @@ public class PayloadOverviewServlet extends HttpServlet {
         String payloadName = request.getParameter("payloadName");
         if (payloadName != null && (Aider.getBzPayloadStore().containsKey(payloadName) || Aider.getJiraPayloadStore().containsKey(payloadName))) {
             // Put the data list in request and let Freemarker paint it.
+            String[] selectedStatus = request.getParameterValues("selectedStatus"); // from ftl
+            String[] missedFlags = request.getParameterValues("missedFlags"); // from ftl
             payloadData = Aider.getPayloadData(payloadName);
             if (payloadData == null || payloadData.isEmpty()) {
                 response.addHeader("Refresh", "5");
                 request.getRequestDispatcher("/error-wait.html").forward(request, response);
             } else {
+                if(selectedStatus != null && selectedStatus.length > 0){
+                    payloadData = filterBySelectedStatus(payloadData, Arrays.asList(selectedStatus));
+                }
+                if(missedFlags != null && missedFlags.length > 0){
+                    payloadData = filterByMissedFlags(payloadData, Arrays.asList(missedFlags));
+                }
                 request.setAttribute("rows", payloadData);
                 request.setAttribute("payloadName", payloadName);
                 request.setAttribute("payloadSize", payloadData.size());

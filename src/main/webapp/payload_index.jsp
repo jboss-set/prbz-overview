@@ -37,7 +37,7 @@
 				<c:forEach var="i" items="${payloadSet}">
 					<h4>
 						<li>
-							<a href="payloadview/overview?payloadName=${i}" id=${i}}> <c:out value="${i}" /></a>
+							<a href="payloadview/overview?payloadName=${i}" id=${i}> <c:out value="${i}" /></a>
 						</li>
 					</h4>
 				</c:forEach>

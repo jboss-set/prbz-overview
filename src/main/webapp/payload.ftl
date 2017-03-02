@@ -23,6 +23,12 @@
 	</style>
   </head>
   <body>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <link href="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.0.3/js/bootstrap.min.js"></script>
+    <link href="http://cdn.rawgit.com/davidstutz/bootstrap-multiselect/master/dist/css/bootstrap-multiselect.css" rel="stylesheet" type="text/css" />
+    <script src="http://cdn.rawgit.com/davidstutz/bootstrap-multiselect/master/dist/js/bootstrap-multiselect.js" type="text/javascript"></script>
+
      <div class="container">
 		<div class="row">
 		  <div class="col-md-12"><h1>EAP Cumulative Patch Releases ${Request.payloadName} Issue List</h1></div>
@@ -30,7 +36,22 @@
 		<div class="row">
 		  <div class="col-md-12">
 		  <h4>
-			${Request.payloadSize} issues in payload in overall status
+
+		  <#if RequestParameters.selectedStatus??>
+			<#if RequestParameters.missedFlags??>
+				<#assign summary = "found by issue status and CDW flags">
+			<#else>
+				<#assign summary = "found by issue status">
+			</#if>
+		  <#else>
+			<#if RequestParameters.missedFlags??>
+				<#assign summary = "found by CDW flags">
+			<#else>
+				<#assign summary = "">
+			</#if>
+		  </#if>
+
+			${Request.payloadSize} issues ${summary} in payload in overall status
 			<#if Request.payloadStatus?has_content>
 				<#switch Request.payloadStatus>
 					<#case "BLOCKER"><img src="../images/red-blocker.png" alt="red-blocker" title="blocker"><#break>
@@ -51,6 +72,25 @@
 				<li><img src="../images/gray-trivial.png" alt="gray-trivial" title="trivial"> gray status with trivial issue(s), process is moving forward as planned with trivial obstacle.</li>
 				<li><img src="../images/green-good.png" alt="good green light" title="good"> Green status without notable issue(s), process is moving forward as planned with no visible obstacle.</li>
 		  </ul>
+
+		  <form action="/prbz-overview/payloadview/overview">
+			  <input type="hidden" name="payloadName" value=${Request.payloadName}>
+			  <select id="lstStatus" name="selectedStatus" multiple="multiple">
+				  <option value="RED">RED</option>
+				  <option value="ORANGE">ORANGE</option>
+				  <option value="YELLOW">YELLOW</option>
+				  <option value="BLUE">BLUE</option>
+				  <option value="GRAY">GRAY</option>
+				  <option value="GREEN">GREEN</option>
+			  </select>
+			  <select id="lstFlags" name="missedFlags" multiple="multiple">
+				  <option value="PM">Need PM+</option>
+				  <option value="DEV">Need DEV+</option>
+				  <option value="QE">Need QE+</option>
+			  </select>
+			  <input type="submit" id="" value="Search" />
+		  </form>
+
 		  </div>
 		</div>
 		<div class="row">
@@ -197,8 +237,18 @@
 		    </div>
 		</div>
 	</div>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
-
   </body>
+
+<script type="text/javascript">
+	$(function() {
+		$('#lstStatus').multiselect({
+			includeSelectAllOption: true
+		});
+	});
+	$(function() {
+		$('#lstFlags').multiselect({
+			includeSelectAllOption: true
+		});
+	});
+</script>
 </html>

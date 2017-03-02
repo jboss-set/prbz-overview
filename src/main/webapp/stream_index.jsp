@@ -37,7 +37,7 @@
 				<c:forEach var="i" items="${streamSet}">
 					<h4>
 						<li>
-							<a href="streamview/overview?streamName=${i}" id=${i}}> <c:out value="${i}" /></a>
+							<a href="streamview/overview?streamName=${i}" id=${i}> <c:out value="${i}" /></a>
 						</li>
 					</h4>
 				</c:forEach>
