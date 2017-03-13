@@ -139,12 +139,9 @@ public class Util {
                 index++;
                 String fixVersion = Constants.EAP70XPAYLOAD_ALIAS_PREFIX + index + Constants.EAP70XPAYLOAD_ALIAS_SUFFIX;
                 List<Issue> issues = testJiraPayloadExistence(aphrodite, fixVersion);
-                while (!issues.isEmpty()) {
+                if (!issues.isEmpty()) {
                     jiraPayloadStore.put(fixVersion, issues);
                     logger.log(Level.INFO, "Found new Jira Payloads : " + fixVersion);
-                    index++;
-                    fixVersion = Constants.EAP70XPAYLOAD_ALIAS_PREFIX + index + Constants.EAP70XPAYLOAD_ALIAS_SUFFIX;
-                    testJiraPayloadExistence(aphrodite, fixVersion);
                 }
             }
         }
