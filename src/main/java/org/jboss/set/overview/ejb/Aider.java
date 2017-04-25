@@ -44,7 +44,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.ejb.Schedule;
 import javax.ejb.Startup;
 import javax.ejb.Stateless;
@@ -110,15 +109,6 @@ public class Aider {
 
     public static List<ProcessorData> getPayloadData(String payloadName) {
         return payloadData.get(payloadName);
-    }
-
-    @PreDestroy
-    public void destroy() {
-        try {
-            aphrodite.close();
-        } catch (Exception e) {
-            logger.log(Level.WARNING, "Failed to close aphrodite instance.", e);
-        }
     }
 
     public void initAllPullRequestData() {

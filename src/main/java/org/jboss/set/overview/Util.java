@@ -71,7 +71,7 @@ public class Util {
             }
         } else {
             // schedule update run, search any new one until it hits NotFoundException for nonexistent alias.
-            String lastKey = (String) bzPayloadStore.keySet().toArray()[bzPayloadStore.size() -1];
+            String lastKey = (String) bzPayloadStore.keySet().toArray()[bzPayloadStore.size() - 1];
             Matcher matcher = EAP64XPAYLOADPATTERN.matcher(lastKey);
             if (matcher.find()) {
                 int index = Integer.parseInt(matcher.group(1));
@@ -106,6 +106,9 @@ public class Util {
         } catch (NotFoundException e) {
             // OK, ignored with null as return value. Nonexistent alias, just don't add to return result.
             return null;
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Error to find Bugzilla for payload " + i + "due to " + e.getMessage(), e);
+            return null;
         }
     }
 
@@ -115,7 +118,7 @@ public class Util {
                 // search from 7.0.1.GA to 7.0.9.GA, add to list if result is not empty.
                 String fixVersion = Constants.EAP70XPAYLOAD_ALIAS_PREFIX + i + Constants.EAP70XPAYLOAD_ALIAS_SUFFIX;
                 List<Issue> issues = testJiraPayloadExistence(aphrodite, fixVersion);
-                if (!issues.isEmpty()){
+                if (!issues.isEmpty()) {
                     jiraPayloadStore.put(fixVersion, issues);
                     logger.log(Level.INFO, "Found Jira Payload : " + fixVersion);
                 }
