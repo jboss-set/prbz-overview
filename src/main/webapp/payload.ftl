@@ -121,13 +121,17 @@
 									</#if>
 									<a href="${data.payloadDependency.link}" title="${data.payloadDependency.summary}">#${data.payloadDependency.label}</a> - ${data.payloadDependency.status} - ${data.payloadDependency.type}
 									</br>
-									<#list data.payloadDependency.flags?keys as key>
-										<#switch data.payloadDependency.flags[key]>
-											<#case "SET"> <span class="label label-primary">${key} ?</span><#break>
-											<#case "ACCEPTED"> <span class="label label-success">${key} +</span><#break>
-											<#case "REJECTED"> <span class="label label-danger">${key} -</span><#break>
-										</#switch>
-									</#list>
+									<#if data.payloadDependency.allAcks>
+										<span class="label label-success">Has all 3 acks</span>
+									<#else>
+										<#list data.payloadDependency.flags?keys as key>
+											<#switch data.payloadDependency.flags[key]>
+												<#case "SET"> <span class="label label-primary">${key} ?</span><#break>
+												<#case "ACCEPTED"> <span class="label label-success">${key} +</span><#break>
+												<#case "REJECTED"> <span class="label label-danger">${key} -</span><#break>
+											</#switch>
+										</#list>
+									</#if>
 									<#if data.payloadDependency.maxSeverity?has_content>
 										<#list data.payloadDependency.violations>
 											<ul>
