@@ -35,6 +35,7 @@ import java.util.regex.Matcher;
 
 import org.jboss.set.aphrodite.Aphrodite;
 import org.jboss.set.aphrodite.domain.Issue;
+import org.jboss.set.aphrodite.domain.IssueStatus;
 import org.jboss.set.aphrodite.domain.Release;
 import org.jboss.set.aphrodite.domain.SearchCriteria;
 import org.jboss.set.aphrodite.domain.StreamComponent;
@@ -81,8 +82,12 @@ public class Util {
                 for (int i = 6411; i <= index; i++) {
                     Issue payloadCandidate = testBzPayloadExistence(aphrodite, i);
                     if (payloadCandidate != null) {
-                        bzPayloadStore.put(Constants.EAP64XPAYLOAD_ALIAS_PREFIX + i + Constants.EAP64XPAYLOAD_ALIAS_SUFFIX, payloadCandidate);
-                        logger.log(Level.INFO, "Reload Bugzilla Payload : " + Constants.EAP64XPAYLOAD_ALIAS_PREFIX + i);
+                        if (payloadCandidate.getStatus().equals(IssueStatus.CLOSED) || payloadCandidate.getStatus().equals(IssueStatus.VERIFIED)) {
+                            logger.log(Level.INFO, "Skip Bugzilla Payload : " + Constants.EAP64XPAYLOAD_ALIAS_PREFIX + i);
+                        } else {
+                            bzPayloadStore.put(Constants.EAP64XPAYLOAD_ALIAS_PREFIX + i + Constants.EAP64XPAYLOAD_ALIAS_SUFFIX, payloadCandidate);
+                            logger.log(Level.INFO, "Reload Bugzilla Payload : " + Constants.EAP64XPAYLOAD_ALIAS_PREFIX + i);
+                        }
                     }
                 }
                 index++;
