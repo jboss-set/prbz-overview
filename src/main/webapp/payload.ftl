@@ -23,11 +23,11 @@
 	</style>
   </head>
   <body>
-    <script type="text/javascript" src="js/jquery.min.js"></script>
-    <link href="css/bootstrap.min.css" rel="stylesheet" type="text/css" />
-    <script type="text/javascript" src="js/bootstrap.min.js"></script>
-    <link href="css/bootstrap-multiselect.css" rel="stylesheet" type="text/css" />
-    <script src="js/bootstrap-multiselect.js" type="text/javascript"></script>
+    <script type="text/javascript" src="../js/jquery.min.js"></script>
+    <link href="../css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="../js/bootstrap.min.js"></script>
+    <link href="../css/bootstrap-multiselect.css" rel="stylesheet" type="text/css" />
+    <script src="../js/bootstrap-multiselect.js" type="text/javascript"></script>
 
      <div class="container">
 		<div class="row">
