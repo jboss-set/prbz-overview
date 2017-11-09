@@ -67,6 +67,8 @@ public class PullRequestOverviewProcessor implements PullRequestProcessor {
 
     private ExecutorService singleExecutorService;
 
+    private static final boolean devProfile = System.getProperty("prbz-dev") != null;
+
     @Override
     public void init(Aphrodite aphrodite) {
         this.aphrodite = aphrodite;
@@ -183,7 +185,11 @@ public class PullRequestOverviewProcessor implements PullRequestProcessor {
         public List<PullRequest> call() throws Exception {
             List<PullRequest> pullRequests = new ArrayList<>();
             pullRequests = aphrodite.getPullRequestsByState(repository, PullRequestState.OPEN);
-            return pullRequests.stream().filter(e -> checkPullRequestBranch(e, stream)).collect(Collectors.toList());
+            java.util.stream.Stream<PullRequest> pullRequestStream = pullRequests.stream();
+            if (devProfile) {
+                pullRequestStream = pullRequestStream.limit(10);
+            }
+            return pullRequestStream.filter(e -> checkPullRequestBranch(e, stream)).collect(Collectors.toList());
         }
     }
 

@@ -71,6 +71,8 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
 
     private ExecutorService singleExecutorService;
 
+    private static final boolean devProfile = System.getProperty("prbz-dev") != null;
+
     @Override
     public void init(Aphrodite aphrodite){
         this.aphrodite = aphrodite;
@@ -109,10 +111,14 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
                 if (service.isShutdown()) {
                     service = Executors.newFixedThreadPool(10);
                 }
+                java.util.stream.Stream<Issue> issueStream = dependencyIssues.stream();
+                if (devProfile) {
+                    issueStream = issueStream.limit(10);
+                }
+                List<PayloadProcessingTask> tasks = issueStream.map(e -> new PayloadProcessingTask(e, issue, TrackerType.BUGZILLA, stream))
+                        .collect(Collectors.toList());
                 List<Future<ProcessorData>> results = service
-                        .invokeAll(dependencyIssues.stream()
-                                .map(e -> new PayloadProcessingTask(e, issue, TrackerType.BUGZILLA, stream))
-                                .collect(Collectors.toList()), 5, TimeUnit.MINUTES);
+                        .invokeAll(tasks, 5, TimeUnit.MINUTES);
 
                 for (Future<ProcessorData> result : results) {
                     try {

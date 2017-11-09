@@ -50,6 +50,8 @@ public class Util {
     public static LinkedHashMap<String, Issue> bzPayloadStore = new LinkedHashMap<>();
     public static LinkedHashMap<String, List<Issue>> jiraPayloadStore = new LinkedHashMap<>();
 
+    private static final boolean devProfile = System.getProperty("prbz-dev") != null;
+
     public static boolean filterComponent(StreamComponent component) {
         String name = component.getName().trim();
         return name.equalsIgnoreCase(Constants.WILDFLY_WILDFLY)
@@ -61,7 +63,8 @@ public class Util {
 
     public static void findAllBugzillaPayloads(Aphrodite aphrodite, boolean first) {
         if (first) {
-            for (int i = 6411; i < 6420; i++) {
+            int max = devProfile ? 6416 : 6420;
+            for (int i = 6411; i < max; i++) {
                 // first time run, search from eap6411-payload to eap6420-payload
                 Issue payloadCandidate = testBzPayloadExistence(aphrodite, i);
                 if (payloadCandidate != null) {
@@ -114,7 +117,8 @@ public class Util {
 
     public static void findAllJiraPayloads(Aphrodite aphrodite, boolean first) {
         if (first) {
-            for (int i = 1; i < 10; i++) {
+            int max = devProfile ? 6 : 10;
+            for (int i = 1; i < max; i++) {
                 // search from 7.0.1.GA to 7.0.9.GA, add to list if result is not empty.
                 String fixVersion = Constants.EAP70XPAYLOAD_ALIAS_PREFIX + i + Constants.EAP70XPAYLOAD_ALIAS_SUFFIX;
                 List<Issue> issues = testJiraPayloadExistence(aphrodite, fixVersion);
@@ -152,10 +156,11 @@ public class Util {
     }
 
     private static List<Issue> testJiraPayloadExistence(Aphrodite aphrodite, String fixVersion) {
+        int maxResults = devProfile ? 10 : 200;
         SearchCriteria sc = new SearchCriteria.Builder()
                 .setRelease(new Release(fixVersion.trim()))
                 .setProduct("JBEAP")
-                .setMaxResults(200)
+                .setMaxResults(maxResults)
                 .build();
         return aphrodite.searchIssues(sc);
     }
