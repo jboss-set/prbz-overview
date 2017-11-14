@@ -87,6 +87,8 @@ public class Aider {
     private static final Object pullRequestDataLock = new Object();
     private static final Object payloadDataLock = new Object();
 
+    private static final boolean devProfile = System.getProperty("prbz-dev") != null;
+
     @PostConstruct
     public void init() {
         try {
@@ -245,6 +247,7 @@ public class Aider {
 
     @Schedule(minute = "*/30", hour = "*")
     public void updatePullRequestData() {
+        if (devProfile) return;
         logger.info("schedule pull request data update is started ...");
         // TOOD load new streams, although it's not often.
         for (Stream s : allStreams) {
@@ -258,6 +261,7 @@ public class Aider {
 
     @Schedule(minute = "*/30", hour = "*")
     public void updatePayloadData() {
+        if (devProfile) return;
         logger.info("schedule payload data update is started ...");
         findAllBugzillaPayloads(aphrodite, false);
         findAllJiraPayloads(aphrodite, false);

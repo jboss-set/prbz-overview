@@ -41,6 +41,12 @@ Since one payload update can sometimes takes several minutes due to server side 
 
 	<coordinator-environment default-timeout="300"/>
 
+### Dev profile
+
+For development purposes you can use a dev profile that will retrieve a small portion of the data and not perform any updates. To enable it add this system property:
+
+    <property name="prbz-dev" value="true"/>
+
 #Deployment
 ------------
 
