@@ -29,6 +29,13 @@
     <link href="../css/bootstrap-multiselect.css" rel="stylesheet" type="text/css" />
     <script src="../js/bootstrap-multiselect.js" type="text/javascript"></script>
 
+    <ul class="nav nav-pills" style="width: 80%; margin: 6px auto">
+        <li style="font-size: 20px"><a href="/prbz-overview/">Home</a></li>
+        <#list payloadSet as payload>
+            <li<#if payload == Request.payloadName> class="active"</#if>><a href="/prbz-overview/payloadview/overview?payloadName=${payload}">${payload}</a></li>
+        </#list>
+    </ul>
+
      <div class="container">
 		<div class="row">
 		  <div class="col-md-12"><h1>EAP Cumulative Patch Releases ${Request.payloadName} Issue List</h1></div>

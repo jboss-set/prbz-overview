@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
@@ -82,6 +83,9 @@ public class PayloadOverviewServlet extends HttpServlet {
             // Put the data list in request and let Freemarker paint it.
             String[] selectedStatus = request.getParameterValues("selectedStatus"); // from ftl
             String[] missedFlags = request.getParameterValues("missedFlags"); // from ftl
+            TreeSet<String> payloadSet = new TreeSet<String>();
+            payloadSet.addAll(Aider.getBzPayloadStore().keySet());
+            payloadSet.addAll(Aider.getJiraPayloadStore().keySet());
             payloadData = Aider.getPayloadData(payloadName);
             if (payloadData == null || payloadData.isEmpty()) {
                 response.addHeader("Refresh", "5");
@@ -97,6 +101,7 @@ public class PayloadOverviewServlet extends HttpServlet {
                 request.setAttribute("payloadName", payloadName);
                 request.setAttribute("payloadSize", payloadData.size());
                 request.setAttribute("payloadStatus", maxSeverity(payloadData));
+                request.setAttribute("payloadSet", payloadSet);
                 request.getRequestDispatcher("/payload.ftl").forward(request, response);
             }
         } else {

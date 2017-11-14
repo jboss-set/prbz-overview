@@ -22,13 +22,18 @@
 
 package org.jboss.set.overview.servlet;
 
+import static org.jboss.set.overview.Util.filterComponent;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import javax.ejb.EJB;
 import javax.servlet.ServletException;
@@ -81,10 +86,18 @@ public class PullRequestOverviewServlet extends HttpServlet {
                 response.addHeader("Refresh", "5");
                 request.getRequestDispatcher("/error-wait.html").forward(request, response);
             } else {
+                Map<String, List<String>> streamMap = new TreeMap<>(
+                        Aider.getAllStreams().stream().collect(
+                                Collectors.toMap(e -> e.getName(),
+                                        e -> e.getAllComponents().stream()
+                                            .filter(f -> filterComponent(f)).map(g -> g.getName())
+                                            .collect(Collectors.toList()))
+                                ));
                 request.setAttribute("rows", pullRequestData);
                 request.setAttribute("streamName", streamName);
                 request.setAttribute("componentName", componentName);
                 request.setAttribute("pullRequestSize", pullRequestData.size());
+                request.setAttribute("streamMap", streamMap);
                 request.getRequestDispatcher("/pullrequest.ftl").forward(request, response);
             }
         } else {

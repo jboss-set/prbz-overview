@@ -23,6 +23,21 @@
 	</style>
   </head>
   <body>
+      <ul class="nav nav-pills" style="width: 80%; margin: 6px auto">
+          <li style="font-size: 20px"><a href="/prbz-overview/">Home</a></li>
+          <#list streamMap?keys as stream>
+              <li role="presentation" class="dropdown">
+                <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+                    ${stream} <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu">
+                    <#list streamMap[stream] as component>
+                    <li class="<#if component == Request.componentName && stream == Request.streamName>active</#if>"><a href="/prbz-overview/streamview/pullrequestoverview?streamName=${stream}&componentName=${component}">${component}</a></li>
+                    </#list>
+                </ul>
+              </li>
+          </#list>
+      </ul>
      <div class="container">
 		<div class="row">
 		  <div class="col-md-12"><h1>EAP Cumulative Patch Releases ${Request.streamName} -  ${Request.componentName} List</h1></div>
@@ -65,7 +80,7 @@
 
 								<td>${data.branch}</td>
 
-								<td>	
+								<td>
 									<#list data.streams as stream> ${stream} </#list>
 								</td>
 
@@ -91,7 +106,7 @@
 												</#list>
 											</li>
 							    		</#items>
-							    		</ul> 
+							    		</ul>
 							    	</#list>
 							    </td>
 
@@ -149,7 +164,7 @@
 												</#list>
 							    		   </li>
 							    		</#items>
-							    		</ul> 
+							    		</ul>
 							    	</#list>
 							    </td>
 							</tr>
