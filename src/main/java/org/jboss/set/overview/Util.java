@@ -131,7 +131,7 @@ public class Util {
 
     public static void findAllJiraPayloads(Aphrodite aphrodite, boolean first) {
         if (first) {
-            int max = devProfile ? DEVMODE_70X_PAYLOAD : DEVMODE_70X_PAYLOAD;
+            int max = devProfile ? DEVMODE_70X_PAYLOAD : LAST_70X_PAYLOAD;
             for (int i = FIRST_70X_PAYLOAD; i < max; i++) {
                 // search from 7.0.1.GA to 7.0.10.GA, add to list if result is not empty.
                 StringBuilder fixVersion = extractFixVersion(i);
