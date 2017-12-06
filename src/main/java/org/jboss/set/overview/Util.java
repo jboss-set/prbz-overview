@@ -23,7 +23,6 @@
 package org.jboss.set.overview;
 
 import static org.jboss.set.assistant.Constants.EAP64XPAYLOADPATTERN;
-import static org.jboss.set.assistant.Constants.EAP70XPAYLOADPATTERN;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -32,6 +31,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.jboss.set.aphrodite.Aphrodite;
 import org.jboss.set.aphrodite.domain.Issue;
@@ -51,13 +51,15 @@ public class Util {
     public static LinkedHashMap<String, Issue> bzPayloadStore = new LinkedHashMap<>();
     public static LinkedHashMap<String, List<Issue>> jiraPayloadStore = new LinkedHashMap<>();
 
+    public static final Pattern EAP70XPAYLOADPATTERN = Pattern.compile("7.0.([0-9]*).GA"); // TODO update this in assistant
+
     // some default boundary in first time load.
     private static int FIRST_64X_PAYLOAD = 6411;
     private static int DEVMODE_64X_PAYLOAD = 6416;
     private static int LAST_64X_PAYLOAD = 6420;
-    private static int FIRST_70X_PAYLOAD = 701;
-    private static int DEVMODE_70X_PAYLOAD = 706;
-    private static int LAST_70X_PAYLOAD = 709;
+    private static int FIRST_70X_PAYLOAD = 1;
+    private static int DEVMODE_70X_PAYLOAD = 6;
+    private static int LAST_70X_PAYLOAD = 9;
 
     private static final boolean devProfile = System.getProperty("prbz-dev") != null;
 
@@ -74,7 +76,7 @@ public class Util {
         if (first) {
             int max = devProfile ? DEVMODE_64X_PAYLOAD : LAST_64X_PAYLOAD;
             for (int i = FIRST_64X_PAYLOAD; i < max; i++) {
-                // first time run, search from eap6411-payload to eap6420-payload
+                // first time run, search from FIRST_64X_PAYLOAD to LAST_64X_PAYLOAD
                 Issue payloadCandidate = testBzPayloadExistence(aphrodite, i);
                 if (payloadCandidate != null) {
                     bzPayloadStore.put(Constants.EAP64XPAYLOAD_ALIAS_PREFIX + i + Constants.EAP64XPAYLOAD_ALIAS_SUFFIX, payloadCandidate);
@@ -133,12 +135,12 @@ public class Util {
         if (first) {
             int max = devProfile ? DEVMODE_70X_PAYLOAD : LAST_70X_PAYLOAD;
             for (int i = FIRST_70X_PAYLOAD; i < max; i++) {
-                // search from 7.0.1.GA to 7.0.10.GA, add to list if result is not empty.
-                StringBuilder fixVersion = extractFixVersion(i);
-                List<Issue> issues = testJiraPayloadExistence(aphrodite, fixVersion.toString());
+                // search from FIRST_70X_PAYLOAD to LAST_70X_PAYLOAD, add to list if result is not empty.
+                String fixVersion = Constants.EAP70XPAYLOAD_ALIAS_PREFIX + i + Constants.EAP70XPAYLOAD_ALIAS_SUFFIX;
+                List<Issue> issues = testJiraPayloadExistence(aphrodite, fixVersion);
                 if (!issues.isEmpty()) {
-                    jiraPayloadStore.put(fixVersion.toString(), issues);
-                    logger.log(Level.INFO, "Found Jira Payload : " + fixVersion.toString());
+                    jiraPayloadStore.put(fixVersion, issues);
+                    logger.log(Level.INFO, "Found Jira Payload : " + fixVersion);
 
                 }
             }
@@ -146,28 +148,28 @@ public class Util {
             String lastKey = (String) jiraPayloadStore.keySet().toArray()[jiraPayloadStore.size() - 1];
             Matcher matcher = EAP70XPAYLOADPATTERN.matcher(lastKey);
             if (matcher.find()) {
-                int index = Integer.parseInt(matcher.group(1).replace(".", ""));
+                int index = Integer.parseInt(matcher.group(1));
 
                 for (int i = FIRST_70X_PAYLOAD; i <= index; i++) {
                     // update from 7.0.1.GA to index, add to list if result is not empty.
-                    StringBuilder fixVersion = extractFixVersion(i);
-                    List<Issue> issues = testJiraPayloadExistence(aphrodite, fixVersion.toString());
-                    if (!issues.isEmpty() && !aphrodite.isCPReleased(fixVersion.toString())) {
-                        jiraPayloadStore.put(fixVersion.toString(), issues);
-                        logger.log(Level.INFO, "Reload Jira Payload : " + fixVersion.toString());
+                    String fixVersion = Constants.EAP70XPAYLOAD_ALIAS_PREFIX + i + Constants.EAP70XPAYLOAD_ALIAS_SUFFIX;
+                    List<Issue> issues = testJiraPayloadExistence(aphrodite, fixVersion);
+                    if (!issues.isEmpty() && !aphrodite.isCPReleased(fixVersion)) {
+                        jiraPayloadStore.put(fixVersion, issues);
+                        logger.log(Level.INFO, "Reload Jira Payload : " + fixVersion);
                     } else {
-                        logger.log(Level.INFO, "Skip Jira Payload : " + fixVersion.toString());
+                        logger.log(Level.INFO, "Skip Jira Payload : " + fixVersion);
 
                     }
                 }
 
                 index++;
                 // Try to query a new payload on index++
-                StringBuilder fixVersion = extractFixVersion(++index);
-                List<Issue> issues = testJiraPayloadExistence(aphrodite, fixVersion.toString());
+                String fixVersion = Constants.EAP70XPAYLOAD_ALIAS_PREFIX + index + Constants.EAP70XPAYLOAD_ALIAS_SUFFIX;
+                List<Issue> issues = testJiraPayloadExistence(aphrodite, fixVersion);
                 if (!issues.isEmpty()) {
-                    jiraPayloadStore.put(fixVersion.toString(), issues);
-                    logger.log(Level.INFO, "Found new Jira Payloads : " + fixVersion.toString());
+                    jiraPayloadStore.put(fixVersion, issues);
+                    logger.log(Level.INFO, "Found new Jira Payloads : " + fixVersion);
                 }
             }
         }
@@ -183,15 +185,4 @@ public class Util {
                 .build();
         return aphrodite.searchIssues(sc);
     }
-
-    private static StringBuilder extractFixVersion(int i) {
-        // transform 701 to 7.0.1.GA
-        String indexStr = String.valueOf(i);
-        StringBuilder fixVersion = new StringBuilder().append(indexStr.substring(0, 1)).append(".")
-                .append(indexStr.substring(1, 2)).append(".")
-                .append(indexStr.substring(2))
-                .append(Constants.EAP70XPAYLOAD_ALIAS_SUFFIX);
-        return fixVersion;
-    }
-
 }

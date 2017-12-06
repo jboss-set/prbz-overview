@@ -51,7 +51,7 @@ For development purposes you can use a dev profile that will retrieve a small po
 ------------
 
 ```
-mvn clean package
+mvn clean package -Dnorpm
 ```
 
 Copy generated war file to $JBOSS_HOME/standalone/deployments/ and visit http://localhost:8080/prbz-overview-${version}/prbz-overview.
