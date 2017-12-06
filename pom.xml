@@ -13,7 +13,7 @@
 	<groupId>org.jboss.set</groupId>
 	<artifactId>prbz-overview</artifactId>
 	<name>prbz-overview</name>
-	<version>0.2.8.Final</version>
+	<version>0.2.9.Final-SNAPSHOT</version>
 	<packaging>war</packaging>
 	<description>An overview place to review all pull requests on GitHub repository and issues in each payload tracker.</description>
 
