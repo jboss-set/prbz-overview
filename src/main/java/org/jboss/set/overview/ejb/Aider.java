@@ -130,7 +130,7 @@ public class Aider {
 
     public void initAllPayloadData() {
         logger.info("payload data initialization is started.");
-        generatePayloadDataForJira(Util.jiraPayloadStore);
+        generatePayloadDataForJira(Util.jiraPayloadStore, true);
         generatePayloadDataForBz(Util.bzPayloadStore, true);
         logger.info("payload data initialization is finished.");
     }
@@ -181,7 +181,7 @@ public class Aider {
         }
     }
 
-    public void generatePayloadDataForJira(Map<String, List<Issue>> payloads) {
+    public void generatePayloadDataForJira(Map<String, List<Issue>> payloads, boolean firstInit) {
         payloads.keySet().forEach(payload -> {
             List<ProcessorData> dataList = new ArrayList<>();
             logger.info(payload + " data genearation is started...");
@@ -190,7 +190,11 @@ public class Aider {
                 for (PayloadProcessor processor : payloadProcessors) {
                     logger.info("executing processor: " + processor.getClass().getName());
                     try {
-                        dataList.addAll(processor.process(payload, payloads.get(payload), stream.get()));
+                        if (firstInit || !aphrodite.isCPReleased(payload)) {
+                            dataList.addAll(processor.process(payload, payloads.get(payload), stream.get()));
+                        } else {
+                            logger.log(Level.INFO, "Released payload " + payload + " is skipped.");
+                        }
                     } catch (ProcessorException ex1) {
                         logger.log(Level.WARNING, ex1.getMessage(), ex1);
                     } catch (Exception ex2) {
@@ -265,7 +269,7 @@ public class Aider {
         logger.info("schedule payload data update is started ...");
         findAllBugzillaPayloads(aphrodite, false);
         findAllJiraPayloads(aphrodite, false);
-        generatePayloadDataForJira(Util.jiraPayloadStore);
+        generatePayloadDataForJira(Util.jiraPayloadStore, false);
         generatePayloadDataForBz(Util.bzPayloadStore, false);
         logger.info("schedule payload data update is finished ...");
 

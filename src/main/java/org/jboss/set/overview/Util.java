@@ -153,13 +153,14 @@ public class Util {
                 for (int i = FIRST_70X_PAYLOAD; i <= index; i++) {
                     // update from 7.0.1.GA to index, add to list if result is not empty.
                     String fixVersion = Constants.EAP70XPAYLOAD_ALIAS_PREFIX + i + Constants.EAP70XPAYLOAD_ALIAS_SUFFIX;
-                    List<Issue> issues = testJiraPayloadExistence(aphrodite, fixVersion);
-                    if (!issues.isEmpty() && !aphrodite.isCPReleased(fixVersion)) {
-                        jiraPayloadStore.put(fixVersion, issues);
-                        logger.log(Level.INFO, "Reload Jira Payload : " + fixVersion);
+                    if (aphrodite.isCPReleased(fixVersion)) {
+                        logger.log(Level.INFO, "Skip released Jira Payload : " + fixVersion);
                     } else {
-                        logger.log(Level.INFO, "Skip Jira Payload : " + fixVersion);
-
+                        List<Issue> issues = testJiraPayloadExistence(aphrodite, fixVersion);
+                        if (!issues.isEmpty()) {
+                            jiraPayloadStore.put(fixVersion, issues);
+                            logger.log(Level.INFO, "Reload Jira Payload : " + fixVersion);
+                        }
                     }
                 }
 

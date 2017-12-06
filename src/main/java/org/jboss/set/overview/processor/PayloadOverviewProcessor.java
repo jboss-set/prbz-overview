@@ -85,7 +85,7 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
     @Lock(LockType.READ)
     @Override
     public List<ProcessorData> process(Issue issue, Stream stream) throws ProcessorException {
-        logger.info("PayloadProcessor process is started for " + issue.getURL());
+        logger.log(Level.INFO, "PayloadProcessor process is started for " + issue.getURL());
         try {
             if(singleExecutorService.isShutdown()){
                 singleExecutorService = Executors.newSingleThreadExecutor();
@@ -100,7 +100,7 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
                     listen = false;
                     future.cancel(true);
                     singleExecutorService.shutdown();
-                    logger.log(Level.SEVERE, "Failed to retrieve dependency issues due to " + e);
+                    logger.log(Level.WARNING, "Failed to retrieve dependency issues due to " + e);
                 } finally {
                     listen = false;
                 }
@@ -128,11 +128,11 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
                         logger.log(Level.WARNING, "unfinished task is cancelled due to timeout", e);
                     } catch (ExecutionException ex) {
                         result.cancel(true);
-                        logger.log(Level.SEVERE, "ouch !" + ex.getCause());
+                        logger.log(Level.WARNING, "ouch !" + ex.getCause());
                     }
                 }
 
-                logger.info("PayloadProcessor process is finished for " + issue.getURL());
+                logger.log(Level.INFO, "PayloadProcessor process is finished for " + issue.getURL());
                 if(!singleExecutorService.isShutdown())
                     singleExecutorService.shutdown();
                 service.shutdown();
@@ -147,7 +147,7 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
     @Lock(LockType.READ)
     @Override
     public List<ProcessorData> process(String fixVersion, List<Issue> dependencyIssues, Stream stream) throws ProcessorException {
-        logger.info("PayloadProcessor process is started for " + fixVersion);
+        logger.log(Level.INFO, "PayloadProcessor process is started for " + fixVersion);
         try {
             List<ProcessorData> data = new ArrayList<>();
             if (!dependencyIssues.isEmpty()) {
@@ -167,11 +167,11 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
                         logger.log(Level.WARNING, "unfinished task is cancelled due to timeout", e);
                     } catch (ExecutionException ex) {
                         result.cancel(true);
-                        logger.log(Level.SEVERE, "ouch !" + ex.getCause());
+                        logger.log(Level.WARNING, "ouch !" + ex.getCause());
                     }
                 }
 
-                logger.info("PayloadProcessor process is finished for " + fixVersion);
+                logger.log(Level.FINE, "PayloadProcessor process is finished for " + fixVersion);
                 service.shutdown();
             }
             return data;
@@ -206,7 +206,7 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
         @Override
         public ProcessorData call() throws Exception {
             try {
-                logger.info("processing " + dependencyIssue.getURL());
+                logger.log(Level.FINE, "processing " + dependencyIssue.getURL());
                 Map<String, Object> data = new HashMap<>();
                 PayloadEvaluatorContext context;
                 if (trackerType.equals(TrackerType.BUGZILLA)) {
@@ -215,12 +215,12 @@ public class PayloadOverviewProcessor implements PayloadProcessor {
                     context = new PayloadEvaluatorContext(aphrodite, dependencyIssue, fixVersion, trackerType, stream);
                 }
                 for (PayloadEvaluator evaluator : evaluators) {
-                    logger.fine("issue " + dependencyIssue.getURL() + " is applying evaluator " + evaluator.name());
+                    logger.log(Level.FINE, "issue " + dependencyIssue.getURL() + " is applying evaluator " + evaluator.name());
                     evaluator.eval(context, data);
                 }
                 return new ProcessorData(data);
             } catch (Throwable th) {
-                logger.log(Level.SEVERE, "failed to read " + dependencyIssue.getURL(), th);
+                logger.log(Level.WARNING, "failed to read " + dependencyIssue.getURL(), th);
                 throw new Exception(th);
             }
         }

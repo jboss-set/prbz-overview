@@ -79,7 +79,7 @@ public class PullRequestOverviewProcessor implements PullRequestProcessor {
 
     @Override
     public List<ProcessorData> process(Repository repository, Stream stream) throws ProcessorException {
-        logger.info("PullRequestOverviewProcessor process is started for " + repository.getURL());
+        logger.log(Level.INFO, "PullRequestOverviewProcessor process is started for " + repository.getURL());
         try {
             if (singleExecutorService.isShutdown()) {
                 singleExecutorService = Executors.newSingleThreadExecutor();
@@ -96,7 +96,7 @@ public class PullRequestOverviewProcessor implements PullRequestProcessor {
                     listen = false;
                     future.cancel(true);
                     singleExecutorService.shutdown();
-                    logger.log(Level.SEVERE, "Failed to retrieve patches due to " + e);
+                    logger.log(Level.WARNING, "Failed to retrieve patches due to " + e);
                 } finally {
                     listen = false;
                 }
@@ -119,11 +119,11 @@ public class PullRequestOverviewProcessor implements PullRequestProcessor {
                         logger.log(Level.WARNING, "unfinished task is cancelled due to timeout", e);
                     } catch (ExecutionException ex) {
                         result.cancel(true);
-                        logger.log(Level.SEVERE, "ouch !" + ex.getCause());
+                        logger.log(Level.WARNING, "ouch !" + ex.getCause());
                     }
                 }
 
-                logger.info("PullRequestProcessor process is finished...");
+                logger.log(Level.INFO, "PullRequestProcessor process is finished for " + repository.getURL());
                 if (!singleExecutorService.isShutdown())
                     singleExecutorService.shutdown();
                 service.shutdown();
@@ -151,21 +151,19 @@ public class PullRequestOverviewProcessor implements PullRequestProcessor {
         @Override
         public ProcessorData call() throws Exception {
             try {
-                logger.info("processing " + pullRequest.getURL().toString());
+                logger.log(Level.FINE, "processing " + pullRequest.getURL().toString());
                 Set<Issue> issues = new HashSet<>(aphrodite.getIssuesAssociatedWith(pullRequest));
 
                 Set<PullRequest> relatedRequests = new HashSet<>(aphrodite.findPullRequestsRelatedTo(pullRequest));
                 Map<String, Object> data = new HashMap<>();
                 EvaluatorContext context = new EvaluatorContext(aphrodite, repository, pullRequest, issues, relatedRequests, stream);
                 for (Evaluator evaluator : evaluators) {
-                    logger.fine(
-                            "repository " + repository.getURL() + "applying evaluator " + evaluator.name() + " to "
-                                    + pullRequest.getId());
+                    logger.log(Level.FINE, "repository " + repository.getURL() + "applying evaluator " + evaluator.name() + " to " + pullRequest.getId());
                     evaluator.eval(context, data);
                 }
                 return new ProcessorData(data);
             } catch (Throwable th) {
-                logger.log(Level.SEVERE, "failed to read " + pullRequest.getURL(), th);
+                logger.log(Level.WARNING, "failed to read " + pullRequest.getURL(), th);
                 throw new Exception(th);
             }
         }
