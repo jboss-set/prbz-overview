@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -51,7 +52,7 @@ public class PayloadOverviewServlet extends HttpServlet {
 
     private static final long serialVersionUID = 8833071859201802046L;
 
-    public static Logger logger = Logger.getLogger(PayloadOverviewServlet.class.getCanonicalName());
+    private static Logger logger = Logger.getLogger(PayloadOverviewServlet.class.getCanonicalName());
 
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
@@ -79,34 +80,45 @@ public class PayloadOverviewServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String payloadName = request.getParameter("payloadName");
-        if (payloadName != null && (Aider.getBzPayloadStore().containsKey(payloadName) || Aider.getJiraPayloadStore().containsKey(payloadName))) {
-            // Put the data list in request and let Freemarker paint it.
-            String[] selectedStatus = request.getParameterValues("selectedStatus"); // from ftl
-            String[] missedFlags = request.getParameterValues("missedFlags"); // from ftl
-            TreeSet<String> payloadSet = new TreeSet<String>();
-            payloadSet.addAll(Aider.getBzPayloadStore().keySet());
-            payloadSet.addAll(Aider.getJiraPayloadStore().keySet());
-            payloadData = Aider.getPayloadData(payloadName);
-            if (payloadData == null || payloadData.isEmpty()) {
-                response.addHeader("Refresh", "5");
-                request.getRequestDispatcher("/error-wait.html").forward(request, response);
+        String streamName = request.getParameter("streamName");
+        Set<String> payloadSet = new TreeSet<>();
+        if (payloadName != null && streamName != null) {
+            if (Aider.getJiraPayloadStoresByStream().containsKey(streamName)) {
+                payloadSet = Aider.getJiraPayloadStoresByStream().get(streamName).keySet();
+            } else if (Aider.getBzPayloadStoresByStream().containsKey(streamName)) {
+                payloadSet = Aider.getBzPayloadStoresByStream().get(streamName).keySet();
             } else {
-                if(selectedStatus != null && selectedStatus.length > 0){
-                    payloadData = filterBySelectedStatus(payloadData, Arrays.asList(selectedStatus));
+                request.getRequestDispatcher("/error-wait.html").forward(request, response);
+            }
+
+            if (!payloadSet.isEmpty()) {
+                // Put the data list in request and let Freemarker paint it.
+                String[] selectedStatus = request.getParameterValues("selectedStatus"); // from ftl
+                String[] missedFlags = request.getParameterValues("missedFlags"); // from ftl
+                payloadData = Aider.getPayloadData(payloadName);
+                if (payloadData == null || payloadData.isEmpty()) {
+                    response.addHeader("Refresh", "5");
+                    request.getRequestDispatcher("/error-wait.html").forward(request, response);
+                } else {
+                    if (selectedStatus != null && selectedStatus.length > 0) {
+                        payloadData = filterBySelectedStatus(payloadData, Arrays.asList(selectedStatus));
+                    }
+                    if (missedFlags != null && missedFlags.length > 0) {
+                        payloadData = filterByMissedFlags(payloadData, Arrays.asList(missedFlags));
+                    }
+                    request.setAttribute("rows", payloadData);
+                    request.setAttribute("payloadName", payloadName);
+                    request.setAttribute("streamName", streamName);
+                    request.setAttribute("payloadSize", payloadData.size());
+                    request.setAttribute("payloadStatus", maxSeverity(payloadData));
+                    request.setAttribute("payloadSet", payloadSet);
+                    request.getRequestDispatcher("/payload.ftl").forward(request, response);
                 }
-                if(missedFlags != null && missedFlags.length > 0){
-                    payloadData = filterByMissedFlags(payloadData, Arrays.asList(missedFlags));
-                }
-                request.setAttribute("rows", payloadData);
-                request.setAttribute("payloadName", payloadName);
-                request.setAttribute("payloadSize", payloadData.size());
-                request.setAttribute("payloadStatus", maxSeverity(payloadData));
-                request.setAttribute("payloadSet", payloadSet);
-                request.getRequestDispatcher("/payload.ftl").forward(request, response);
+            } else {
+                request.getRequestDispatcher("/error-wait.html").forward(request, response);
             }
         } else {
-            logger.log(Level.WARNING, "payloadName " + payloadName + " is not specified in request parameter or is not defined in payload.properties");
-            request.getRequestDispatcher("/error-wait.html").forward(request, response);
+            logger.log(Level.WARNING, "streamName " + streamName + " or " + "payloadName " + payloadName + " is not specified in request");
         }
     }
 

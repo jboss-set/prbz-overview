@@ -23,7 +23,6 @@
 package org.jboss.set.overview.servlet;
 
 import java.io.IOException;
-import java.util.Set;
 import java.util.TreeSet;
 
 import javax.ejb.EJB;
@@ -39,30 +38,25 @@ import org.jboss.set.overview.ejb.Aider;
  * @author wangc
  *
  */
-@WebServlet(name = "DefaultPayloadViewServlet", loadOnStartup = 1, urlPatterns = { "/payloadview" })
-public class DefaultPayloadViewServlet extends HttpServlet {
+@WebServlet(name = "StreamPayloadViewServlet", loadOnStartup = 1, urlPatterns = { "/streampayloadview" })
+public class StreamPayloadViewServlet extends HttpServlet {
 
-    private static final long serialVersionUID = -6272165168062116652L;
+    private static final long serialVersionUID = 6161071130951666640L;
+
     @EJB
     private Aider aiderService;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        Set<String> payloadSet = new TreeSet<String>();
-        String streamName = request.getParameter("streamName");
-        if (Aider.getJiraPayloadStoresByStream().containsKey(streamName)) {
-            payloadSet = Aider.getJiraPayloadStoresByStream().get(streamName).keySet();
-        } else if (Aider.getBzPayloadStoresByStream().containsKey(streamName)) {
-            payloadSet = Aider.getBzPayloadStoresByStream().get(streamName).keySet();
-        }
-
-        if (payloadSet.isEmpty()) {
+        TreeSet<String> payloadSetByStream = new TreeSet<String>();
+        payloadSetByStream.addAll(Aider.getBzPayloadStoresByStream().keySet());
+        payloadSetByStream.addAll(Aider.getJiraPayloadStoresByStream().keySet());
+        if (payloadSetByStream.isEmpty()) {
             response.addHeader("Refresh", "5");
             request.getRequestDispatcher("/error-wait.html").forward(request, response);
         } else {
-            request.setAttribute("payloadSet", payloadSet);
-            request.setAttribute("streamName", streamName);
-            request.getRequestDispatcher("/payload_index.jsp").forward(request, response);
+            request.setAttribute("payloadSetByStream", payloadSetByStream);
+            request.getRequestDispatcher("/payload_stream_index.jsp").forward(request, response);
         }
     }
 

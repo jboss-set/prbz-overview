@@ -48,7 +48,7 @@ import org.jboss.set.overview.ejb.Aider;
 @WebServlet(name = "PullRequestOverviewServlet", loadOnStartup = 1, urlPatterns = { "/streamview/pullrequestoverview" })
 public class PullRequestOverviewServlet extends HttpServlet {
 
-    public static Logger logger = Logger.getLogger(PullRequestOverviewServlet.class.getCanonicalName());
+    private static Logger logger = Logger.getLogger(PullRequestOverviewServlet.class.getCanonicalName());
 
     private static final long serialVersionUID = -8119634403150269667L;
 

@@ -27,7 +27,7 @@
 		<version.checkstyle.plugin>2.11</version.checkstyle.plugin>
 		<version.jboss.spec.javaee.7.0>1.0.3.Final</version.jboss.spec.javaee.7.0>
 		<version.org.freemaker.freemarker>2.3.23</version.org.freemaker.freemarker>
-		<version.org.jboss.set.assistant>0.1.6.Final</version.org.jboss.set.assistant>
+		<version.org.jboss.set.assistant>0.1.7.Final</version.org.jboss.set.assistant>
 		<version.org.wildfly.checkstyle-config>1.0.4.Final</version.org.wildfly.checkstyle-config>
 		<version.org.wildfly.wildfly.build.config>8.0.0.Final</version.org.wildfly.wildfly.build.config>
 		<version.rpm.plugin>2.1.5</version.rpm.plugin>

@@ -37,10 +37,11 @@ public class Constants {
     public static final String FAILURE = "Failure";
 
     public static final String BUGZILLA_URL_PREFIX = "https://bugzilla.redhat.com/show_bug.cgi?id=";
-    public static final String EAP64XPAYLOAD_ALIAS_PREFIX = "eap";
-    public static final String EAP64XPAYLOAD_ALIAS_SUFFIX = "-payload";
+    public static final String EAP64ZPAYLOAD_ALIAS_PREFIX = "eap";
+    public static final String EAP64ZPAYLOAD_ALIAS_SUFFIX = "-payload";
 
-    public static final String EAP70XPAYLOAD_ALIAS_PREFIX = "7.0.";
-    public static final String EAP70XPAYLOAD_ALIAS_SUFFIX = ".GA";
+    public static final String EAP70ZPAYLOAD_ALIAS_PREFIX = "7.0.";
+    public static final String EAP71ZPAYLOAD_ALIAS_PREFIX = "7.1.";
+    public static final String EAP7PAYLOAD_ALIAS_SUFFIX = ".GA";
 
 }
