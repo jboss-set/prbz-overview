@@ -1,0 +1,54 @@
+.streams {
+     padding: 5px;
+     width: 280px;
+}
+
+tr.odd:nth-of-type(4n+1),
+tr.odd:nth-of-type(4n+1) > th,
+tr.odd:nth-of-type(4n+1) > td {
+    background-color: #f9f9f9;
+}
+
+tr.even,
+tr.even > th,
+tr.even > td  {
+    background-color: #efefef;
+}
+
+th .switch::before,
+.odd.has-data .switch::before {
+    content: "+";
+    font-size: 18px;
+    font-weight: bold;
+    line-height: 10px;
+    vertical-align: text-bottom;
+}
+
+th.open .switch::before,
+.odd.has-data.open .switch::before {
+    content: "\2212";
+}
+
+.even {
+    display: none;
+}
+
+.open.has-data + .even {
+    display: table-row;
+}
+
+.even .inner-div {
+    display: inline-block;
+    width: 48%;
+}
+
+.issues-table .first-column {
+    width: 120px;
+}
+
+.issues-table .second-column {
+    width: 90px;
+}
+.issues-table .third-column {
+    width: 60px;
+}
