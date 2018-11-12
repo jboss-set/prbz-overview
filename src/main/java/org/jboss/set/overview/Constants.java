@@ -42,6 +42,7 @@ public class Constants {
 
     public static final String EAP70ZPAYLOAD_ALIAS_PREFIX = "7.0.";
     public static final String EAP71ZPAYLOAD_ALIAS_PREFIX = "7.1.";
+    public static final String EAP72ZPAYLOAD_ALIAS_PREFIX = "7.2.";
     public static final String EAP7PAYLOAD_ALIAS_SUFFIX = ".GA";
 
 }

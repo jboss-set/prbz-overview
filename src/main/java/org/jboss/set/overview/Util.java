@@ -25,12 +25,15 @@ package org.jboss.set.overview;
 import static org.jboss.set.assistant.Constants.EAP64ZPAYLOADPATTERN;
 import static org.jboss.set.assistant.Constants.EAP70ZPAYLOADPATTERN;
 import static org.jboss.set.assistant.Constants.EAP71ZPAYLOADPATTERN;
+import static org.jboss.set.assistant.Constants.EAP72ZPAYLOADPATTERN;
 import static org.jboss.set.assistant.Constants.EAP64ZSTREAM;
 import static org.jboss.set.assistant.Constants.EAP70ZSTREAM;
 import static org.jboss.set.assistant.Constants.EAP71ZSTREAM;
+import static org.jboss.set.assistant.Constants.EAP72ZSTREAM;
 
 import static org.jboss.set.overview.Constants.EAP70ZPAYLOAD_ALIAS_PREFIX;
 import static org.jboss.set.overview.Constants.EAP71ZPAYLOAD_ALIAS_PREFIX;
+import static org.jboss.set.overview.Constants.EAP72ZPAYLOAD_ALIAS_PREFIX;
 import static org.jboss.set.overview.Constants.EAP7PAYLOAD_ALIAS_SUFFIX;
 
 import java.net.MalformedURLException;
@@ -61,6 +64,7 @@ public class Util {
     public static LinkedHashMap<String, LinkedHashMap<String, Issue>> bzPayloadStoresByStream = new LinkedHashMap<>();
     public static LinkedHashMap<String, List<Issue>> jiraPayloadStore_70Z = new LinkedHashMap<>();
     public static LinkedHashMap<String, List<Issue>> jiraPayloadStore_71Z = new LinkedHashMap<>();
+    public static LinkedHashMap<String, List<Issue>> jiraPayloadStore_72Z = new LinkedHashMap<>();
     public static LinkedHashMap<String, LinkedHashMap<String, List<Issue>>> jiraPayloadStoresByStream = new LinkedHashMap<>();
 
     // some default boundary in first time load.
@@ -78,6 +82,11 @@ public class Util {
     private static int FIRST_71X_PAYLOAD = 1;
     private static int DEVMODE_71X_PAYLOAD = 2;
     private static int LAST_71X_PAYLOAD = 5;
+
+    // 7.2.z stream jira payload, default range is from 7.2.1 to 7.2.5, development mode to 7.2.2
+    private static int FIRST_72X_PAYLOAD = 1;
+    private static int DEVMODE_72X_PAYLOAD = 2;
+    private static int LAST_72X_PAYLOAD = 5;
 
     private static final boolean devProfile = System.getProperty("prbz-dev") != null;
 
@@ -146,7 +155,7 @@ public class Util {
             // OK, ignored with null as return value. Nonexistent alias, just don't add to return result.
             return null;
         } catch (Exception e) {
-            logger.log(Level.WARNING, "Error to find Bugzilla for payload " + i + "due to " + e.getMessage(), e);
+            logger.log(Level.WARNING, "Error to find Bugzilla for payload " + i + " due to " + e.getMessage(), e);
             return null;
         }
     }
@@ -154,52 +163,58 @@ public class Util {
     public static void findAllJiraPayloads(Aphrodite aphrodite, boolean first) {
         findJiraPayloads(aphrodite, first, EAP70ZSTREAM, jiraPayloadStore_70Z, FIRST_70X_PAYLOAD, LAST_70X_PAYLOAD, DEVMODE_70X_PAYLOAD, EAP70ZPAYLOAD_ALIAS_PREFIX, EAP70ZPAYLOADPATTERN);
         findJiraPayloads(aphrodite, first, EAP71ZSTREAM, jiraPayloadStore_71Z, FIRST_71X_PAYLOAD, LAST_71X_PAYLOAD, DEVMODE_71X_PAYLOAD, EAP71ZPAYLOAD_ALIAS_PREFIX, EAP71ZPAYLOADPATTERN);
+        findJiraPayloads(aphrodite, first, EAP72ZSTREAM, jiraPayloadStore_72Z, FIRST_72X_PAYLOAD, LAST_72X_PAYLOAD, DEVMODE_72X_PAYLOAD, EAP72ZPAYLOAD_ALIAS_PREFIX, EAP72ZPAYLOADPATTERN);
     }
 
     private static void findJiraPayloads(Aphrodite aphrodite, boolean first, String eapStream, LinkedHashMap<String, List<Issue>> jiraPayloadStore, int firstPayload, int lastPayload, int devModePayload, String payloadPrefix, Pattern payloadPattern) {
-        if (first) {
-            int max = devProfile ? devModePayload : lastPayload;
-            for (int i = firstPayload; i <= max; i++) {
-                // search from firstPayload to lastPayload, add to list if result is not empty.
-                String fixVersion = payloadPrefix + i + EAP7PAYLOAD_ALIAS_SUFFIX;
-                List<Issue> issues = testJiraPayloadExistence(aphrodite, fixVersion);
-                if (!issues.isEmpty()) {
-                    jiraPayloadStore.put(fixVersion, issues);
-                    logger.log(Level.INFO, "Found Jira Payload : " + fixVersion);
-
-                }
-            }
-        } else {
-            String lastKey = (String) jiraPayloadStore.keySet().toArray()[jiraPayloadStore.size() - 1];
-            Matcher matcher = payloadPattern.matcher(lastKey);
-            if (matcher.find()) {
-                int index = Integer.parseInt(matcher.group(1));
-                for (int i = firstPayload; i <= index; i++) {
-                    // update from 7.0.1.GA to index, add to list if result is not empty.
+        try {
+            if (first) {
+                int max = devProfile ? devModePayload : lastPayload;
+                for (int i = firstPayload; i <= max; i++) {
+                    // search from firstPayload to lastPayload, add to list if result is not empty.
                     String fixVersion = payloadPrefix + i + EAP7PAYLOAD_ALIAS_SUFFIX;
-                    if (aphrodite.isCPReleased(fixVersion)) {
-                        logger.log(Level.INFO, "Skip released Jira Payload : " + fixVersion);
-                    } else {
-                        List<Issue> issues = testJiraPayloadExistence(aphrodite, fixVersion);
-                        if (!issues.isEmpty()) {
-                            jiraPayloadStore.put(fixVersion, issues);
-                            logger.log(Level.INFO, "Reload Jira Payload : " + fixVersion);
-                        }
+                    List<Issue> issues = testJiraPayloadExistence(aphrodite, fixVersion);
+                    if (!issues.isEmpty()) {
+                        jiraPayloadStore.put(fixVersion, issues);
+                        logger.log(Level.INFO, "Found Jira Payload : " + fixVersion);
+
                     }
                 }
+            } else {
+                String lastKey = (String) jiraPayloadStore.keySet().toArray()[jiraPayloadStore.size() - 1];
+                Matcher matcher = payloadPattern.matcher(lastKey);
+                if (matcher.find()) {
+                    int index = Integer.parseInt(matcher.group(1));
+                    for (int i = firstPayload; i <= index; i++) {
+                        // update from 7.0.1.GA to index, add to list if result is not empty.
+                        String fixVersion = payloadPrefix + i + EAP7PAYLOAD_ALIAS_SUFFIX;
+                        if (aphrodite.isCPReleased(fixVersion)) {
+                            logger.log(Level.INFO, "Skip released Jira Payload : " + fixVersion);
+                        } else {
+                            List<Issue> issues = testJiraPayloadExistence(aphrodite, fixVersion);
+                            if (!issues.isEmpty()) {
+                                jiraPayloadStore.put(fixVersion, issues);
+                                logger.log(Level.INFO, "Reload Jira Payload : " + fixVersion);
+                            }
+                        }
+                    }
 
-                index++;
-                // Try to query a new payload on index++
-                String fixVersion = payloadPrefix + index + EAP7PAYLOAD_ALIAS_SUFFIX;
-                List<Issue> issues = testJiraPayloadExistence(aphrodite, fixVersion);
-                if (!issues.isEmpty()) {
-                    jiraPayloadStore.put(fixVersion, issues);
-                    logger.log(Level.INFO, "Found new Jira Payloads : " + fixVersion);
+                    index++;
+                    // Try to query a new payload on index++
+                    String fixVersion = payloadPrefix + index + EAP7PAYLOAD_ALIAS_SUFFIX;
+                    List<Issue> issues = testJiraPayloadExistence(aphrodite, fixVersion);
+                    if (!issues.isEmpty()) {
+                        jiraPayloadStore.put(fixVersion, issues);
+                        logger.log(Level.INFO, "Found new Jira Payloads : " + fixVersion);
+                    }
                 }
             }
+        } catch (Exception e) {
+            logger.log(Level.WARNING, " Error to find jira payload ", e);
+        } finally {
+            jiraPayloadStoresByStream.put(eapStream, jiraPayloadStore);
+            logger.log(Level.INFO, "Found Jira Payloads : " + jiraPayloadStore.keySet());
         }
-        jiraPayloadStoresByStream.put(eapStream, jiraPayloadStore);
-        logger.log(Level.INFO, "Found Jira Payloads : " + jiraPayloadStore.keySet());
     }
 
     private static List<Issue> testJiraPayloadExistence(Aphrodite aphrodite, String fixVersion) {
