@@ -25,7 +25,6 @@ package org.jboss.set.overview;
 public class Constants {
     public static final String WILDFLY_WILDFLY = "wildfly-wildfly";
     public static final String WILDFLY_WILDFLY_CORE = "wildfly-wildfly-core";
-    public static final String JBOSSAS_JBOSS_EAP7 = "jbossas-jboss-eap7";
     public static final String JBOSSAS_WILDFLY_CORE_EAP = "jbossas-wildfly-core-eap";
     public static final String JBOSSAS_JBOSS_EAP = "jbossas-jboss-eap";
 
