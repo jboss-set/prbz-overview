@@ -100,7 +100,7 @@ public class Util {
     }
 
     public static void findAllBugzillaPayloads(Aphrodite aphrodite, boolean first) {
-        if (first) {
+        if (first | bzPayloadStore.size() == 0) {
             int max = devProfile ? DEVMODE_64X_PAYLOAD : LAST_64X_PAYLOAD;
             for (int i = FIRST_64X_PAYLOAD; i <= max; i++) {
                 // first time run, search from FIRST_64X_PAYLOAD to LAST_64X_PAYLOAD
@@ -167,7 +167,7 @@ public class Util {
 
     private static void findJiraPayloads(Aphrodite aphrodite, boolean first, String eapStream, LinkedHashMap<String, List<Issue>> jiraPayloadStore, int firstPayload, int lastPayload, int devModePayload, String payloadPrefix, Pattern payloadPattern) {
         try {
-            if (first) {
+            if (first | jiraPayloadStore.size() == 0) {
                 int max = devProfile ? devModePayload : lastPayload;
                 for (int i = firstPayload; i <= max; i++) {
                     // search from firstPayload to lastPayload, add to list if result is not empty.
