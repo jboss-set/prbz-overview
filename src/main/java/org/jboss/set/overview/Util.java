@@ -217,7 +217,8 @@ public class Util {
     }
 
     private static List<Issue> testJiraPayloadExistence(Aphrodite aphrodite, String fixVersion) {
-        int maxResults = devProfile ? 10 : 200;
+        int maxResults = devProfile ? 5 : 10;
+        // A big maxResults value can cause SocketTimeoutException in JiraIssueTracker.paginateResults method
         SearchCriteria sc = new SearchCriteria.Builder()
                 .setRelease(new Release(fixVersion.trim()))
                 .setProduct("JBEAP")
