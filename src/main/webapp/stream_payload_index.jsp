@@ -8,7 +8,7 @@
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-		<title>EAP Cumulative Patch Releases Stream Repositories List</title>
+		<title>EAP Cumulative Patch Releases Payload By Streams</title>
 
 		<!-- Bootstrap -->
 		<link
@@ -31,13 +31,13 @@
 	<body>
 		<div class="container">
 			<div class="row">
-			  <div class="col-md-12"><h1>EAP Cumulative Patch Releases Stream Repositories List</h1></div>
+			  <div class="col-md-12"><h1>EAP Cumulative Patch Releases Payload By Streams</h1></div>
 			</div>
-			<div class="stream">
-				<c:forEach var="i" items="${streamSet}">
+			<div class="payload">
+				<c:forEach var="i" items="${payloadSetByStream}">
 					<h4>
 						<li>
-							<a href="streamview/overview?streamName=${i}" id=${i}> <c:out value="${i}" /></a>
+							<a href="streampayload/${i}" id=${i}> <c:out value="${i}" /></a>
 						</li>
 					</h4>
 				</c:forEach>

@@ -20,7 +20,7 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.jboss.set.overview.servlet;
+package org.jboss.set.overview;
 
 import static org.jboss.set.overview.Util.filterComponent;
 
@@ -28,63 +28,80 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TreeMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import javax.ejb.EJB;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.core.Context;
 
+import org.jboss.set.aphrodite.domain.Stream;
+import org.jboss.set.aphrodite.domain.StreamComponent;
 import org.jboss.set.assistant.data.ProcessorData;
 import org.jboss.set.overview.ejb.Aider;
 
-@WebServlet(name = "PullRequestOverviewServlet", loadOnStartup = 1, urlPatterns = { "/streamview/pullrequestoverview" })
-public class PullRequestOverviewServlet extends HttpServlet {
+/**
+ * @author wangc
+ *
+ */
+@Path("/streampullrequest")
+public class StreamPullRequest {
 
-    private static Logger logger = Logger.getLogger(PullRequestOverviewServlet.class.getCanonicalName());
-
-    private static final long serialVersionUID = -8119634403150269667L;
-
-    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private static Logger logger = Logger.getLogger(StreamPullRequest.class.getCanonicalName());
 
     private List<ProcessorData> pullRequestData = new ArrayList<>();
 
-    @EJB
-    private Aider aiderService;
-
-    public PullRequestOverviewServlet() {
-        super();
+    @GET
+    public void get(@Context ServletContext context, @Context HttpServletRequest request, @Context HttpServletResponse response) throws IOException, ServletException {
+        List<Stream> streams = Aider.getAllStreams();
+        if (streams == null) {
+            context.getRequestDispatcher("/error-wait.html").forward(request, response);
+        } else {
+            TreeSet<String> streamSet = new TreeSet<String>(
+                    Aider.getAllStreams().stream().map(e -> e.getName()).collect((Collectors.toList())));
+            request.setAttribute("streamSet", streamSet);
+            context.getRequestDispatcher("/stream_pullrequest_index.jsp").forward(request, response);
+        }
     }
 
-    @Override
-    public void init() {
-        executorService.submit(new Runnable() {
-            @Override
-            public void run() {
-                logger.log(Level.INFO, "pull request data initialisation in Servlet init()");
-                aiderService.initAllPullRequestData();
+    @GET
+    @Path("/{streamName}")
+    public void geStream(@Context ServletContext context, @Context HttpServletRequest request, @Context HttpServletResponse response, @PathParam("streamName") String streamName) throws IOException, ServletException {
+        List<Stream> streams = Aider.getAllStreams();
+        if (streams == null) {
+            request.getRequestDispatcher("/error-wait.html").forward(request, response);
+        } else {
+            Optional<Stream> stream = Aider.getCurrentStream(streamName);
+            if (stream.isPresent()) {
+                List<StreamComponent> filteredstreams = stream.get().getAllComponents().stream().filter(e -> filterComponent(e)).collect(Collectors.toList());
+                request.setAttribute("streamName", streamName);
+                request.setAttribute("components", filteredstreams);
+                context.getRequestDispatcher("/component.jsp").forward(request, response);
+            } else {
+                logger.log(Level.WARNING, "stream is an invalid");
+                context.getRequestDispatcher("/error.html").forward(request, response);
             }
-        });
-        executorService.shutdown();
+        }
     }
 
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+    @GET
+    @Path("/{streamName}/component/{componentName}")
+    public void getPullRequest(@Context ServletContext context, @Context HttpServletRequest request, @Context HttpServletResponse response, @PathParam("streamName") String streamName, @PathParam("componentName") String componentName)
             throws ServletException, IOException {
-        String streamName = request.getParameter("streamName");
-        String componentName = request.getParameter("componentName");
 
         if (streamName != null && componentName != null) {
             pullRequestData = Aider.getPullRequestData(streamName, componentName);
             if (pullRequestData == null || pullRequestData.isEmpty()) {
-                response.addHeader("Refresh", "5");
-                request.getRequestDispatcher("/error-wait.html").forward(request, response);
+                context.getRequestDispatcher("/error-wait.html").forward(request, response);
             } else {
                 Map<String, List<String>> streamMap = new TreeMap<>(
                         Aider.getAllStreams().stream().collect(
@@ -98,16 +115,12 @@ public class PullRequestOverviewServlet extends HttpServlet {
                 request.setAttribute("componentName", componentName);
                 request.setAttribute("pullRequestSize", pullRequestData.size());
                 request.setAttribute("streamMap", streamMap);
-                request.getRequestDispatcher("/pullrequest.ftl").forward(request, response);
+                context.getRequestDispatcher("/pullrequest.ftl").forward(request, response);
             }
         } else {
             logger.log(Level.WARNING, "streamName " + streamName + " and " + "componentName " + componentName
                     + " must be specified in request parameter");
         }
 
-    }
-
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // do nothing
     }
 }

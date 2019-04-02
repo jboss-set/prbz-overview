@@ -6,10 +6,9 @@
 	id="WebApp_ID" version="2.5">
 
 	<display-name>FreeMarker_Overview</display-name>
+
 	<welcome-file-list>
 		<welcome-file>index.html</welcome-file>
-		<welcome-file>index.htm</welcome-file>
-		<welcome-file>index.jsp</welcome-file>
 	</welcome-file-list>
 
 	<servlet>
@@ -53,6 +52,11 @@
 	<servlet-mapping>
 		<servlet-name>freemarker</servlet-name>
 		<url-pattern>*.ftl</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>javax.ws.rs.core.Application</servlet-name>
+		<url-pattern>/rest/*</url-pattern>
 	</servlet-mapping>
 
 	<!-- Prevent the visiting of MVC Views from outside the servlet container. 

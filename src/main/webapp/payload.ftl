@@ -18,18 +18,18 @@
 
   </head>
   <body>
-    <script type="text/javascript" src="../js/jquery.min.js"></script>
-    <link href="../css/bootstrap.min.css" rel="stylesheet" type="text/css" />
-    <script type="text/javascript" src="../js/bootstrap.min.js"></script>
-    <link href="../css/bootstrap-multiselect.css" rel="stylesheet" type="text/css" />
-    <script src="../js/bootstrap-multiselect.js" type="text/javascript"></script>
-    <link href="../css/prbz.css" rel="stylesheet" type="text/css" />
-    <script src="../js/prbz.js"></script>
+    <script type="text/javascript" src="../../../../js/jquery.min.js"></script>
+    <link href="../../../../css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="../../../../js/bootstrap.min.js"></script>
+    <link href="../../../../css/bootstrap-multiselect.css" rel="stylesheet" type="text/css" />
+    <script src="../../../../js/bootstrap-multiselect.js" type="text/javascript"></script>
+    <link href="../../../../css/prbz.css" rel="stylesheet" type="text/css" />
+    <script src="../../../../js/prbz.js"></script>
 
     <ul class="nav nav-pills" style="width: 80%; margin: 6px auto">
         <li style="font-size: 20px"><a href="/prbz-overview/">Home</a></li>
         <#list payloadSet as payload>
-            <li<#if payload == Request.payloadName> class="active"</#if>><a href="/prbz-overview/payloadview/overview?streamName=${streamName}&payloadName=${payload}">${payload}</a></li>
+            <li<#if payload == Request.payloadName> class="active"</#if>><a href="/prbz-overview/rest/streampayload/${streamName}/payload/${payload}">${payload}</a></li>
         </#list>
     </ul>
 
@@ -58,28 +58,28 @@
 			${Request.payloadSize} issues ${summary} in payload in overall status
 			<#if Request.payloadStatus?has_content>
 				<#switch Request.payloadStatus>
-					<#case "BLOCKER"><img src="../images/red-blocker.png" alt="red-blocker" title="blocker"><#break>
-					<#case "CRITICAL"><img src="../images/orange-critical.png" alt="orange-critical" title="critical"><#break>
-					<#case "MAJOR"><img src="../images/yellow-major.png" alt="yellow-major" title="major"><#break>
-					<#case "MINOR"><img src="../images/blue-minor.png" alt="blue-minor" title="minor"><#break>
-					<#case "TRIVIAL"><img src="../images/gray-trivial.png" alt="gray-trivial" title="trivial"><#break>
+					<#case "BLOCKER"><img src="../../../../images/red-blocker.png" alt="red-blocker" title="blocker"><#break>
+					<#case "CRITICAL"><img src="../../../../images/orange-critical.png" alt="orange-critical" title="critical"><#break>
+					<#case "MAJOR"><img src="../../../../images/yellow-major.png" alt="yellow-major" title="major"><#break>
+					<#case "MINOR"><img src="../../../../images/blue-minor.png" alt="blue-minor" title="minor"><#break>
+					<#case "TRIVIAL"><img src="../../../../images/gray-trivial.png" alt="gray-trivial" title="trivial"><#break>
 				</#switch>
 			<#else>
-				<img src="../images/green-good.png" alt="good green light" title="good">
+				<img src="../../../../images/green-good.png" alt="good green light" title="good">
 			</#if>
 		  </h4>
 		  <ul>
-				<li><img src="../images/red-blocker.png" alt="red-blocker" title="blocker"> Red status with blocker issue(s), an immediate call to triage.</li>
-				<li><img src="../images/orange-critical.png" alt="orange-critical" title="critical"> Orange status with critical issue(s), attention is needed until progress can no longer be made.</li>
-				<li><img src="../images/yellow-major.png" alt="yellow-major" title="major"> Yellow status with major issue(s), a pending condition to triage.</li>
-				<li><img src="../images/blue-minor.png" alt="blue-minor" title="minor"> Blue status with minor issue(s), attention is needed, forward progress can be made.</li>
-				<li><img src="../images/gray-trivial.png" alt="gray-trivial" title="trivial"> gray status with trivial issue(s), process is moving forward as planned with trivial obstacle.</li>
-				<li><img src="../images/green-good.png" alt="good green light" title="good"> Green status without notable issue(s), process is moving forward as planned with no visible obstacle.</li>
+				<li><img src="../../../../images/red-blocker.png" alt="red-blocker" title="blocker"> Red status with blocker issue(s), an immediate call to triage.</li>
+				<li><img src="../../../../images/orange-critical.png" alt="orange-critical" title="critical"> Orange status with critical issue(s), attention is needed until progress can no longer be made.</li>
+				<li><img src="../../../../images/yellow-major.png" alt="yellow-major" title="major"> Yellow status with major issue(s), a pending condition to triage.</li>
+				<li><img src="../../../../images/blue-minor.png" alt="blue-minor" title="minor"> Blue status with minor issue(s), attention is needed, forward progress can be made.</li>
+				<li><img src="../../../../images/gray-trivial.png" alt="gray-trivial" title="trivial"> gray status with trivial issue(s), process is moving forward as planned with trivial obstacle.</li>
+				<li><img src="../../../../images/green-good.png" alt="good green light" title="good"> Green status without notable issue(s), process is moving forward as planned with no visible obstacle.</li>
 		  </ul>
 
-		  <form action="/prbz-overview/payloadview/overview">
-			  <input type="hidden" name="payloadName" value=${Request.payloadName}>
+		  <form action="/prbz-overview/rest/streampayload/${Request.streamName}/payload/${Request.payloadName}">
 			  <input type="hidden" name="streamName" value=${Request.streamName}>
+			  <input type="hidden" name="payloadName" value=${Request.payloadName}>
 			  <select id="lstStatus" name="selectedStatus" multiple="multiple">
 				  <option value="RED">RED</option>
 				  <option value="ORANGE">ORANGE</option>
@@ -130,14 +130,14 @@
 								<td>
 									<#if data.payloadDependency.maxSeverity?has_content>
 										<#switch data.payloadDependency.maxSeverity>
-											<#case "BLOCKER"><img src="../images/red-blocker.png" alt="red-blocker" title="blocker"><#break>
-											<#case "CRITICAL"><img src="../images/orange-critical.png" alt="orange-critical" title="critical"><#break>
-											<#case "MAJOR"><img src="../images/yellow-major.png" alt="yellow-major" title="major"><#break>
-											<#case "MINOR"><img src="../images/blue-minor.png" alt="blue-minor" title="minor"><#break>
-											<#case "TRIVIAL"><img src="../images/gray-trivial.png" alt="gray-trivial" title="trivial"><#break>
+											<#case "BLOCKER"><img src="../../../../images/red-blocker.png" alt="red-blocker" title="blocker"><#break>
+											<#case "CRITICAL"><img src="../../../../images/orange-critical.png" alt="orange-critical" title="critical"><#break>
+											<#case "MAJOR"><img src="../../../../images/yellow-major.png" alt="yellow-major" title="major"><#break>
+											<#case "MINOR"><img src="../../../../images/blue-minor.png" alt="blue-minor" title="minor"><#break>
+											<#case "TRIVIAL"><img src="../../../../images/gray-trivial.png" alt="gray-trivial" title="trivial"><#break>
 										</#switch>
 									<#else>
-										<img src="../images/green-good.png" alt="good green light" title="good">
+										<img src="../../../../images/green-good.png" alt="good green light" title="good">
 									</#if>
                                     <a href="${data.payloadDependency.link}" title="${data.payloadDependency.summary}">#${data.payloadDependency.label}</a>
                                 </td>
@@ -166,11 +166,11 @@
                                             <#items as violation>
                                                 <li>
                                                     <#switch violation.level>
-                                                        <#case "BLOCKER"><img src="../images/red-blocker.png" alt="red-blocker" title="blocker"><#break>
-                                                        <#case "CRITICAL"><img src="../images/orange-critical.png" alt="orange-critical" title="critical"><#break>
-                                                        <#case "MAJOR"><img src="../images/yellow-major.png" alt="yellow-major" title="major"><#break>
-                                                        <#case "MINOR"><img src="../images/blue-minor.png" alt="blue-minor" title="minor"><#break>
-                                                        <#case "TRIVIAL"><img src="../images/gray-trivial.png" alt="gray-trivial" title="trivial"><#break>
+                                                        <#case "BLOCKER"><img src="../../../../images/red-blocker.png" alt="red-blocker" title="blocker"><#break>
+                                                        <#case "CRITICAL"><img src="../../../../images/orange-critical.png" alt="orange-critical" title="critical"><#break>
+                                                        <#case "MAJOR"><img src="../../../../images/yellow-major.png" alt="yellow-major" title="major"><#break>
+                                                        <#case "MINOR"><img src="../../../../images/blue-minor.png" alt="blue-minor" title="minor"><#break>
+                                                        <#case "TRIVIAL"><img src="../../../../images/gray-trivial.png" alt="gray-trivial" title="trivial"><#break>
                                                     </#switch>
                                                     ${violation.level} Violation ${violation.checkName} : ${violation.message}
                                                 </li>

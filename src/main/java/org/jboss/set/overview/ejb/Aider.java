@@ -29,6 +29,7 @@ import static org.jboss.set.overview.Util.findAllJiraPayloads;
 import static org.jboss.set.assistant.Constants.EAP64ZSTREAM;
 import static org.jboss.set.assistant.Constants.EAP70ZSTREAM;
 import static org.jboss.set.assistant.Constants.EAP71ZSTREAM;
+import static org.jboss.set.assistant.Constants.EAP72ZSTREAM;
 
 import java.net.URI;
 import java.net.URL;
@@ -39,6 +40,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ServiceLoader;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -46,8 +49,8 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.Schedule;
+import javax.ejb.Singleton;
 import javax.ejb.Startup;
-import javax.ejb.Stateless;
 
 import org.jboss.set.aphrodite.Aphrodite;
 import org.jboss.set.aphrodite.domain.Issue;
@@ -70,14 +73,16 @@ import org.jboss.set.overview.Util;
  * @author wangc
  *
  */
-@Stateless
+@Singleton
 @Startup
 public class Aider {
     private static Logger logger = Logger.getLogger(Aider.class.getCanonicalName());
     private static final String WILDFLY_STREAM = "wildfly"; // ignored upstream in streams view
 
-    private static Aphrodite aphrodite;
-    private static List<Stream> allStreams = new ArrayList<>();
+    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+    public static Aphrodite aphrodite;
+    public static List<Stream> allStreams = new ArrayList<>();
     private static Map<String, List<ProcessorData>> pullRequestData = new HashMap<>();
     private static Map<String, List<ProcessorData>> payloadData = new HashMap<>();
     private static Map<String, Map<String, List<ProcessorData>>> payloadsByStreams = new HashMap<>();
@@ -91,15 +96,30 @@ public class Aider {
 
     @PostConstruct
     public void init() {
+        // Perform action during application's startup
         try {
             aphrodite = AssistantClient.getAphrodite();
 
-            findAllJiraPayloads(aphrodite, true);
-            findAllBugzillaPayloads(aphrodite, true);
+            executorService.submit(new Runnable() {
+                @Override
+                public void run() {
+                    logger.log(Level.INFO, "New initialisation in Aider init()");
 
-            allStreams = aphrodite.getAllStreams().stream().filter(e -> !e.getName().equals(WILDFLY_STREAM)).collect(Collectors.toList());
+                    findAllJiraPayloads(Aider.aphrodite, true);
+                    findAllBugzillaPayloads(Aider.aphrodite, true);
 
-            initProcessors();
+                    allStreams = aphrodite.getAllStreams().stream().filter(e -> !e.getName().equals(Aider.WILDFLY_STREAM)).collect(Collectors.toList());
+
+                    initProcessors();
+
+                    initAllPayloadData();
+
+                    initAllPullRequestData();
+                }
+            });
+
+            executorService.shutdown();
+
         } catch (AphroditeException e) {
             throw new IllegalStateException("Failed to get aphrodite instance", e);
         }
@@ -132,11 +152,12 @@ public class Aider {
         logger.info("payload data initialization is started.");
         generatePayloadDataForJira(EAP70ZSTREAM, Util.jiraPayloadStore_70Z, true);
         generatePayloadDataForJira(EAP71ZSTREAM, Util.jiraPayloadStore_71Z, true);
+        generatePayloadDataForJira(EAP72ZSTREAM, Util.jiraPayloadStore_72Z, true);
         generatePayloadDataForBz(EAP64ZSTREAM, Util.bzPayloadStore, true);
         logger.info("payload data initialization is finished.");
     }
 
-    private void initProcessors() {
+    public void initProcessors() {
         payloadProcessors = ServiceLoader.load(PayloadProcessor.class);
         for (PayloadProcessor processor : payloadProcessors) {
             logger.info("init payload processor: " + processor.getClass().getName());
@@ -251,7 +272,7 @@ public class Aider {
         });
     }
 
-    @Schedule(minute = "*/30", hour = "*")
+    @Schedule(hour = "0,2,4,6,8,10,12,14,16,18,20,22")
     public void updatePullRequestData() {
         if (devProfile) return;
         logger.info("schedule pull request data update is started ...");
@@ -265,7 +286,7 @@ public class Aider {
         }
     }
 
-    @Schedule(minute = "*/30", hour = "*")
+    @Schedule(hour = "1,3,5,7,9,11,13,15,17,19,21,23")
     public void updatePayloadData() {
         if (devProfile) return;
         logger.info("schedule payload data update is started ...");
@@ -277,7 +298,7 @@ public class Aider {
 
     }
 
-    public Optional<Stream> getCurrentStream(String streamName) {
+    public static Optional<Stream> getCurrentStream(String streamName) {
         return allStreams.stream().filter(e -> e.getName().equalsIgnoreCase(streamName)).findFirst();
     }
 
@@ -293,7 +314,7 @@ public class Aider {
         return Util.jiraPayloadStoresByStream;
     }
 
-    public Map<RepositoryType, RateLimit> getRateLimits() {
+    public static Map<RepositoryType, RateLimit> getRateLimits() {
         try {
             return aphrodite.getRateLimits();
         } catch (NotFoundException e) {

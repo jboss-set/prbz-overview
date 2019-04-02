@@ -37,7 +37,7 @@
 				<c:forEach var="i" items="${components}">
 					<h4>
 						<li>
-							<a href="pullrequestoverview?streamName=${streamName}&componentName=${i.name}" id=${i}> <c:out value="${i.name}" /></a>
+							<a href="${streamName}/component/${i.name}" id=${i}> <c:out value="${i.name}" /></a>
 						</li>
 					</h4>
 				</c:forEach>
