@@ -62,33 +62,39 @@ public class StreamPullRequest {
 
     @GET
     public void get(@Context ServletContext context, @Context HttpServletRequest request, @Context HttpServletResponse response) throws IOException, ServletException {
+        CustomRequest customRequest = new CustomRequest(request);
+        CustomResponse customResponse = new CustomResponse(response);
+
         List<Stream> streams = Aider.getAllStreams();
         if (streams == null) {
-            context.getRequestDispatcher("/error-wait.html").forward(request, response);
+            context.getRequestDispatcher("/error-wait.html").forward(customRequest, customResponse);
         } else {
             TreeSet<String> streamSet = new TreeSet<String>(
                     Aider.getAllStreams().stream().map(e -> e.getName()).collect((Collectors.toList())));
-            request.setAttribute("streamSet", streamSet);
-            context.getRequestDispatcher("/stream_pullrequest_index.jsp").forward(request, response);
+            customRequest.setAttribute("streamSet", streamSet);
+            context.getRequestDispatcher("/stream_pullrequest_index.jsp").forward(customRequest, customResponse);
         }
     }
 
     @GET
     @Path("/{streamName}")
     public void geStream(@Context ServletContext context, @Context HttpServletRequest request, @Context HttpServletResponse response, @PathParam("streamName") String streamName) throws IOException, ServletException {
+        CustomRequest customRequest = new CustomRequest(request);
+        CustomResponse customResponse = new CustomResponse(response);
+
         List<Stream> streams = Aider.getAllStreams();
         if (streams == null) {
-            request.getRequestDispatcher("/error-wait.html").forward(request, response);
+            customRequest.getRequestDispatcher("/error-wait.html").forward(customRequest, customResponse);
         } else {
             Optional<Stream> stream = Aider.getCurrentStream(streamName);
             if (stream.isPresent()) {
                 List<StreamComponent> filteredstreams = stream.get().getAllComponents().stream().filter(e -> filterComponent(e)).collect(Collectors.toList());
-                request.setAttribute("streamName", streamName);
-                request.setAttribute("components", filteredstreams);
-                context.getRequestDispatcher("/component.jsp").forward(request, response);
+                customRequest.setAttribute("streamName", streamName);
+                customRequest.setAttribute("components", filteredstreams);
+                context.getRequestDispatcher("/component.jsp").forward(customRequest, customResponse);
             } else {
                 logger.log(Level.WARNING, "stream is an invalid");
-                context.getRequestDispatcher("/error.html").forward(request, response);
+                context.getRequestDispatcher("/error.html").forward(customRequest, customResponse);
             }
         }
     }
@@ -97,11 +103,13 @@ public class StreamPullRequest {
     @Path("/{streamName}/component/{componentName}")
     public void getPullRequest(@Context ServletContext context, @Context HttpServletRequest request, @Context HttpServletResponse response, @PathParam("streamName") String streamName, @PathParam("componentName") String componentName)
             throws ServletException, IOException {
+        CustomRequest customRequest = new CustomRequest(request);
+        CustomResponse customResponse = new CustomResponse(response);
 
         if (streamName != null && componentName != null) {
             pullRequestData = Aider.getPullRequestData(streamName, componentName);
             if (pullRequestData == null || pullRequestData.isEmpty()) {
-                context.getRequestDispatcher("/error-wait.html").forward(request, response);
+                context.getRequestDispatcher("/error-wait.html").forward(customRequest, customResponse);
             } else {
                 Map<String, List<String>> streamMap = new TreeMap<>(
                         Aider.getAllStreams().stream().collect(
@@ -110,12 +118,12 @@ public class StreamPullRequest {
                                             .filter(f -> filterComponent(f)).map(g -> g.getName())
                                             .collect(Collectors.toList()))
                                 ));
-                request.setAttribute("rows", pullRequestData);
-                request.setAttribute("streamName", streamName);
-                request.setAttribute("componentName", componentName);
-                request.setAttribute("pullRequestSize", pullRequestData.size());
-                request.setAttribute("streamMap", streamMap);
-                context.getRequestDispatcher("/pullrequest.ftl").forward(request, response);
+                customRequest.setAttribute("rows", pullRequestData);
+                customRequest.setAttribute("streamName", streamName);
+                customRequest.setAttribute("componentName", componentName);
+                customRequest.setAttribute("pullRequestSize", pullRequestData.size());
+                customRequest.setAttribute("streamMap", streamMap);
+                context.getRequestDispatcher("/pullrequest.ftl").forward(customRequest, customResponse);
             }
         } else {
             logger.log(Level.WARNING, "streamName " + streamName + " and " + "componentName " + componentName

@@ -60,14 +60,18 @@ public class StreamPayload {
     @GET
     public void get(@Context ServletContext context, @Context HttpServletRequest request, @Context HttpServletResponse response)
             throws ServletException, IOException {
+        CustomRequest customRequest = new CustomRequest(request);
+        CustomResponse customResponse = new CustomResponse(response);
+
         TreeSet<String> payloadSetByStream = new TreeSet<String>();
         payloadSetByStream.addAll(Aider.getBzPayloadStoresByStream().keySet());
         payloadSetByStream.addAll(Aider.getJiraPayloadStoresByStream().keySet());
+
         if (payloadSetByStream.isEmpty()) {
-            context.getRequestDispatcher("/error-wait.html").forward(request, response);
+            context.getRequestDispatcher("/error-wait.html").forward(customRequest, customResponse);
         } else {
-            request.setAttribute("payloadSetByStream", payloadSetByStream);
-            context.getRequestDispatcher("/stream_payload_index.jsp").forward(request, response);
+            customRequest.setAttribute("payloadSetByStream", payloadSetByStream);
+            context.getRequestDispatcher("/stream_payload_index.jsp").forward(customRequest, customResponse);
         }
     }
 
@@ -75,6 +79,9 @@ public class StreamPayload {
     @Path("/{streamName}")
     public void getStream(@Context ServletContext context, @Context HttpServletRequest request, @Context HttpServletResponse response, @PathParam("streamName") String streamName)
             throws ServletException, IOException {
+        CustomRequest customRequest = new CustomRequest(request);
+        CustomResponse customResponse = new CustomResponse(response);
+
         Set<String> payloadSet = new TreeSet<String>();
         if (Aider.getJiraPayloadStoresByStream().containsKey(streamName)) {
             payloadSet = Aider.getJiraPayloadStoresByStream().get(streamName).keySet();
@@ -83,11 +90,11 @@ public class StreamPayload {
         }
 
         if (payloadSet.isEmpty()) {
-            context.getRequestDispatcher("/error-wait.html").forward(request, response);
+            context.getRequestDispatcher("/error-wait.html").forward(customRequest, customResponse);
         } else {
-            request.setAttribute("payloadSet", payloadSet);
-            request.setAttribute("streamName", streamName);
-            context.getRequestDispatcher("/payload_index.jsp").forward(request, response);
+            customRequest.setAttribute("payloadSet", payloadSet);
+            customRequest.setAttribute("streamName", streamName);
+            context.getRequestDispatcher("/payload_index.jsp").forward(customRequest, customResponse);
         }
     }
 
@@ -95,6 +102,9 @@ public class StreamPayload {
     @Path("/{streamName}/payload/{payloadName}")
     public void getPayload(@Context UriInfo info, @Context ServletContext context, @Context HttpServletRequest request, @Context HttpServletResponse response, @PathParam("streamName") String streamName, @PathParam("payloadName") String payloadName)
             throws ServletException, IOException {
+        CustomRequest customRequest = new CustomRequest(request);
+        CustomResponse customResponse = new CustomResponse(response);
+
         Set<String> payloadSet = new TreeSet<>();
         if (payloadName != null && streamName != null) {
             if (Aider.getJiraPayloadStoresByStream().containsKey(streamName)) {
@@ -102,7 +112,7 @@ public class StreamPayload {
             } else if (Aider.getBzPayloadStoresByStream().containsKey(streamName)) {
                 payloadSet = Aider.getBzPayloadStoresByStream().get(streamName).keySet();
             } else {
-                context.getRequestDispatcher("/error-wait.html").forward(request, response);
+                context.getRequestDispatcher("/error-wait.html").forward(customRequest, customResponse);
             }
 
             if (!payloadSet.isEmpty()) {
@@ -111,7 +121,7 @@ public class StreamPayload {
                 List<String> missedFlags = info.getQueryParameters().get("missedFlags"); // from ftl
                 payloadData = Aider.getPayloadData(payloadName);
                 if (payloadData == null || payloadData.isEmpty()) {
-                    context.getRequestDispatcher("/error-wait.html").forward(request, response);
+                    context.getRequestDispatcher("/error-wait.html").forward(customRequest, customResponse);
                 } else {
                     if (selectedStatus != null && selectedStatus.size() > 0) {
                         payloadData = filterBySelectedStatus(payloadData, selectedStatus);
@@ -121,17 +131,17 @@ public class StreamPayload {
                         payloadData = filterByMissedFlags(payloadData, missedFlags);
                     }
 
-                    request.setAttribute("rows", payloadData);
-                    request.setAttribute("payloadName", payloadName);
-                    request.setAttribute("streamName", streamName);
-                    request.setAttribute("payloadSize", payloadData.size());
-                    request.setAttribute("payloadStatus", maxSeverity(payloadData));
-                    request.setAttribute("payloadSet", payloadSet);
+                    customRequest.setAttribute("rows", payloadData);
+                    customRequest.setAttribute("payloadName", payloadName);
+                    customRequest.setAttribute("streamName", streamName);
+                    customRequest.setAttribute("payloadSize", payloadData.size());
+                    customRequest.setAttribute("payloadStatus", maxSeverity(payloadData));
+                    customRequest.setAttribute("payloadSet", payloadSet);
 
-                    context.getRequestDispatcher("/payload.ftl").forward(request, response);
+                    context.getRequestDispatcher("/payload.ftl").forward(customRequest, customResponse);
                 }
             } else {
-                context.getRequestDispatcher("/error-wait.html").forward(request, response);
+                context.getRequestDispatcher("/error-wait.html").forward(customRequest, customResponse);
             }
         } else {
             logger.log(Level.WARNING,
