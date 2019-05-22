@@ -71,7 +71,7 @@ public class Util {
     // Bugzilla, default range is from eap6411-payload to eap6420-payload, development mode to eap6415-payload
     private static int FIRST_64X_PAYLOAD = 6411;
     private static int DEVMODE_64X_PAYLOAD = 6415;
-    private static int LAST_64X_PAYLOAD = 6420;
+    private static int LAST_64X_PAYLOAD = 6425;
 
     // 7.0.z stream jira payload, default range is from 7.0.1 to 7.0.8, development mode to 7.0.5
     private static int FIRST_70X_PAYLOAD = 1;
