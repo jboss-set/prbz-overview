@@ -46,7 +46,7 @@ import javax.ws.rs.core.Context;
 
 import org.jboss.set.aphrodite.domain.Stream;
 import org.jboss.set.aphrodite.domain.StreamComponent;
-import org.jboss.set.assistant.data.ProcessorData;
+import org.jboss.set.assist.data.ProcessorData;
 import org.jboss.set.overview.ejb.Aider;
 
 /**

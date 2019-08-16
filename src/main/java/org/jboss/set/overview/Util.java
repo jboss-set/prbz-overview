@@ -22,14 +22,14 @@
 
 package org.jboss.set.overview;
 
-import static org.jboss.set.assistant.Constants.EAP64ZPAYLOADPATTERN;
-import static org.jboss.set.assistant.Constants.EAP70ZPAYLOADPATTERN;
-import static org.jboss.set.assistant.Constants.EAP71ZPAYLOADPATTERN;
-import static org.jboss.set.assistant.Constants.EAP72ZPAYLOADPATTERN;
-import static org.jboss.set.assistant.Constants.EAP64ZSTREAM;
-import static org.jboss.set.assistant.Constants.EAP70ZSTREAM;
-import static org.jboss.set.assistant.Constants.EAP71ZSTREAM;
-import static org.jboss.set.assistant.Constants.EAP72ZSTREAM;
+import static org.jboss.set.assist.Constants.EAP64ZPAYLOADPATTERN;
+import static org.jboss.set.assist.Constants.EAP70ZPAYLOADPATTERN;
+import static org.jboss.set.assist.Constants.EAP71ZPAYLOADPATTERN;
+import static org.jboss.set.assist.Constants.EAP72ZPAYLOADPATTERN;
+import static org.jboss.set.assist.Constants.EAP64ZSTREAM;
+import static org.jboss.set.assist.Constants.EAP70ZSTREAM;
+import static org.jboss.set.assist.Constants.EAP71ZSTREAM;
+import static org.jboss.set.assist.Constants.EAP72ZSTREAM;
 
 import static org.jboss.set.overview.Constants.EAP70ZPAYLOAD_ALIAS_PREFIX;
 import static org.jboss.set.overview.Constants.EAP71ZPAYLOAD_ALIAS_PREFIX;

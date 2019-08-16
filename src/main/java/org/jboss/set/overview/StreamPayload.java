@@ -22,9 +22,9 @@
 
 package org.jboss.set.overview;
 
-import static org.jboss.set.assistant.Util.filterByMissedFlags;
-import static org.jboss.set.assistant.Util.filterBySelectedStatus;
-import static org.jboss.set.assistant.Util.maxSeverity;
+import static org.jboss.set.assist.Util.filterByMissedFlags;
+import static org.jboss.set.assist.Util.filterBySelectedStatus;
+import static org.jboss.set.assist.Util.maxSeverity;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -44,7 +44,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 
-import org.jboss.set.assistant.data.ProcessorData;
+import org.jboss.set.assist.data.ProcessorData;
 import org.jboss.set.overview.ejb.Aider;
 
 /**

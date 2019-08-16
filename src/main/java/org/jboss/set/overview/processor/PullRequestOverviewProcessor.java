@@ -49,11 +49,11 @@ import org.jboss.set.aphrodite.domain.PullRequest;
 import org.jboss.set.aphrodite.domain.PullRequestState;
 import org.jboss.set.aphrodite.domain.Repository;
 import org.jboss.set.aphrodite.domain.Stream;
-import org.jboss.set.assistant.data.ProcessorData;
-import org.jboss.set.assistant.evaluator.Evaluator;
-import org.jboss.set.assistant.evaluator.EvaluatorContext;
-import org.jboss.set.assistant.processor.ProcessorException;
-import org.jboss.set.assistant.processor.PullRequestProcessor;
+import org.jboss.set.assist.data.ProcessorData;
+import org.jboss.set.assist.evaluator.Evaluator;
+import org.jboss.set.assist.evaluator.EvaluatorContext;
+import org.jboss.set.assist.processor.ProcessorException;
+import org.jboss.set.assist.processor.PullRequestProcessor;
 
 public class PullRequestOverviewProcessor implements PullRequestProcessor {
 

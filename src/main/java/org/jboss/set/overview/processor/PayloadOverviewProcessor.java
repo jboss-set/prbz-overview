@@ -49,11 +49,11 @@ import org.jboss.set.aphrodite.config.TrackerType;
 import org.jboss.set.aphrodite.domain.Issue;
 import org.jboss.set.aphrodite.domain.Stream;
 import org.jboss.set.aphrodite.spi.NotFoundException;
-import org.jboss.set.assistant.data.ProcessorData;
-import org.jboss.set.assistant.evaluator.PayloadEvaluator;
-import org.jboss.set.assistant.evaluator.PayloadEvaluatorContext;
-import org.jboss.set.assistant.processor.PayloadProcessor;
-import org.jboss.set.assistant.processor.ProcessorException;
+import org.jboss.set.assist.data.ProcessorData;
+import org.jboss.set.assist.evaluator.PayloadEvaluator;
+import org.jboss.set.assist.evaluator.PayloadEvaluatorContext;
+import org.jboss.set.assist.processor.PayloadProcessor;
+import org.jboss.set.assist.processor.ProcessorException;
 
 /**
  * @author wangc

@@ -26,10 +26,10 @@ import static org.jboss.set.overview.Util.filterComponent;
 import static org.jboss.set.overview.Util.findAllBugzillaPayloads;
 import static org.jboss.set.overview.Util.findAllJiraPayloads;
 
-import static org.jboss.set.assistant.Constants.EAP64ZSTREAM;
-import static org.jboss.set.assistant.Constants.EAP70ZSTREAM;
-import static org.jboss.set.assistant.Constants.EAP71ZSTREAM;
-import static org.jboss.set.assistant.Constants.EAP72ZSTREAM;
+import static org.jboss.set.assist.Constants.EAP64ZSTREAM;
+import static org.jboss.set.assist.Constants.EAP70ZSTREAM;
+import static org.jboss.set.assist.Constants.EAP71ZSTREAM;
+import static org.jboss.set.assist.Constants.EAP72ZSTREAM;
 
 import java.net.URI;
 import java.net.URL;
@@ -62,11 +62,11 @@ import org.jboss.set.aphrodite.domain.StreamComponent;
 import org.jboss.set.aphrodite.repository.services.common.RepositoryType;
 import org.jboss.set.aphrodite.spi.AphroditeException;
 import org.jboss.set.aphrodite.spi.NotFoundException;
-import org.jboss.set.assistant.AssistantClient;
-import org.jboss.set.assistant.data.ProcessorData;
-import org.jboss.set.assistant.processor.PayloadProcessor;
-import org.jboss.set.assistant.processor.ProcessorException;
-import org.jboss.set.assistant.processor.PullRequestProcessor;
+import org.jboss.set.assist.AssistantClient;
+import org.jboss.set.assist.data.ProcessorData;
+import org.jboss.set.assist.processor.PayloadProcessor;
+import org.jboss.set.assist.processor.ProcessorException;
+import org.jboss.set.assist.processor.PullRequestProcessor;
 import org.jboss.set.overview.Util;
 
 /**
