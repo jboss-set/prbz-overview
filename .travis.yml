@@ -1,5 +1,5 @@
 language: java
 jdk:
- - oraclejdk8
+ - oraclejdk11
 
 install: mvn clean install -DskipTests=true -Dmaven.javadoc.skip=true -Dnorpm -B -V
