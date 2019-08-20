@@ -2,4 +2,4 @@ language: java
 jdk:
  - oraclejdk11
 
-install: mvn clean install -DskipTests=true -Dmaven.javadoc.skip=true -Dnorpm -B -V
+install: mvn clean install -Pcommunity -DskipTests=true -Dmaven.javadoc.skip=true -Dnorpm -B -V
