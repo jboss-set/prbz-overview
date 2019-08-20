@@ -248,6 +248,19 @@
 				<updatePolicy>daily</updatePolicy>
 			</snapshots>
 		</repository>
+		<repository>
+			<id>atlassian-public</id>
+			<url>https://maven.atlassian.com/maven-external</url>
+			<snapshots>
+				<enabled>true</enabled>
+				<updatePolicy>daily</updatePolicy>
+				<checksumPolicy>warn</checksumPolicy>
+			</snapshots>
+			<releases>
+				<enabled>true</enabled>
+				<checksumPolicy>warn</checksumPolicy>
+			</releases>
+		</repository>
 	</repositories>
 
 	<scm>
