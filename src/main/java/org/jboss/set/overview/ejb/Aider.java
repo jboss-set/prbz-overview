@@ -30,6 +30,7 @@ import static org.jboss.set.assist.Constants.EAP64ZSTREAM;
 import static org.jboss.set.assist.Constants.EAP70ZSTREAM;
 import static org.jboss.set.assist.Constants.EAP71ZSTREAM;
 import static org.jboss.set.assist.Constants.EAP72ZSTREAM;
+import static org.jboss.set.assist.Constants.EAP73ZSTREAM;
 
 import java.net.URI;
 import java.net.URL;
@@ -153,6 +154,7 @@ public class Aider {
         generatePayloadDataForJira(EAP70ZSTREAM, Util.jiraPayloadStore_70Z, true);
         generatePayloadDataForJira(EAP71ZSTREAM, Util.jiraPayloadStore_71Z, true);
         generatePayloadDataForJira(EAP72ZSTREAM, Util.jiraPayloadStore_72Z, true);
+        generatePayloadDataForJira(EAP73ZSTREAM, Util.jiraPayloadStore_73Z, true);
         generatePayloadDataForBz(EAP64ZSTREAM, Util.bzPayloadStore, true);
         logger.info("payload data initialization is finished.");
     }

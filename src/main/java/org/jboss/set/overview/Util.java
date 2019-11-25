@@ -26,15 +26,17 @@ import static org.jboss.set.assist.Constants.EAP64ZPAYLOADPATTERN;
 import static org.jboss.set.assist.Constants.EAP70ZPAYLOADPATTERN;
 import static org.jboss.set.assist.Constants.EAP71ZPAYLOADPATTERN;
 import static org.jboss.set.assist.Constants.EAP72ZPAYLOADPATTERN;
+import static org.jboss.set.assist.Constants.EAP73ZPAYLOADPATTERN;
 import static org.jboss.set.assist.Constants.EAP64ZSTREAM;
 import static org.jboss.set.assist.Constants.EAP70ZSTREAM;
 import static org.jboss.set.assist.Constants.EAP71ZSTREAM;
 import static org.jboss.set.assist.Constants.EAP72ZSTREAM;
-
-import static org.jboss.set.overview.Constants.EAP70ZPAYLOAD_ALIAS_PREFIX;
-import static org.jboss.set.overview.Constants.EAP71ZPAYLOAD_ALIAS_PREFIX;
-import static org.jboss.set.overview.Constants.EAP72ZPAYLOAD_ALIAS_PREFIX;
-import static org.jboss.set.overview.Constants.EAP7PAYLOAD_ALIAS_SUFFIX;
+import static org.jboss.set.assist.Constants.EAP73ZSTREAM;
+import static org.jboss.set.assist.Constants.EAP70ZPAYLOAD_ALIAS_PREFIX;
+import static org.jboss.set.assist.Constants.EAP71ZPAYLOAD_ALIAS_PREFIX;
+import static org.jboss.set.assist.Constants.EAP72ZPAYLOAD_ALIAS_PREFIX;
+import static org.jboss.set.assist.Constants.EAP73ZPAYLOAD_ALIAS_PREFIX;
+import static org.jboss.set.assist.Constants.EAP7PAYLOAD_ALIAS_SUFFIX;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -52,6 +54,7 @@ import org.jboss.set.aphrodite.domain.Release;
 import org.jboss.set.aphrodite.domain.SearchCriteria;
 import org.jboss.set.aphrodite.domain.StreamComponent;
 import org.jboss.set.aphrodite.spi.NotFoundException;
+import org.jboss.set.assist.Constants;
 
 /**
  * @author wangc
@@ -65,6 +68,7 @@ public class Util {
     public static LinkedHashMap<String, List<Issue>> jiraPayloadStore_70Z = new LinkedHashMap<>();
     public static LinkedHashMap<String, List<Issue>> jiraPayloadStore_71Z = new LinkedHashMap<>();
     public static LinkedHashMap<String, List<Issue>> jiraPayloadStore_72Z = new LinkedHashMap<>();
+    public static LinkedHashMap<String, List<Issue>> jiraPayloadStore_73Z = new LinkedHashMap<>();
     public static LinkedHashMap<String, LinkedHashMap<String, List<Issue>>> jiraPayloadStoresByStream = new LinkedHashMap<>();
 
     // some default boundary in first time load.
@@ -73,20 +77,11 @@ public class Util {
     private static int DEVMODE_64X_PAYLOAD = 6415;
     private static int LAST_64X_PAYLOAD = 6425;
 
-    // 7.0.z stream jira payload, default range is from 7.0.1 to 7.0.8, development mode to 7.0.5
-    private static int FIRST_70X_PAYLOAD = 1;
-    private static int DEVMODE_70X_PAYLOAD = 5;
-    private static int LAST_70X_PAYLOAD = 8;
+    // 7.z CP stream jira payload, default range is from 7.1.1 to 7.1.5, development mode to 7.1.2
+    private static int FIRST_PAYLOAD = 1;
+    private static int DEVMODE_PAYLOAD = 2;
+    private static int LAST_PAYLOAD = 5;
 
-    // 7.1.z stream jira payload, default range is from 7.1.1 to 7.1.5, development mode to 7.1.2
-    private static int FIRST_71X_PAYLOAD = 1;
-    private static int DEVMODE_71X_PAYLOAD = 2;
-    private static int LAST_71X_PAYLOAD = 5;
-
-    // 7.2.z stream jira payload, default range is from 7.2.1 to 7.2.5, development mode to 7.2.2
-    private static int FIRST_72X_PAYLOAD = 1;
-    private static int DEVMODE_72X_PAYLOAD = 2;
-    private static int LAST_72X_PAYLOAD = 5;
 
     private static final boolean devProfile = System.getProperty("prbz-dev") != null;
 
@@ -160,16 +155,17 @@ public class Util {
     }
 
     public static void findAllJiraPayloads(Aphrodite aphrodite, boolean first) {
-        findJiraPayloads(aphrodite, first, EAP70ZSTREAM, jiraPayloadStore_70Z, FIRST_70X_PAYLOAD, LAST_70X_PAYLOAD, DEVMODE_70X_PAYLOAD, EAP70ZPAYLOAD_ALIAS_PREFIX, EAP70ZPAYLOADPATTERN);
-        findJiraPayloads(aphrodite, first, EAP71ZSTREAM, jiraPayloadStore_71Z, FIRST_71X_PAYLOAD, LAST_71X_PAYLOAD, DEVMODE_71X_PAYLOAD, EAP71ZPAYLOAD_ALIAS_PREFIX, EAP71ZPAYLOADPATTERN);
-        findJiraPayloads(aphrodite, first, EAP72ZSTREAM, jiraPayloadStore_72Z, FIRST_72X_PAYLOAD, LAST_72X_PAYLOAD, DEVMODE_72X_PAYLOAD, EAP72ZPAYLOAD_ALIAS_PREFIX, EAP72ZPAYLOADPATTERN);
+        findJiraPayloads(aphrodite, first, EAP70ZSTREAM, jiraPayloadStore_70Z, EAP70ZPAYLOAD_ALIAS_PREFIX, EAP70ZPAYLOADPATTERN);
+        findJiraPayloads(aphrodite, first, EAP71ZSTREAM, jiraPayloadStore_71Z, EAP71ZPAYLOAD_ALIAS_PREFIX, EAP71ZPAYLOADPATTERN);
+        findJiraPayloads(aphrodite, first, EAP72ZSTREAM, jiraPayloadStore_72Z, EAP72ZPAYLOAD_ALIAS_PREFIX, EAP72ZPAYLOADPATTERN);
+        findJiraPayloads(aphrodite, first, EAP73ZSTREAM, jiraPayloadStore_73Z, EAP73ZPAYLOAD_ALIAS_PREFIX, EAP73ZPAYLOADPATTERN);
     }
 
-    private static void findJiraPayloads(Aphrodite aphrodite, boolean first, String eapStream, LinkedHashMap<String, List<Issue>> jiraPayloadStore, int firstPayload, int lastPayload, int devModePayload, String payloadPrefix, Pattern payloadPattern) {
+    private static void findJiraPayloads(Aphrodite aphrodite, boolean first, String eapStream, LinkedHashMap<String, List<Issue>> jiraPayloadStore, String payloadPrefix, Pattern payloadPattern) {
         try {
             if (first | jiraPayloadStore.size() == 0) {
-                int max = devProfile ? devModePayload : lastPayload;
-                for (int i = firstPayload; i <= max; i++) {
+                int max = devProfile ? DEVMODE_PAYLOAD : LAST_PAYLOAD;
+                for (int i = FIRST_PAYLOAD; i <= max; i++) {
                     // search from firstPayload to lastPayload, add to list if result is not empty.
                     String fixVersion = payloadPrefix + i + EAP7PAYLOAD_ALIAS_SUFFIX;
                     List<Issue> issues = testJiraPayloadExistence(aphrodite, fixVersion);
@@ -184,7 +180,7 @@ public class Util {
                 Matcher matcher = payloadPattern.matcher(lastKey);
                 if (matcher.find()) {
                     int index = Integer.parseInt(matcher.group(1));
-                    for (int i = firstPayload; i <= index; i++) {
+                    for (int i = FIRST_PAYLOAD; i <= index; i++) {
                         // update from 7.0.1.GA to index, add to list if result is not empty.
                         String fixVersion = payloadPrefix + i + EAP7PAYLOAD_ALIAS_SUFFIX;
                         if (aphrodite.isCPReleased(fixVersion)) {

@@ -40,6 +40,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.jboss.set.aphrodite.domain.RateLimit;
 import org.jboss.set.aphrodite.repository.services.common.RepositoryType;
+import org.jboss.set.assist.Constants;
 import org.jboss.set.overview.ejb.Aider;
 
 /**
