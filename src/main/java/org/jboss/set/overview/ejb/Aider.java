@@ -27,10 +27,6 @@ import static org.jboss.set.overview.Util.findAllBugzillaPayloads;
 import static org.jboss.set.overview.Util.findAllJiraPayloads;
 
 import static org.jboss.set.assist.Constants.EAP64ZSTREAM;
-//import static org.jboss.set.assist.Constants.EAP70ZSTREAM;
-//import static org.jboss.set.assist.Constants.EAP71ZSTREAM;
-//import static org.jboss.set.assist.Constants.EAP72ZSTREAM;
-//import static org.jboss.set.assist.Constants.EAP73ZSTREAM;
 
 import java.net.URI;
 import java.net.URL;
