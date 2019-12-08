@@ -29,13 +29,19 @@
     <ul class="nav nav-pills" style="width: 80%; margin: 6px auto">
         <li style="font-size: 20px"><a href="/prbz-overview/">Home</a></li>
         <#list payloadSet as payload>
-            <li<#if payload == Request.payloadName> class="active"</#if>><a href="/prbz-overview/rest/streampayload/${streamName}/payload/${payload}">${payload}</a></li>
+            <li<#if payload == Request.payloadName> class="active"</#if>><a href="/prbz-overview/rest/streampayload/${streamName}/payload/${payload}">${payload}</a>
+            </li>
         </#list>
     </ul>
 
      <div class="container">
 		<div class="row">
-		  <div class="col-md-12"><h1>EAP Cumulative Patch Releases ${Request.payloadName} Issue List</h1></div>
+		  <div class="col-md-12">
+		    <form action="/prbz-overview/rest/streampayload/${Request.streamName}/payload/${Request.payloadName}" method="post">
+		      <h1>EAP Cumulative Patch Releases ${Request.payloadName} Issue List
+		      <input type="image" src="../../../../images/refresh.png" border="0" title="Refresh payload"/>
+		    </form></h1>
+		  </div>
 		</div>
 		<div class="row">
 		  <div class="col-md-12">

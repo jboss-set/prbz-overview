@@ -39,6 +39,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
@@ -105,44 +106,78 @@ public class StreamPayload {
         CustomRequest customRequest = new CustomRequest(request);
         CustomResponse customResponse = new CustomResponse(response);
 
-        Set<String> payloadSet = new TreeSet<>();
         if (payloadName != null && streamName != null) {
-            if (Aider.getJiraPayloadStoresByStream().containsKey(streamName)) {
-                payloadSet = Aider.getJiraPayloadStoresByStream().get(streamName).keySet();
-            } else if (Aider.getBzPayloadStoresByStream().containsKey(streamName)) {
-                payloadSet = Aider.getBzPayloadStoresByStream().get(streamName).keySet();
-            } else {
+            getPayload(info, context, streamName, payloadName, customRequest, customResponse);
+        } else {
+            logger.log(Level.WARNING,
+                    "streamName " + streamName + " or " + "payloadName " + payloadName + " is not specified in request");
+        }
+    }
+
+    /**
+     * @param info
+     * @param context
+     * @param streamName
+     * @param payloadName
+     * @param customRequest
+     * @param customResponse
+     * @throws ServletException
+     * @throws IOException
+     */
+    private void getPayload(UriInfo info, ServletContext context, String streamName, String payloadName,
+            CustomRequest customRequest, CustomResponse customResponse) throws ServletException, IOException {
+        Set<String> payloadSet = new TreeSet<>();
+        if (Aider.getJiraPayloadStoresByStream().containsKey(streamName)) {
+            payloadSet = Aider.getJiraPayloadStoresByStream().get(streamName).keySet();
+        } else if (Aider.getBzPayloadStoresByStream().containsKey(streamName)) {
+            payloadSet = Aider.getBzPayloadStoresByStream().get(streamName).keySet();
+        } else {
+            context.getRequestDispatcher("/error-wait.html").forward(customRequest, customResponse);
+        }
+
+        if (!payloadSet.isEmpty()) {
+            // Put the data list in request and let Freemarker paint it.
+            List<String> selectedStatus = info.getQueryParameters().get("selectedStatus"); // from ftl
+            List<String> missedFlags = info.getQueryParameters().get("missedFlags"); // from ftl
+            payloadData = Aider.getPayloadData(payloadName);
+            if (payloadData == null || payloadData.isEmpty()) {
                 context.getRequestDispatcher("/error-wait.html").forward(customRequest, customResponse);
-            }
-
-            if (!payloadSet.isEmpty()) {
-                // Put the data list in request and let Freemarker paint it.
-                List<String> selectedStatus = info.getQueryParameters().get("selectedStatus"); // from ftl
-                List<String> missedFlags = info.getQueryParameters().get("missedFlags"); // from ftl
-                payloadData = Aider.getPayloadData(payloadName);
-                if (payloadData == null || payloadData.isEmpty()) {
-                    context.getRequestDispatcher("/error-wait.html").forward(customRequest, customResponse);
-                } else {
-                    if (selectedStatus != null && selectedStatus.size() > 0) {
-                        payloadData = filterBySelectedStatus(payloadData, selectedStatus);
-                    }
-
-                    if (missedFlags != null && missedFlags.size() > 0) {
-                        payloadData = filterByMissedFlags(payloadData, missedFlags);
-                    }
-
-                    customRequest.setAttribute("rows", payloadData);
-                    customRequest.setAttribute("payloadName", payloadName);
-                    customRequest.setAttribute("streamName", streamName);
-                    customRequest.setAttribute("payloadSize", payloadData.size());
-                    customRequest.setAttribute("payloadStatus", maxSeverity(payloadData));
-                    customRequest.setAttribute("payloadSet", payloadSet);
-
-                    context.getRequestDispatcher("/payload.ftl").forward(customRequest, customResponse);
+            } else {
+                if (selectedStatus != null && selectedStatus.size() > 0) {
+                    payloadData = filterBySelectedStatus(payloadData, selectedStatus);
                 }
-            } else {
-                context.getRequestDispatcher("/error-wait.html").forward(customRequest, customResponse);
+
+                if (missedFlags != null && missedFlags.size() > 0) {
+                    payloadData = filterByMissedFlags(payloadData, missedFlags);
+                }
+
+                customRequest.setAttribute("rows", payloadData);
+                customRequest.setAttribute("payloadName", payloadName);
+                customRequest.setAttribute("streamName", streamName);
+                customRequest.setAttribute("payloadSize", payloadData.size());
+                customRequest.setAttribute("payloadStatus", maxSeverity(payloadData));
+                customRequest.setAttribute("payloadSet", payloadSet);
+
+                context.getRequestDispatcher("/payload.ftl").forward(customRequest, customResponse);
             }
+        } else {
+            context.getRequestDispatcher("/error-wait.html").forward(customRequest, customResponse);
+        }
+    }
+
+    @POST
+    @Path("/{streamName}/payload/{payloadName}")
+    public void refreshPayload(@Context UriInfo info, @Context ServletContext context, @Context HttpServletRequest request,
+            @Context HttpServletResponse response, @PathParam("streamName") String streamName,
+            @PathParam("payloadName") String payloadName)
+            throws ServletException, IOException {
+        CustomRequest customRequest = new CustomRequest(request);
+        CustomResponse customResponse = new CustomResponse(response);
+
+        if (payloadName != null && streamName != null) {
+            Aider.generatedSinglePayloadData(streamName, payloadName);
+            getPayload(info, context, streamName, payloadName, customRequest, customResponse);
+            context.getRequestDispatcher("/" + streamName + "/payload/" + payloadName).forward(customRequest, customResponse);
         } else {
             logger.log(Level.WARNING,
                     "streamName " + streamName + " or " + "payloadName " + payloadName + " is not specified in request");

@@ -27,10 +27,10 @@ import static org.jboss.set.overview.Util.findAllBugzillaPayloads;
 import static org.jboss.set.overview.Util.findAllJiraPayloads;
 
 import static org.jboss.set.assist.Constants.EAP64ZSTREAM;
-import static org.jboss.set.assist.Constants.EAP70ZSTREAM;
-import static org.jboss.set.assist.Constants.EAP71ZSTREAM;
-import static org.jboss.set.assist.Constants.EAP72ZSTREAM;
-import static org.jboss.set.assist.Constants.EAP73ZSTREAM;
+//import static org.jboss.set.assist.Constants.EAP70ZSTREAM;
+//import static org.jboss.set.assist.Constants.EAP71ZSTREAM;
+//import static org.jboss.set.assist.Constants.EAP72ZSTREAM;
+//import static org.jboss.set.assist.Constants.EAP73ZSTREAM;
 
 import java.net.URI;
 import java.net.URL;
@@ -86,7 +86,7 @@ public class Aider {
     public static List<Stream> allStreams = new ArrayList<>();
     private static Map<String, List<ProcessorData>> pullRequestData = new HashMap<>();
     private static Map<String, List<ProcessorData>> payloadData = new HashMap<>();
-    private static Map<String, Map<String, List<ProcessorData>>> payloadsByStreams = new HashMap<>();
+    private static Map<String, Map<String, List<ProcessorData>>> payloadsDataByStreams = new HashMap<>();
     private static ServiceLoader<PullRequestProcessor> pullRequestProcessors;
     private static ServiceLoader<PayloadProcessor> payloadProcessors;
 
@@ -151,10 +151,7 @@ public class Aider {
 
     public void initAllPayloadData() {
         logger.info("payload data initialization is started.");
-        generatePayloadDataForJira(EAP70ZSTREAM, Util.jiraPayloadStore_70Z, true);
-        generatePayloadDataForJira(EAP71ZSTREAM, Util.jiraPayloadStore_71Z, true);
-        generatePayloadDataForJira(EAP72ZSTREAM, Util.jiraPayloadStore_72Z, true);
-        generatePayloadDataForJira(EAP73ZSTREAM, Util.jiraPayloadStore_73Z, true);
+        generatePayloadDataForJira(Util.jiraPayloadStoresByStream, true);
         generatePayloadDataForBz(EAP64ZSTREAM, Util.bzPayloadStore, true);
         logger.info("payload data initialization is finished.");
     }
@@ -172,7 +169,7 @@ public class Aider {
         }
     }
 
-    public void generatePullRequestData(String streamName, String componentName) {
+    public static void generatePullRequestData(String streamName, String componentName) {
         List<ProcessorData> dataList = new ArrayList<>();
         try {
             logger.info("stream " + streamName + " component " + componentName + " pull request data genearation is started...");
@@ -205,17 +202,17 @@ public class Aider {
         }
     }
 
-    public void generatePayloadDataForJira(String taregtStream, Map<String, List<Issue>> payloads, boolean firstInit) {
-        payloads.keySet().forEach(payload -> {
+    public static void generatePayloadDataForJira(LinkedHashMap<String, LinkedHashMap<String, List<Issue>>> jiraPayloadStoresByStream, boolean firstInit) {
+        jiraPayloadStoresByStream.keySet().forEach(s -> jiraPayloadStoresByStream.get(s).keySet().forEach(payload -> {
             List<ProcessorData> dataList = new ArrayList<>();
             logger.info(payload + " data genearation is started...");
-            Optional<Stream> stream = getCurrentStream(taregtStream);
+            Optional<Stream> stream = getCurrentStream(s);
             if (stream.isPresent()) {
                 for (PayloadProcessor processor : payloadProcessors) {
                     logger.info("executing processor: " + processor.getClass().getName());
                     try {
                         if (firstInit || payloadData.get(payload) == null || !aphrodite.isCPReleased(payload)) {
-                            dataList.addAll(processor.process(payload, payloads.get(payload), stream.get()));
+                            dataList.addAll(processor.process(payload, jiraPayloadStoresByStream.get(s).get(payload), stream.get()));
                         } else {
                             logger.log(Level.INFO, "Released payload " + payload + " is skipped.");
                         }
@@ -235,8 +232,46 @@ public class Aider {
                 }
             }
             logger.info(payload + " data genearation is finished...");
-        });
-        payloadsByStreams.put(taregtStream, payloadData);
+            payloadsDataByStreams.put(s, payloadData);
+        }));
+    }
+
+    public static void generatedSinglePayloadData(String targetStream, String payload) {
+        logger.info("refresh " + payload + " for " + targetStream + " is started ...");
+        List<ProcessorData> dataList = new ArrayList<>();
+        Optional<Stream> stream = getCurrentStream(targetStream);
+
+        // update payload list
+        List<Issue> issues = Util.testJiraPayloadExistence(aphrodite, payload);
+        if (!issues.isEmpty()) {
+            Util.jiraPayloadStoresByStream.get(targetStream).put(payload, issues);
+            logger.log(Level.INFO, "Reload Jira Payload : " + payload);
+        }
+        LinkedHashMap<String, List<Issue>> payloads = Util.jiraPayloadStoresByStream.get(targetStream);
+
+        // update payload date with processors
+        if (stream.isPresent()) {
+            for (PayloadProcessor processor : payloadProcessors) {
+                logger.info("executing processor: " + processor.getClass().getName());
+                try {
+                    dataList.addAll(processor.process(payload, payloads.get(payload), stream.get()));
+                } catch (ProcessorException ex1) {
+                    logger.log(Level.WARNING, ex1.getMessage(), ex1);
+                } catch (Exception ex2) {
+                    logger.log(Level.WARNING, ex2.getMessage(), ex2);
+                    Thread.currentThread().interrupt();
+                }
+            }
+        } else {
+            logger.log(Level.WARNING, "Empty stream name for payload " + payload);
+        }
+        if (!dataList.isEmpty()) {
+            synchronized (payloadDataLock) {
+                payloadData.put(payload, dataList);
+            }
+        }
+        logger.info("refresh " + payload + " for " + targetStream +  " is finished ...");
+        payloadsDataByStreams.put(targetStream, payloadData);
     }
 
     public void generatePayloadDataForBz(String targetStream, Map<String, Issue> payloads, boolean firstInit) {
@@ -294,7 +329,7 @@ public class Aider {
         logger.info("schedule payload data update is started ...");
         findAllBugzillaPayloads(aphrodite, false);
         findAllJiraPayloads(aphrodite, false);
-        Util.jiraPayloadStoresByStream.keySet().stream().forEach(e -> generatePayloadDataForJira(e, Util.jiraPayloadStoresByStream.get(e), false));
+        generatePayloadDataForJira(Util.jiraPayloadStoresByStream, false);
         Util.bzPayloadStoresByStream.keySet().stream().forEach(e -> generatePayloadDataForBz(e, Util.bzPayloadStoresByStream.get(e), false));
         logger.info("schedule payload data update is finished ...");
 
