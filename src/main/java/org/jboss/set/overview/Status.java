@@ -50,7 +50,7 @@ import org.jboss.set.overview.ejb.Aider;
 @Path("/status")
 public class Status {
 
-    private static final String JIRA_HOST = "https://issues.jboss.org/";
+    private static final String JIRA_HOST = "https://issues.redhat.com/";
     private static final String BUGZILLA_HOST = "https://bugzilla.redhat.com/";
     private static final String GITHUB_HOST = "https://github.com/";
 
