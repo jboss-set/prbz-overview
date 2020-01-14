@@ -28,7 +28,7 @@
                 </a>
                 <ul class="dropdown-menu">
                     <#list streamMap[stream] as component>
-                    <li class="<#if component == Request.componentName && stream == Request.streamName>active</#if>"><a href="/prbz-overview/streamview/pullrequestoverview?streamName=${stream}&componentName=${component}">${component}</a></li>
+                    <li class="<#if component == Request.componentName && stream == Request.streamName>active</#if>"><a href="/prbz-overview/rest/streampullrequest/${stream}/component/${component}">${component}</a></li>
                     </#list>
                 </ul>
               </li>
