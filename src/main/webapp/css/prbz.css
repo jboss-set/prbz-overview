@@ -3,20 +3,22 @@
      width: 280px;
 }
 
-tr.odd:nth-of-type(4n+1),
-tr.odd:nth-of-type(4n+1) > th,
-tr.odd:nth-of-type(4n+1) > td {
+tr.odd,
+tr.odd > th,
+tr.odd > td {
     background-color: #f9f9f9;
 }
 
-tr.even,
-tr.even > th,
-tr.even > td  {
+tr.open + tr > td  {
     background-color: #efefef;
 }
 
-th .switch::before,
-.odd.has-data .switch::before {
+th.switch, td.switch {
+    cursor: pointer;
+}
+
+th.switch span::before,
+.has-data td.switch span::before {
     content: "+";
     font-size: 18px;
     font-weight: bold;
@@ -24,20 +26,12 @@ th .switch::before,
     vertical-align: text-bottom;
 }
 
-th.open .switch::before,
-.odd.has-data.open .switch::before {
+th.open.switch span::before,
+.has-data.open td.switch span::before {
     content: "\2212";
 }
 
-.even {
-    display: none;
-}
-
-.open.has-data + .even {
-    display: table-row;
-}
-
-.even .inner-div {
+.exp.inner-div {
     display: inline-block;
     width: 48%;
 }
@@ -51,4 +45,9 @@ th.open .switch::before,
 }
 .issues-table .third-column {
     width: 60px;
+}
+
+/* override datatables.net styling */
+table.dataTable thead th {
+    padding: 10px;
 }
