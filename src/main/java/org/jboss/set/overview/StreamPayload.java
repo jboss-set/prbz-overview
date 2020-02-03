@@ -29,10 +29,13 @@ import static org.jboss.set.assist.Util.maxSeverity;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -58,6 +61,8 @@ public class StreamPayload {
     private static Logger logger = Logger.getLogger(StreamPayload.class.getCanonicalName());
     private List<ProcessorData> payloadData = new ArrayList<>();
 
+    private static final String LIST_TITLE = "Payload By Streams";
+
     @GET
     public void get(@Context ServletContext context, @Context HttpServletRequest request, @Context HttpServletResponse response)
             throws ServletException, IOException {
@@ -71,31 +76,12 @@ public class StreamPayload {
         if (payloadSetByStream.isEmpty()) {
             context.getRequestDispatcher("/error-wait.html").forward(customRequest, customResponse);
         } else {
-            customRequest.setAttribute("payloadSetByStream", payloadSetByStream);
-            context.getRequestDispatcher("/stream_payload_index.jsp").forward(customRequest, customResponse);
-        }
-    }
-
-    @GET
-    @Path("/{streamName}")
-    public void getStream(@Context ServletContext context, @Context HttpServletRequest request, @Context HttpServletResponse response, @PathParam("streamName") String streamName)
-            throws ServletException, IOException {
-        CustomRequest customRequest = new CustomRequest(request);
-        CustomResponse customResponse = new CustomResponse(response);
-
-        Set<String> payloadSet = new TreeSet<String>();
-        if (Aider.getJiraPayloadStoresByStream().containsKey(streamName)) {
-            payloadSet = Aider.getJiraPayloadStoresByStream().get(streamName).keySet();
-        } else if (Aider.getBzPayloadStoresByStream().containsKey(streamName)) {
-            payloadSet = Aider.getBzPayloadStoresByStream().get(streamName).keySet();
-        }
-
-        if (payloadSet.isEmpty()) {
-            context.getRequestDispatcher("/error-wait.html").forward(customRequest, customResponse);
-        } else {
-            customRequest.setAttribute("payloadSet", payloadSet);
-            customRequest.setAttribute("streamName", streamName);
-            context.getRequestDispatcher("/payload_index.jsp").forward(customRequest, customResponse);
+            Map<String, List<String>> streamMap = getStreamMap();
+            customRequest.setAttribute("title", LIST_TITLE);
+            customRequest.setAttribute("first", "streampayload");
+            customRequest.setAttribute("second", "payload");
+            customRequest.setAttribute("streamMap", streamMap);
+            context.getRequestDispatcher("/stream_index.jsp").forward(customRequest, customResponse);
         }
     }
 
@@ -126,42 +112,44 @@ public class StreamPayload {
      */
     private void getPayload(UriInfo info, ServletContext context, String streamName, String payloadName,
             CustomRequest customRequest, CustomResponse customResponse) throws ServletException, IOException {
-        Set<String> payloadSet = new TreeSet<>();
+        boolean payloadEmpty = true;
+
         if (Aider.getJiraPayloadStoresByStream().containsKey(streamName)) {
-            payloadSet = Aider.getJiraPayloadStoresByStream().get(streamName).keySet();
+            payloadEmpty = Aider.getJiraPayloadStoresByStream().get(streamName).keySet().isEmpty();
         } else if (Aider.getBzPayloadStoresByStream().containsKey(streamName)) {
-            payloadSet = Aider.getBzPayloadStoresByStream().get(streamName).keySet();
-        } else {
-            context.getRequestDispatcher("/error-wait.html").forward(customRequest, customResponse);
+            payloadEmpty = Aider.getBzPayloadStoresByStream().get(streamName).keySet().isEmpty();
         }
 
-        if (!payloadSet.isEmpty()) {
-            // Put the data list in request and let Freemarker paint it.
-            List<String> selectedStatus = info.getQueryParameters().get("selectedStatus"); // from ftl
-            List<String> missedFlags = info.getQueryParameters().get("missedFlags"); // from ftl
-            payloadData = Aider.getPayloadData(payloadName);
-            if (payloadData == null || payloadData.isEmpty()) {
-                context.getRequestDispatcher("/error-wait.html").forward(customRequest, customResponse);
-            } else {
-                if (selectedStatus != null && selectedStatus.size() > 0) {
-                    payloadData = filterBySelectedStatus(payloadData, selectedStatus);
-                }
-
-                if (missedFlags != null && missedFlags.size() > 0) {
-                    payloadData = filterByMissedFlags(payloadData, missedFlags);
-                }
-
-                customRequest.setAttribute("rows", payloadData);
-                customRequest.setAttribute("payloadName", payloadName);
-                customRequest.setAttribute("streamName", streamName);
-                customRequest.setAttribute("payloadSize", payloadData.size());
-                customRequest.setAttribute("payloadStatus", maxSeverity(payloadData));
-                customRequest.setAttribute("payloadSet", payloadSet);
-
-                context.getRequestDispatcher("/payload.ftl").forward(customRequest, customResponse);
-            }
-        } else {
+        if (payloadEmpty) {
             context.getRequestDispatcher("/error-wait.html").forward(customRequest, customResponse);
+            return;
+        }
+
+        Map<String, List<String>> payloadMap = getStreamMap();
+
+        // Put the data list in request and let Freemarker paint it.
+        List<String> selectedStatus = info.getQueryParameters().get("selectedStatus"); // from ftl
+        List<String> missedFlags = info.getQueryParameters().get("missedFlags"); // from ftl
+        payloadData = Aider.getPayloadData(payloadName);
+        if (payloadData == null || payloadData.isEmpty()) {
+            context.getRequestDispatcher("/error-wait.html").forward(customRequest, customResponse);
+        } else {
+            if (selectedStatus != null && selectedStatus.size() > 0) {
+                payloadData = filterBySelectedStatus(payloadData, selectedStatus);
+            }
+
+            if (missedFlags != null && missedFlags.size() > 0) {
+                payloadData = filterByMissedFlags(payloadData, missedFlags);
+            }
+
+            customRequest.setAttribute("rows", payloadData);
+            customRequest.setAttribute("payloadName", payloadName);
+            customRequest.setAttribute("streamName", streamName);
+            customRequest.setAttribute("payloadSize", payloadData.size());
+            customRequest.setAttribute("payloadStatus", maxSeverity(payloadData));
+            customRequest.setAttribute("payloadMap", payloadMap);
+
+            context.getRequestDispatcher("/payload.ftl").forward(customRequest, customResponse);
         }
     }
 
@@ -182,5 +170,14 @@ public class StreamPayload {
             logger.log(Level.WARNING,
                     "streamName " + streamName + " or " + "payloadName " + payloadName + " is not specified in request");
         }
+    }
+
+    private Map<String, List<String>> getStreamMap() {
+        return new TreeMap<>(
+                Stream.concat(Aider.getBzPayloadStoresByStream().entrySet().stream(), Aider.getJiraPayloadStoresByStream().entrySet().stream())
+                        .collect(Collectors.toMap(e -> e.getKey(),
+                                e -> e.getValue().keySet().stream().collect(Collectors.toList())
+                        )
+                ));
     }
 }
