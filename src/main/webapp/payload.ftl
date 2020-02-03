@@ -1,3 +1,4 @@
+<#import "macros.ftl" as pr>
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -15,17 +16,12 @@
       <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
+    <link href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css" rel="stylesheet" />
+    <link href="../../../../css/bootstrap-multiselect.css" rel="stylesheet" type="text/css" />
+    <link href="../../../../css/prbz.css" rel="stylesheet" type="text/css" />
 
   </head>
   <body>
-    <script type="text/javascript" src="../../../../js/jquery.min.js"></script>
-    <link href="../../../../css/bootstrap.min.css" rel="stylesheet" type="text/css" />
-    <script type="text/javascript" src="../../../../js/bootstrap.min.js"></script>
-    <link href="../../../../css/bootstrap-multiselect.css" rel="stylesheet" type="text/css" />
-    <script src="../../../../js/bootstrap-multiselect.js" type="text/javascript"></script>
-    <link href="../../../../css/prbz.css" rel="stylesheet" type="text/css" />
-    <script src="../../../../js/prbz.js"></script>
-
     <ul class="nav nav-pills" style="width: 80%; margin: 6px auto">
         <li style="font-size: 20px"><a href="/prbz-overview/">Home</a></li>
         <#list payloadSet as payload>
@@ -109,7 +105,8 @@
 			  	<table id="eventTable" class="table">
                     <colgroup>
                         <col style="width: 20px">
-                        <col style="width: 140px">
+                        <col style="width: 20px">
+                        <col style="width: 150px">
                         <col style="width: 100px">
                         <col style="width: 50px">
                         <col style="width: 150px">
@@ -117,7 +114,8 @@
                     </colgroup>
 			  		<thead>
 			  			<tr>
-                            <th><span class="switch" title="Expand All"></span></th>
+                            <th class="switch" title="Expand All"><span></span></th>
+                            <th>S</th>
                             <th>Dependency Issue</th>
                             <th>Status</th>
                             <th>Type</th>
@@ -129,11 +127,11 @@
 						<#list rows as row>
 							<#assign data = row.data>
                             <#assign hasAdditionalData = data.associatedPullRequest?has_content || data.associatedUnrelatedPullRequest?has_content || data.dependsOn?has_content>
-							<tr class="odd<#if hasAdditionalData> has-data</#if>">
-                                <td>
-                                    <span class="switch" title="Expand"></span>
+							<tr<#if hasAdditionalData> class="has-data"</#if> data-pr-id="${data.payloadDependency.label}">
+                                <td<#if hasAdditionalData> class="switch" title="Expand"</#if>>
+                                    <span></span>
                                 </td>
-								<td>
+								<td data-order="${(data.payloadDependency.maxSeverity!"OK")?switch("BLOCKER", 1, "CRITICAL", 2, "MAJOR", 3, "MINOR", 4, "TRIVIAL", 5, 6)}">
 									<#if data.payloadDependency.maxSeverity?has_content>
 										<#switch data.payloadDependency.maxSeverity>
 											<#case "BLOCKER"><img src="../../../../images/red-blocker.png" alt="red-blocker" title="blocker"><#break>
@@ -145,6 +143,8 @@
 									<#else>
 										<img src="../../../../images/green-good.png" alt="good green light" title="good">
 									</#if>
+                                </td>
+                                <td data-order="${data.payloadDependency.label?keep_after('-')?left_pad(5,'0')}">
                                     <a href="${data.payloadDependency.link}" title="${data.payloadDependency.summary}">#${data.payloadDependency.label}</a>
                                 </td>
                                 <td>
@@ -184,126 +184,6 @@
                                         </ul>
                                     </#list>
                                 </td>
-                            </tr>
-                            <tr class="even">
-                                <td colspan="6">
-                                    <#if data.associatedPullRequest?has_content || data.associatedUnrelatedPullRequest?has_content>
-                                        <div class="inner-div">
-                                            <table class="inner-table table table-striped">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Pull Requests</th>
-                                                        <th>Branch</th>
-                                                        <th>Build Result</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-            								    	<#list data.associatedPullRequest>
-            								    		<#items as patch>
-            				  								<tr>
-                                                                <td>
-                                                                    <a href="${patch.link}">#${patch.label}</a>
-                                                                </td>
-                                                                <td>
-                                                                    ${patch.codebase}
-                                                                </td>
-                                                                <td>
-                													<#switch patch.patchState>
-                														<#case "OPEN"> <span class="label label-success">open</span><#break>
-                														<#case "CLOSED"> <span class="label label-default">closed</span><#break>
-                														<#case "UNDEFINED"> <span class="label label-default">undefined</span><#break>
-                													</#switch>
-                													<#switch patch.commitStatus>
-                														<#case "success"> <span class="label label-success">success</span><#break>
-                														<#case "failure"> <span class="label label-warning">failure</span><#break>
-                														<#case "error"> <span class="label label-danger">error</span><#break>
-                														<#case "pending"> <span class="label label-default">pending</span><#break>
-                														<#case "unknown"> <span class="label label-primary">unknown</span><#break>
-                													</#switch>
-                													<#if patch.noUpstreamRequired?? && (patch.noUpstreamRequired==true)>
-                														<span class="label label-success">No Upstream Required</span>
-                													</#if>
-                				  								</td>
-                                                            </tr>
-            				  							</#items>
-            										</#list>
-            										<#list data.associatedUnrelatedPullRequest>
-            											<#items as patch>
-            												<tr>
-                                                                <td><a href="${patch.link}">#${patch.label}</a></td>
-                                                                <td>${patch.codebase}</td>
-                                                                <td>
-                													<#switch patch.patchState>
-                														<#case "OPEN"> <span class="label label-success">open</span><#break>
-                														<#case "CLOSED"> <span class="label label-default">closed</span><#break>
-                														<#case "UNDEFINED"> <span class="label label-default">undefined</span><#break>
-                													</#switch>
-                													<#switch patch.commitStatus>
-                														<#case "success"> <span class="label label-success">success</span><#break>
-                														<#case "failure"> <span class="label label-warning">failure</span><#break>
-                														<#case "error"> <span class="label label-danger">error</span><#break>
-                														<#case "pending"> <span class="label label-default">pending</span><#break>
-                														<#case "unknown"> <span class="label label-primary">unknown</span><#break>
-                													</#switch>
-                													<span class="label label-info">other stream</span>
-                													<#if patch.noUpstreamRequired?? && (patch.noUpstreamRequired==true)>
-                														<span class="label label-success">No Upstream Required</span>
-                													</#if>
-            												    </td>
-                                                            </tr>
-            											</#items>
-            										</#list>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </#if>
-                                    <#list data.dependsOn>
-                                        <div class="inner-div">
-                                            <table class="inner-table table table-striped issues-table">
-                                                <colgroup>
-                                                    <col class="first-column">
-                                                    <col class="second-column">
-                                                    <col class="third-column">
-                                                    <col>
-                                                </colgroup>
-                                                <thead>
-                                                    <tr>
-                                                        <th>Depends On</th>
-                                                        <th>Status</th>
-                                                        <th>Type</th>
-                                                        <th>Flags</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <#items as issue>
-                                                        <tr>
-                                                            <td><a href="${issue.link}" title="${issue.summary}">#${issue.label}</a></td>
-                                                            <td>${issue.status}</td>
-                                                            <td>${issue.type}</td>
-                                                            <td>
-                                                                <#if issue.fixVersions?has_content>
-                                                                    Fix Version:
-                                                                    <#list issue.fixVersions as fixVersion> ${fixVersion} </#list>
-                                                                </#if>
-                                                                <#if issue.payload?has_content && (issue.payload != "N/A")>
-                                                                    <span class="label label-success">${issue.payload} payload</span>
-                                                                </#if>
-                                                                <#if issue.streamStatus??>
-                                                                    <#list issue.streamStatus?keys as key>
-                                                                        <span class="label label-primary">${key} stream </span>
-                                                                        </#list>
-                                                                </#if>
-                                                                <#if issue.inPayload?? && (issue.inPayload==false)>
-                                                                    <span class="label label-warning">Not in Payload</span>
-                                                                </#if>
-                                                            </td>
-                                                        </tr>
-                                                    </#items>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </#list>
-                                </td>
 							</tr>
 						</#list>
 			  		</tbody>
@@ -313,19 +193,75 @@
 	</div>
   </body>
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+<script src="../../../../js/bootstrap-multiselect.js" type="text/javascript"></script>
+<script src="../../../../js/prbz.js"></script>
 <script type="text/javascript">
-	$(function() {
-		$('#lstStatus').multiselect({
-			includeSelectAllOption: true
-		});
-	});
-	$(function() {
-		$('#lstFlags').multiselect({
-			includeSelectAllOption: true
-		});
-	});
-    $(function() {
-        expandableRows();
-    });
+    var expRows = {
+        <#list rows as row>
+        <#assign data = row.data>
+        <#if data.associatedPullRequest?has_content || data.associatedUnrelatedPullRequest?has_content || data.dependsOn?has_content>
+        "${data.payloadDependency.label}": {
+            "pullrequests": [
+            <@pr.pullRequest data.associatedPullRequest />
+            <#if data.associatedPullRequest?has_content>,</#if>
+            <@pr.pullRequest data.associatedUnrelatedPullRequest />
+            ],
+            "issues": [
+            <#list data.dependsOn as issue>
+                {
+                    "link": "${issue.link}",
+                    "summary": "${issue.summary?html}",
+                    "label": "${issue.label}",
+                    "status": "${issue.status}",
+                    "type": "${issue.type}",
+                    "flags": [
+                    <#if issue.fixVersions?has_content>
+                        'Fix Version <#list issue.fixVersions as fixVersion> ${fixVersion}<#sep>, </#list>',
+                    </#if>
+                    <#if issue.payload?has_content && (issue.payload != "N/A")>
+                        '<span class="label label-success">${issue.payload} payload</span>',
+                    </#if>
+                    <#if issue.streamStatus??>
+                        <#list issue.streamStatus?keys as key>
+                            '<span class="label label-primary">${key} stream </span>',
+                        </#list>
+                    </#if>
+                    <#if !issue.inPayload!true>
+                        '<span class="label label-warning">Not in Payload</span>',
+                    </#if>
+                        ""
+                    ]
+                }<#sep>,
+            </#list>
+            ]
+        },
+        </#if>
+        </#list>
+        "": "" // required for syntactically correct JSON
+    }
+
+    $(document).ready( function () {
+        var eventTable = $('#eventTable').DataTable({
+            "paging": false,
+            "info": false,
+            "order": [],
+            "columnDefs": [
+                { "orderable": false, "targets": 0 }
+              ]
+        });
+
+        expandableRows(eventTable, expRows, true);
+
+        $('#lstStatus').multiselect({
+            includeSelectAllOption: true
+        });
+
+        $('#lstFlags').multiselect({
+            includeSelectAllOption: true
+        });
+    } );
 </script>
 </html>
