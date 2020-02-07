@@ -160,7 +160,7 @@ public class Util {
     private static void findJiraPayloads(Aphrodite aphrodite, boolean first, String eapStream, String payloadPrefix, Pattern payloadPattern) {
         LinkedHashMap<String, List<Issue>> payloadStore = jiraPayloadStoresByStream.get(eapStream);
         try {
-            if (first || payloadStore == null) {
+            if (first || payloadStore == null || payloadStore.size() == 0) {
                 int max = devProfile ? DEVMODE_PAYLOAD : LAST_PAYLOAD;
                 payloadStore = new LinkedHashMap<String, List<Issue>>();
                 for (int i = FIRST_PAYLOAD; i <= max; i++) {
