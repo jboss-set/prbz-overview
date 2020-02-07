@@ -87,24 +87,13 @@
 				<li><img src="../../../../images/green-good.png" alt="good green light" title="good"> Green status without notable issue(s), process is moving forward as planned with no visible obstacle.</li>
 		  </ul>
 
-		  <form action="/prbz-overview/rest/streampayload/${Request.streamName}/payload/${Request.payloadName}">
-			  <input type="hidden" name="streamName" value=${Request.streamName}>
-			  <input type="hidden" name="payloadName" value=${Request.payloadName}>
-			  <select id="lstStatus" name="selectedStatus" multiple="multiple">
-				  <option value="RED">RED</option>
-				  <option value="ORANGE">ORANGE</option>
-				  <option value="YELLOW">YELLOW</option>
-				  <option value="BLUE">BLUE</option>
-				  <option value="GRAY">GRAY</option>
-				  <option value="GREEN">GREEN</option>
-			  </select>
-			  <select id="lstFlags" name="missedFlags" multiple="multiple">
-				  <option value="PM">Need PM+</option>
-				  <option value="DEV">Need DEV+</option>
-				  <option value="QE">Need QE+</option>
-			  </select>
-			  <input type="submit" id="" value="Search" />
-		  </form>
+        <select id="lstStatus" name="selectedStatus" multiple="multiple">
+        </select>
+        <select id="lstFlags" name="missedFlags" multiple="multiple">
+            <option value="PM">Need PM+</option>
+            <option value="DEV">Need DEV+</option>
+            <option value="QE">Need QE+</option>
+        </select>
 
 		  </div>
 		</div>
@@ -139,7 +128,8 @@
                                 <td<#if hasAdditionalData> class="switch" title="Expand"</#if>>
                                     <span></span>
                                 </td>
-								<td data-order="${(data.payloadDependency.maxSeverity!"OK")?switch("BLOCKER", 1, "CRITICAL", 2, "MAJOR", 3, "MINOR", 4, "TRIVIAL", 5, 6)}">
+								<td data-order="${(data.payloadDependency.maxSeverity!"OK")?switch("BLOCKER", 1, "CRITICAL", 2, "MAJOR", 3, "MINOR", 4, "TRIVIAL", 5, 6)}"
+                                    data-filter="${(data.payloadDependency.maxSeverity!"OK")?switch("BLOCKER", "RED", "CRITICAL", "ORANGE", "MAJOR", "YELLOW", "MINOR", "BLUE", "TRIVIAL", "GRAY", "GREEN")}">
 									<#if data.payloadDependency.maxSeverity?has_content>
 										<#switch data.payloadDependency.maxSeverity>
 											<#case "BLOCKER"><img src="../../../../images/red-blocker.png" alt="red-blocker" title="blocker"><#break>
@@ -161,7 +151,7 @@
                                 <td>
                                     ${data.payloadDependency.type}
                                 </td>
-                                <td>
+                                <td data-filter="<#list data.payloadDependency.flags?keys as key>${key + data.payloadDependency.flags[key]?switch("SET", "?", "ACCEPTED", "+", "REJECTED", "-", "")}</#list>">
                                     <#if data.payloadDependency.allAcks>
                                         <span class="label label-success">Has all 3 acks</span>
                                     <#else>
@@ -258,7 +248,31 @@
             "order": [],
             "columnDefs": [
                 { "orderable": false, "targets": 0 }
-              ]
+            ],
+            "initComplete": function () {
+                let columnStatus = this.api().column(1),
+                    select = $('#lstStatus').on( 'change', function () {
+                        let val = $(this).val();
+
+                        columnStatus
+                            .search( val ? '^('+val.join('|')+')$' : '', true, false )
+                            .draw();
+                    } );
+
+                columnStatus.cache('search').unique().sort().each( function ( d, j ) {
+                    select.append( '<option value="'+d+'">'+d+'</option>' )
+                } );
+
+                let columnFlags = this.api().column(5);
+                    $('#lstFlags').on( 'change', function () {
+                        let val = $(this).val();
+
+                        columnFlags
+                            .search( val ? '('+ val.map(i => i + "[^+]").join('|') +')' : '', true, false )
+                            .draw();
+                    } );
+            }
+
         });
 
         expandableRows(eventTable, expRows, true);
