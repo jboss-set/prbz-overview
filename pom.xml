@@ -14,7 +14,7 @@
 	<groupId>org.jboss.set</groupId>
 	<artifactId>prbz-overview</artifactId>
 	<name>prbz-overview</name>
-	<version>0.5.0.Final-SNAPSHOT</version>
+	<version>0.5.0.Final</version>
 	<packaging>war</packaging>
 	<description>An overview place to review all pull requests on GitHub repository and issues in each payload tracker.</description>
 
