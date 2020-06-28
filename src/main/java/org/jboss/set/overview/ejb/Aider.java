@@ -66,7 +66,7 @@ import org.jboss.set.assist.data.ProcessorData;
 import org.jboss.set.assist.processor.PayloadProcessor;
 import org.jboss.set.assist.processor.ProcessorException;
 import org.jboss.set.assist.processor.PullRequestProcessor;
-import org.jboss.set.overview.PrbzStatus;
+import org.jboss.set.overview.PrbzStatusSingleton;
 import org.jboss.set.overview.Util;
 
 /**
@@ -95,7 +95,7 @@ public class Aider {
     private static final boolean devProfile = System.getProperty("prbz-dev") != null;
 
     @Inject
-    private PrbzStatus status;
+    private PrbzStatusSingleton status;
 
     @PostConstruct
     public void init() {

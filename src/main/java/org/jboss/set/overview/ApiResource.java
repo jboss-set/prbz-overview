@@ -36,7 +36,7 @@ public class ApiResource {
     @Inject
     private Aider aider;
     @Inject
-    private PrbzStatus status;
+    private PrbzStatusSingleton status;
 
     @GET
     @Path("/payload/{streamName}/{payloadName}")
@@ -52,30 +52,30 @@ public class ApiResource {
     @Path("/refresh")
     @Produces("application/json")
     public PrbzStatus scheduleUpdate() {
-        if (status.getRefreshStatus().equals(PrbzStatus.COMPLETE)) {
+        if (status.currentState().getRefreshState().equals(PrbzStatusSingleton.COMPLETE)) {
             status.setRefreshScheduled();
             aider.scheduleRefresh();
         }
 
-        return status;
+        return status.currentState();
     }
 
     @POST
     @Path("/refresh/{streamName}/{payloadName}")
     @Produces("application/json")
     public PrbzStatus scheduleSingleUpdate(@PathParam("streamName") String streamName, @PathParam("payloadName") String payloadName) {
-        if (status.getRefreshStatus().equals(PrbzStatus.COMPLETE)) {
+        if (status.currentState().getRefreshState().equals(PrbzStatusSingleton.COMPLETE)) {
             status.setRefreshScheduled();
             aider.scheduleRefresh(streamName, payloadName);
         }
 
-        return status;
+        return status.currentState();
     }
 
     @GET
     @Path("/status")
     @Produces("application/json")
     public PrbzStatus freshnessStatus() {
-        return status;
+        return status.currentState();
     }
 }

@@ -17,42 +17,20 @@
 
 package org.jboss.set.overview;
 
-import javax.ejb.Singleton;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-
-@Singleton
 public class PrbzStatus {
-    public static final String STARTING = "Starting";
-    public static final String REFRESHING = "Refreshing";
-    public static final String COMPLETE = "Complete";
-    public static final String SCHEDULED = "SCHEDULED";
+    private String refreshState = null;
+    private String lastRefresh = null;
 
-    private DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-    private String refreshStatus = "Starting";
-    private String lastRefresh = ZonedDateTime.now().format(formatter);
-
-    public void refreshStarted() {
-        System.out.println("!!!! REFRESH STARTED");
-        if (!this.refreshStatus.equals(STARTING)) {
-            this.refreshStatus = REFRESHING;
-        }
+    public PrbzStatus(String refreshState, String lastRefresh) {
+        this.refreshState = refreshState;
+        this.lastRefresh = lastRefresh;
     }
 
-    public void refreshCompleted() {
-        this.refreshStatus = COMPLETE;
-        lastRefresh = ZonedDateTime.now().format(formatter);
-    }
-
-    public String getRefreshStatus() {
-        return refreshStatus;
+    public String getRefreshState() {
+        return refreshState;
     }
 
     public String getLastRefresh() {
         return lastRefresh;
-    }
-
-    public void setRefreshScheduled() {
-        this.refreshStatus = SCHEDULED;
     }
 }
