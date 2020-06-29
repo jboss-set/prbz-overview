@@ -58,3 +58,47 @@ Copy generated war file to $JBOSS_HOME/standalone/deployments/ and visit http://
 For instance on thunder: [OverviewPage](https://thunder.sin2.redhat.com/prbz-overview)
 
 In order to avoid potential Github API rate limitation, the scheduled update task updates one payload and one stream Github repositories per hour. Therefore, it may take a bit longer to see all streams / payloads information for the first deployment.
+
+#REST endpoint
+---------------
+/rest/api/ exposes a few management operations:
+
+- `GET /rest/api/payload/{stream}/{release}` - produces JSON representation of issues in payload (using cached data)
+```
+[{
+    "summary": "(7.1.z) Upgrade Infinispan to 8.2.9.Final",
+    "url": "https://issues.redhat.com/browse/JBEAP-14221",
+    "type": "component upgrade",
+    "acks": {
+      "QE": "+",
+      "DEV": "+",
+      "PM": "+"
+    },
+    "status": "VERIFIED",
+    "priority": "BLOCKER"
+  },
+  {
+    "summary": "(7.1.z) RPM - Setting JAVA_HOME not effective in RHEL-6 init scripts",
+    "url": "https://issues.redhat.com/browse/JBEAP-14193",
+    "type": "bug",
+    "acks": {
+      "QE": "+",
+      "DEV": "+",
+      "PM": "?"
+    },
+    "status": "VERIFIED",
+    "priority": "MAJOR"
+  }]
+```
+ - `GET /rest/api/status` - returns current status of PRBZ cache
+```
+{"refreshStatus":"Complete","lastRefresh":"2020-06-27T16:16:54.507"}
+```
+ - `POST /rest/api/refresh` - schedules a full refresh of all PRBZ caches. The operation is executed asynchronously and can be monitored through `/rest/api/status`.
+```
+{"refreshStatus":"Scheduled","lastRefresh":"2020-06-27T16:16:54.507"}
+```
+ - `POST /rest/api/refresh/{stream}/{release}` - schedules a refresh of cached informations for selected release only. The operation is executed asynchronously and can be monitored through `/rest/api/status`.
+```
+{"refreshStatus":"Scheduled","lastRefresh":"2020-06-27T16:16:54.507"}
+```

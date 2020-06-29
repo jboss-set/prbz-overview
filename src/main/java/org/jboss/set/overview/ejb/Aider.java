@@ -347,7 +347,10 @@ public class Aider {
 
     @Schedule(hour = "1,3,5,7,9,11,13,15,17,19,21,23")
     public void updatePayloadData() {
-        if (devProfile) return;
+        if (devProfile) {
+            status.refreshCompleted();
+            return;
+        }
 
         status.refreshStarted();
 
