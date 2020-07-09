@@ -20,11 +20,13 @@ package org.jboss.set.overview;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.jboss.set.aphrodite.domain.Flag;
 import org.jboss.set.aphrodite.domain.FlagStatus;
 import org.jboss.set.aphrodite.domain.Issue;
+import org.jboss.set.aphrodite.issue.trackers.jira.JiraIssue;
 
 @XmlRootElement(name = "issue")
 public class SimpleIssue {
@@ -35,6 +37,8 @@ public class SimpleIssue {
     private Map<String, String> acks = new HashMap<>();
     private String status;
     private String priority;
+    private List<URL> pullRequests;
+    private List<URL> linkedIncorporatesIssues;
 
     public static SimpleIssue from(Issue issue) {
         SimpleIssue simpleIssue = new SimpleIssue();
@@ -47,14 +51,36 @@ public class SimpleIssue {
             FlagStatus flagStatus = stateMap.get(flag);
             acks.put(flag.name(), flagStatus.getSymbol());
         }
-        simpleIssue.putAcks(acks);
-        simpleIssue.putStatus(issue.getStatus().name());
-        simpleIssue.putPriority(issue.getPriority().name());
+        simpleIssue.setAcks(acks);
+        simpleIssue.setStatus(issue.getStatus().name());
+        simpleIssue.setPriority(issue.getPriority().name());
+        if (issue instanceof JiraIssue) {
+            JiraIssue jiraIssue = (JiraIssue) issue;
+            // using JiraIssue to get the list of PRs to avoid having to query JIRA through Issue#getPatches()
+            simpleIssue.setPullRequests(jiraIssue.getPullRequests());
+            simpleIssue.setIncorporatedIssues(jiraIssue.getLinkedIncorporatesIssues());
+        }
 
         return simpleIssue;
     }
 
-    private void putPriority(String priority) {
+    private void setIncorporatedIssues(List<URL> linkedIncorporatesIssues) {
+        this.linkedIncorporatesIssues = linkedIncorporatesIssues;
+    }
+
+    public List<URL> getLinkedIncorporatesIssues() {
+        return linkedIncorporatesIssues;
+    }
+
+    public List<URL> getPullRequests() {
+        return pullRequests;
+    }
+
+    private void setPullRequests(List<URL> patches) {
+        this.pullRequests = patches;
+    }
+
+    private void setPriority(String priority) {
         this.priority = priority;
     }
 
@@ -62,7 +88,7 @@ public class SimpleIssue {
         return priority;
     }
 
-    private void putStatus(String status) {
+    private void setStatus(String status) {
         this.status = status;
     }
 
@@ -70,7 +96,7 @@ public class SimpleIssue {
         return status;
     }
 
-    private void putAcks(Map<String, String> acks) {
+    private void setAcks(Map<String, String> acks) {
         this.acks = acks;
     }
 

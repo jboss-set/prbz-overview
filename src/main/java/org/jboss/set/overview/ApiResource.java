@@ -24,7 +24,10 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.jboss.set.aphrodite.domain.Issue;
@@ -77,5 +80,18 @@ public class ApiResource {
     @Produces("application/json")
     public PrbzStatus freshnessStatus() {
         return status.currentState();
+    }
+
+    @GET
+    @Path("/payloads")
+    @Produces("application/json")
+    public Map<String, Set<String>> availablePayloads() {
+        Map<String, Set<String>> res = new HashMap<>();
+        for (String stream : Util.jiraPayloadStoresByStream.keySet()) {
+            Set<String> payloads = Util.jiraPayloadStoresByStream.get(stream).keySet();
+            res.put(stream, payloads);
+        }
+
+        return res;
     }
 }

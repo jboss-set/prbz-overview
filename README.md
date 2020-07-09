@@ -102,3 +102,7 @@ In order to avoid potential Github API rate limitation, the scheduled update tas
 ```
 {"refreshStatus":"Scheduled","lastRefresh":"2020-06-27T16:16:54.507"}
 ```
+ - `GET /rest/api/payloads` - returns a map of avilable streams/payloads
+```
+{"jboss-eap-7.2.z":["7.2.1.GA","7.2.2.GA"],"jboss-eap-7.3.z":["7.3.1.GA","7.3.2.GA"]}
+```
