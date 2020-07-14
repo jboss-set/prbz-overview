@@ -140,9 +140,6 @@ public class Aider {
     }
 
     public void initAllPullRequestData() {
-        if (true) {
-            return;
-        }
         logger.info("pull request data initialization is started.");
         try {
             TimeUnit.MINUTES.sleep(2);// wait for streams loading

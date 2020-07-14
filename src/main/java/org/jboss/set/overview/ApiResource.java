@@ -30,7 +30,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.jboss.set.aphrodite.domain.Issue;
+import org.jboss.set.assist.data.ProcessorData;
 import org.jboss.set.overview.ejb.Aider;
 
 @Path("/api")
@@ -44,11 +44,12 @@ public class ApiResource {
     @GET
     @Path("/payload/{streamName}/{payloadName}")
     @Produces("application/json")
-    public Collection<SimpleIssue> generatePayload(@PathParam("streamName") String streamName, @PathParam("payloadName") String payloadName) {
+    public Collection<RestIssue> generatePayload(@PathParam("streamName") String streamName, @PathParam("payloadName") String payloadName) {
+        List<ProcessorData> payloadData = Aider.getPayloadData(payloadName);
 
-        List<Issue> issues = Util.jiraPayloadStoresByStream.get(streamName).get(payloadName);
-
-        return issues.parallelStream().map(SimpleIssue::from).collect(Collectors.toList());
+        return payloadData.parallelStream()
+                .map(d-> RestIssue.from(d))
+                .collect(Collectors.toList());
     }
 
     @POST

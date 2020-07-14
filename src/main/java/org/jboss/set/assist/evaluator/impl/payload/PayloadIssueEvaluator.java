@@ -33,6 +33,7 @@ import javax.naming.NameNotFoundException;
 
 import org.jboss.jbossset.bugclerk.Violation;
 import org.jboss.set.aphrodite.domain.Issue;
+import org.jboss.set.aphrodite.issue.trackers.jira.JiraIssue;
 import org.jboss.set.aphrodite.simplecontainer.SimpleContainer;
 import org.jboss.set.assist.Constants;
 import org.jboss.set.assist.Util;
@@ -69,7 +70,12 @@ public class PayloadIssueEvaluator implements PayloadEvaluator {
                 dependencyIssue.getSummary().orElse(Constants.NOTAPPLICABLE), dependencyIssue.getStatus(),
                 dependencyIssue.getType(),
                 dependencyIssue.getStage().getStateMap().entrySet().stream().collect(Collectors.toMap(e -> String.valueOf(e.getKey()), e -> String.valueOf(e.getValue()))),
+                dependencyIssue.getPriority().name(),
                 Util.isAllAcks(dependencyIssue),
                 violations));
+
+        if (dependencyIssue instanceof JiraIssue) {
+            data.put("incorporatedIssues", ((JiraIssue) dependencyIssue).getLinkedIncorporatesIssues());
+        }
     }
 }

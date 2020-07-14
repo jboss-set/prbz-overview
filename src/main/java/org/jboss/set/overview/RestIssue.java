@@ -23,13 +23,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jboss.set.aphrodite.domain.Flag;
-import org.jboss.set.aphrodite.domain.FlagStatus;
-import org.jboss.set.aphrodite.domain.Issue;
-import org.jboss.set.aphrodite.issue.trackers.jira.JiraIssue;
+import org.jboss.set.assist.data.ProcessorData;
+import org.jboss.set.assist.data.payload.AssociatedPullRequest;
+import org.jboss.set.assist.data.payload.PayloadIssue;
 
 @XmlRootElement(name = "issue")
-public class SimpleIssue {
+public class RestIssue {
 
     private String summary;
     private URL url;
@@ -37,31 +36,37 @@ public class SimpleIssue {
     private Map<String, String> acks = new HashMap<>();
     private String status;
     private String priority;
-    private List<URL> pullRequests;
+    private List<AssociatedPullRequest> pullRequests;
     private List<URL> linkedIncorporatesIssues;
 
-    public static SimpleIssue from(Issue issue) {
-        SimpleIssue simpleIssue = new SimpleIssue();
-        simpleIssue.setSummary(issue.getSummary().get());
-        simpleIssue.setURL(issue.getURL());
-        simpleIssue.setType(issue.getType().get());
-        Map<Flag, FlagStatus> stateMap = issue.getStage().getStateMap();
-        Map<String, String> acks = new HashMap<>();
-        for (Flag flag : stateMap.keySet()) {
-            FlagStatus flagStatus = stateMap.get(flag);
-            acks.put(flag.name(), flagStatus.getSymbol());
-        }
-        simpleIssue.setAcks(acks);
-        simpleIssue.setStatus(issue.getStatus().name());
-        simpleIssue.setPriority(issue.getPriority().name());
-        if (issue instanceof JiraIssue) {
-            JiraIssue jiraIssue = (JiraIssue) issue;
-            // using JiraIssue to get the list of PRs to avoid having to query JIRA through Issue#getPatches()
-            simpleIssue.setPullRequests(jiraIssue.getPullRequests());
-            simpleIssue.setIncorporatedIssues(jiraIssue.getLinkedIncorporatesIssues());
+    public static RestIssue from(ProcessorData d) {
+        PayloadIssue issue = (PayloadIssue) d.getData().get("payloadDependency");
+        List<AssociatedPullRequest> associatedPullRequest = (List< AssociatedPullRequest >)d.getData().get("associatedPullRequest");
+        associatedPullRequest.addAll((List< AssociatedPullRequest >)d.getData().get("associatedUnrelatedPullRequest"));
+        List<URL> incorporatedIssues = (List<URL>) d.getData().get("incorporatedIssues");
+
+        RestIssue restIssue = new RestIssue();
+        restIssue.setSummary(issue.getSummary());
+        restIssue.setURL(issue.getLink());
+        restIssue.setType(issue.getType().get());
+        restIssue.setAcks(new HashMap<>(issue.getFlags()));
+
+        restIssue.setPriority(issue.getPriority());
+        restIssue.setIncorporatedIssues(incorporatedIssues);
+
+        if (associatedPullRequest != null) {
+            restIssue.setPullRequest(associatedPullRequest);
         }
 
-        return simpleIssue;
+        return restIssue;
+    }
+
+    private void setPullRequest(List<AssociatedPullRequest> associatedPullRequest) {
+        this.pullRequests = associatedPullRequest;
+    }
+
+    public List<AssociatedPullRequest> getPullRequest() {
+        return pullRequests;
     }
 
     private void setIncorporatedIssues(List<URL> linkedIncorporatesIssues) {
@@ -70,14 +75,6 @@ public class SimpleIssue {
 
     public List<URL> getLinkedIncorporatesIssues() {
         return linkedIncorporatesIssues;
-    }
-
-    public List<URL> getPullRequests() {
-        return pullRequests;
-    }
-
-    private void setPullRequests(List<URL> patches) {
-        this.pullRequests = patches;
     }
 
     private void setPriority(String priority) {

@@ -35,23 +35,28 @@ public class AssociatedPullRequest {
     private String codebase;
     private String patchState;
     private String commitStatus;
+    private String mergeStatus;
     private boolean noUpstreamRequired;
     private URL upstreamIssueFromPRDesc;
     private URL upstreamPullRequestFromPRDesc;
 
-    public AssociatedPullRequest(String label, URL link, String codebase, String patchState, String commitStatus, boolean noUpstreamRequired, URL upstreamIssueFromPRDesc, URL upstreamPullRequestFromPRDesc) {
+    public AssociatedPullRequest(String label, URL link, String codebase, String patchState, String commitStatus,
+                                 String mergeStatus, boolean noUpstreamRequired, URL upstreamIssueFromPRDesc,
+                                 URL upstreamPullRequestFromPRDesc) {
         this.label = label;
         this.link = link;
         this.codebase = codebase;
         this.patchState = patchState;
         this.commitStatus = commitStatus;
+        this.mergeStatus = mergeStatus;
         this.noUpstreamRequired = noUpstreamRequired;
         this.upstreamIssueFromPRDesc = upstreamIssueFromPRDesc;
         this.upstreamPullRequestFromPRDesc = upstreamPullRequestFromPRDesc;
     }
 
-    public AssociatedPullRequest(String label, URL link, String codebase, String patchState, String commitStatus, boolean noUpstreamRequired) {
-        this(label, link, codebase, patchState, commitStatus, noUpstreamRequired, null, null);
+    public AssociatedPullRequest(String label, URL link, String codebase, String patchState, String commitStatus,
+                                 String mergeStatus, boolean noUpstreamRequired) {
+        this(label, link, codebase, patchState, commitStatus, mergeStatus, noUpstreamRequired, null, null);
     }
 
     public String getLabel() {
@@ -84,5 +89,9 @@ public class AssociatedPullRequest {
 
     public URL getUpstreamPullRequestFromPRDesc() {
         return upstreamPullRequestFromPRDesc;
+    }
+
+    public String getMergeStatus() {
+        return mergeStatus;
     }
 }

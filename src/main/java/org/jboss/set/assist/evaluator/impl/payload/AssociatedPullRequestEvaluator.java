@@ -113,14 +113,22 @@ public class AssociatedPullRequestEvaluator implements PayloadEvaluator {
             } catch (MalformedURLException e) {
                 logger.log(Level.WARNING, "Can not form upstream pull reuqest url due to : " + e.getMessage());
             }
-            relatedDataList.add(new AssociatedPullRequest(pullRequest.getId(), pullRequest.getURL(), pullRequest.getCodebase().getName(), pullRequest.getState().toString(), commitStatus.orElse(CommitStatus.UNKNOWN).toString(), isNoUpstreamRequired, upstreamIssueFromPRDesc, upstreamPRFromPRDesc));
+            relatedDataList.add(new AssociatedPullRequest(pullRequest.getId(), pullRequest.getURL(),
+                    pullRequest.getCodebase().getName(), pullRequest.getState().toString(),
+                    commitStatus.orElse(CommitStatus.UNKNOWN).toString(),
+                    pullRequest.getMergableState() == null?null:pullRequest.getMergableState().name(),
+                    isNoUpstreamRequired, upstreamIssueFromPRDesc, upstreamPRFromPRDesc));
         }
         data.put(KEY, relatedDataList);
 
         for (PullRequest pullRequest : unrelatedPullRequests) {
             boolean isNoUpstreamRequired = PatchHomeService.isNoUpstreamRequired(pullRequest);
             Optional<CommitStatus> commitStatus = PatchHomeService.retrieveCommitStatus(pullRequest);
-            unrelatedDataList.add(new AssociatedPullRequest(pullRequest.getId(), pullRequest.getURL(), pullRequest.getCodebase().getName(), pullRequest.getState().toString(),commitStatus.orElse(CommitStatus.UNKNOWN).toString(), isNoUpstreamRequired));
+            unrelatedDataList.add(new AssociatedPullRequest(pullRequest.getId(), pullRequest.getURL(),
+                    pullRequest.getCodebase().getName(), pullRequest.getState().toString(),
+                    commitStatus.orElse(CommitStatus.UNKNOWN).toString(),
+                    pullRequest.getMergableState() == null?null:pullRequest.getMergableState().name(),
+                    isNoUpstreamRequired));
         }
         data.put(KEY_UNRELATED, unrelatedDataList);
     }

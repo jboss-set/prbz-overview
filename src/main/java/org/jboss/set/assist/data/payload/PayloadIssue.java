@@ -44,17 +44,21 @@ public class PayloadIssue {
     private IssueStatus status;
     private IssueType type;
     private Map<String, String> flags;
+    private String priority;
     private boolean allAcks;
     private Collection<Violation> violations;
     private Severity maxSeverity;
 
-    public PayloadIssue(URL link, String label, String summary, IssueStatus status, IssueType type, Map<String, String> flags, boolean allAcks, Collection<Violation> violations) {
+    public PayloadIssue(URL link, String label, String summary, IssueStatus status,
+                        IssueType type, Map<String, String> flags, String priority,
+                        boolean allAcks, Collection<Violation> violations) {
         this.link = link;
         this.label = label;
         this.summary = summary;
         this.status = status;
         this.type = type;
         this.flags = flags;
+        this.priority = priority;
         this.allAcks = allAcks;
         this.violations = violations;
         this.maxSeverity = violations.stream().map(violation -> violation.getLevel()).reduce((severity1, severity2) -> maxSeverity(severity1, severity2)).orElse(null);
@@ -82,6 +86,10 @@ public class PayloadIssue {
 
     public Map<String, String> getFlags() {
         return flags;
+    }
+
+    public String getPriority() {
+        return priority;
     }
 
     public boolean isAllAcks() {
