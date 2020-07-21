@@ -35,6 +35,7 @@ import org.jboss.set.assist.data.payload.AssociatedPullRequest;
 import org.jboss.set.assist.evaluator.PayloadEvaluator;
 import org.jboss.set.assist.evaluator.PayloadEvaluatorContext;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -100,7 +101,19 @@ public class AssociatedPullRequestEvaluator implements PayloadEvaluator {
         for (PullRequest pullRequest : relatedPullRequests) {
             boolean isNoUpstreamRequired = PatchHomeService.isNoUpstreamRequired(pullRequest);
             Optional<CommitStatus> commitStatus = PatchHomeService.retrieveCommitStatus(pullRequest);
-            relatedDataList.add(new AssociatedPullRequest(pullRequest.getId(), pullRequest.getURL(), pullRequest.getCodebase().getName(), pullRequest.getState().toString(), commitStatus.orElse(CommitStatus.UNKNOWN).toString(), isNoUpstreamRequired));
+            URL upstreamIssueFromPRDesc = null;
+            URL upstreamPRFromPRDesc = null;
+            try {
+                upstreamIssueFromPRDesc = pullRequest.findUpstreamIssueURL();
+            } catch (MalformedURLException e) {
+                logger.log(Level.WARNING, "Can not form upstream issue url due to : " + e.getMessage());
+            }
+            try {
+                upstreamPRFromPRDesc = pullRequest.findUpstreamPullRequestURL();
+            } catch (MalformedURLException e) {
+                logger.log(Level.WARNING, "Can not form upstream pull reuqest url due to : " + e.getMessage());
+            }
+            relatedDataList.add(new AssociatedPullRequest(pullRequest.getId(), pullRequest.getURL(), pullRequest.getCodebase().getName(), pullRequest.getState().toString(), commitStatus.orElse(CommitStatus.UNKNOWN).toString(), isNoUpstreamRequired, upstreamIssueFromPRDesc, upstreamPRFromPRDesc));
         }
         data.put(KEY, relatedDataList);
 

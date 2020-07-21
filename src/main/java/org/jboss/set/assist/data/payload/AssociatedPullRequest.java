@@ -36,14 +36,22 @@ public class AssociatedPullRequest {
     private String patchState;
     private String commitStatus;
     private boolean noUpstreamRequired;
+    private URL upstreamIssueFromPRDesc;
+    private URL upstreamPullRequestFromPRDesc;
 
-    public AssociatedPullRequest(String label, URL link, String codebase, String patchState, String commitStatus, boolean noUpstreamRequired) {
+    public AssociatedPullRequest(String label, URL link, String codebase, String patchState, String commitStatus, boolean noUpstreamRequired, URL upstreamIssueFromPRDesc, URL upstreamPullRequestFromPRDesc) {
         this.label = label;
         this.link = link;
         this.codebase = codebase;
         this.patchState = patchState;
         this.commitStatus = commitStatus;
         this.noUpstreamRequired = noUpstreamRequired;
+        this.upstreamIssueFromPRDesc = upstreamIssueFromPRDesc;
+        this.upstreamPullRequestFromPRDesc = upstreamPullRequestFromPRDesc;
+    }
+
+    public AssociatedPullRequest(String label, URL link, String codebase, String patchState, String commitStatus, boolean noUpstreamRequired) {
+        this(label, link, codebase, patchState, commitStatus, noUpstreamRequired, null, null);
     }
 
     public String getLabel() {
@@ -68,5 +76,13 @@ public class AssociatedPullRequest {
 
     public boolean isNoUpstreamRequired() {
         return noUpstreamRequired;
+    }
+
+    public URL getUpstreamIssueFromPRDesc() {
+        return upstreamIssueFromPRDesc;
+    }
+
+    public URL getUpstreamPullRequestFromPRDesc() {
+        return upstreamPullRequestFromPRDesc;
     }
 }
