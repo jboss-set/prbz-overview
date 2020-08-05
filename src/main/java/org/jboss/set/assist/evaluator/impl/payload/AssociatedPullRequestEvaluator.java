@@ -103,6 +103,7 @@ public class AssociatedPullRequestEvaluator implements PayloadEvaluator {
             Optional<CommitStatus> commitStatus = PatchHomeService.retrieveCommitStatus(pullRequest);
             URL upstreamIssueFromPRDesc = null;
             URL upstreamPRFromPRDesc = null;
+            String upstreamPatchState = null;
             try {
                 upstreamIssueFromPRDesc = pullRequest.findUpstreamIssueURL();
             } catch (MalformedURLException e) {
@@ -110,6 +111,7 @@ public class AssociatedPullRequestEvaluator implements PayloadEvaluator {
             }
             try {
                 upstreamPRFromPRDesc = pullRequest.findUpstreamPullRequestURL();
+                upstreamPatchState = PatchHomeService.getPatchState(upstreamPRFromPRDesc).name();
             } catch (MalformedURLException e) {
                 logger.log(Level.WARNING, "Can not form upstream pull reuqest url due to : " + e.getMessage());
             }
@@ -117,7 +119,7 @@ public class AssociatedPullRequestEvaluator implements PayloadEvaluator {
                     pullRequest.getCodebase().getName(), pullRequest.getState().toString(),
                     commitStatus.orElse(CommitStatus.UNKNOWN).toString(),
                     pullRequest.getMergableState() == null?null:pullRequest.getMergableState().name(),
-                    isNoUpstreamRequired, upstreamIssueFromPRDesc, upstreamPRFromPRDesc));
+                    isNoUpstreamRequired, upstreamIssueFromPRDesc, upstreamPRFromPRDesc, upstreamPatchState));
         }
         data.put(KEY, relatedDataList);
 

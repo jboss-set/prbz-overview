@@ -19,6 +19,7 @@ package org.jboss.set.overview;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +42,7 @@ public class RestIssue {
 
     public static RestIssue from(ProcessorData d) {
         PayloadIssue issue = (PayloadIssue) d.getData().get("payloadDependency");
-        List<AssociatedPullRequest> associatedPullRequest = (List< AssociatedPullRequest >)d.getData().get("associatedPullRequest");
+        List<AssociatedPullRequest> associatedPullRequest = new ArrayList<>((List< AssociatedPullRequest >)d.getData().get("associatedPullRequest"));
         associatedPullRequest.addAll((List< AssociatedPullRequest >)d.getData().get("associatedUnrelatedPullRequest"));
         List<URL> incorporatedIssues = (List<URL>) d.getData().get("incorporatedIssues");
 

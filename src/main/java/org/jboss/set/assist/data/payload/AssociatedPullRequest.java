@@ -39,10 +39,11 @@ public class AssociatedPullRequest {
     private boolean noUpstreamRequired;
     private URL upstreamIssueFromPRDesc;
     private URL upstreamPullRequestFromPRDesc;
+    private String upstreamPatchState;
 
     public AssociatedPullRequest(String label, URL link, String codebase, String patchState, String commitStatus,
                                  String mergeStatus, boolean noUpstreamRequired, URL upstreamIssueFromPRDesc,
-                                 URL upstreamPullRequestFromPRDesc) {
+                                 URL upstreamPullRequestFromPRDesc, String upstreamPatchState) {
         this.label = label;
         this.link = link;
         this.codebase = codebase;
@@ -52,11 +53,12 @@ public class AssociatedPullRequest {
         this.noUpstreamRequired = noUpstreamRequired;
         this.upstreamIssueFromPRDesc = upstreamIssueFromPRDesc;
         this.upstreamPullRequestFromPRDesc = upstreamPullRequestFromPRDesc;
+        this.upstreamPatchState = upstreamPatchState;
     }
 
     public AssociatedPullRequest(String label, URL link, String codebase, String patchState, String commitStatus,
                                  String mergeStatus, boolean noUpstreamRequired) {
-        this(label, link, codebase, patchState, commitStatus, mergeStatus, noUpstreamRequired, null, null);
+        this(label, link, codebase, patchState, commitStatus, mergeStatus, noUpstreamRequired, null, null, null);
     }
 
     public String getLabel() {
@@ -93,5 +95,9 @@ public class AssociatedPullRequest {
 
     public String getMergeStatus() {
         return mergeStatus;
+    }
+
+    public String getUpstreamPatchState() {
+        return upstreamPatchState;
     }
 }
