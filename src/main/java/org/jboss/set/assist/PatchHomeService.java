@@ -90,7 +90,7 @@ public class PatchHomeService implements PatchHome {
         });
     }
 
-    private PatchType getPatchType(URL url) {
+    private static PatchType getPatchType(URL url) {
         String urlStr = url.toString();
         if (urlStr.contains("/pull/"))
             return PatchType.PULLREQUEST;
@@ -100,7 +100,7 @@ public class PatchHomeService implements PatchHome {
             return PatchType.FILE;
     }
 
-    private PatchState getPatchState(URL url, PatchType patchType) {
+    private static PatchState getPatchState(URL url, PatchType patchType) {
         if (patchType.equals(PatchType.PULLREQUEST)) {
             try {
                 PullRequest pullRequest = aphrodite.getPullRequest(url);
@@ -164,5 +164,10 @@ public class PatchHomeService implements PatchHome {
             }
         }
         return commitStatus;
+    }
+
+    public static PatchState getPatchState(URL url) {
+        PatchType patchType = getPatchType(url);
+        return getPatchState(url, patchType);
     }
 }

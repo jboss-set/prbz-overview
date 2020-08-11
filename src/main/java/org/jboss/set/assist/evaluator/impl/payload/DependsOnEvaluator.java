@@ -103,6 +103,7 @@ public class DependsOnEvaluator implements PayloadEvaluator {
                         issue.getSummary().orElse(Constants.NOTAPPLICABLE), issue.getStatus(), issue.getType(),
                         issue.getStage().getStateMap().entrySet().stream()
                                 .collect(Collectors.toMap(e -> String.valueOf(e.getKey()), e -> String.valueOf(e.getValue()))),
+                        issue.getPriority().name(),
                         Collections.emptyList(), inPayload, getFixVersions(issue), getPayload(issue),
                         issue.getStreamStatus()));
             });
@@ -114,6 +115,7 @@ public class DependsOnEvaluator implements PayloadEvaluator {
                         issue.getSummary().orElse(Constants.NOTAPPLICABLE), issue.getStatus(), issue.getType(),
                         issue.getStage().getStateMap().entrySet().stream()
                                 .collect(Collectors.toMap(e -> String.valueOf(e.getKey()), e -> String.valueOf(e.getValue()))),
+                        issue.getPriority().name(),
                         Collections.emptyList(), inPayload, getFixVersions(issue), getPayload(issue),
                         issue.getStreamStatus()));
             });

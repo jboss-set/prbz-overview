@@ -45,9 +45,11 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
+import javax.ejb.Asynchronous;
 import javax.ejb.Schedule;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
+import javax.inject.Inject;
 
 import org.jboss.set.aphrodite.Aphrodite;
 import org.jboss.set.aphrodite.domain.Issue;
@@ -64,6 +66,7 @@ import org.jboss.set.assist.data.ProcessorData;
 import org.jboss.set.assist.processor.PayloadProcessor;
 import org.jboss.set.assist.processor.ProcessorException;
 import org.jboss.set.assist.processor.PullRequestProcessor;
+import org.jboss.set.overview.PrbzStatusSingleton;
 import org.jboss.set.overview.Util;
 
 /**
@@ -91,6 +94,9 @@ public class Aider {
 
     private static final boolean devProfile = System.getProperty("prbz-dev") != null;
 
+    @Inject
+    private PrbzStatusSingleton status;
+
     @PostConstruct
     public void init() {
         // Perform action during application's startup
@@ -101,6 +107,7 @@ public class Aider {
                 @Override
                 public void run() {
                     logger.log(Level.INFO, "New initialisation in Aider init()");
+                    status.refreshStarted();
 
                     findAllJiraPayloads(Aider.aphrodite, true);
                     findAllBugzillaPayloads(Aider.aphrodite, true);
@@ -112,6 +119,8 @@ public class Aider {
                     initAllPayloadData();
 
                     initAllPullRequestData();
+
+                    status.refreshCompleted();
                 }
             });
 
@@ -305,6 +314,20 @@ public class Aider {
         });
     }
 
+    @Asynchronous
+    public void scheduleRefresh() {
+        updatePayloadData();
+    }
+
+    @Asynchronous
+    public void scheduleRefresh(String streamName, String payloadName) {
+        status.refreshStarted();
+
+        generatedSinglePayloadData(streamName, payloadName);
+
+        status.refreshCompleted();
+    }
+
     @Schedule(hour = "0,2,4,6,8,10,12,14,16,18,20,22")
     public void updatePullRequestData() {
         if (devProfile) return;
@@ -321,7 +344,13 @@ public class Aider {
 
     @Schedule(hour = "1,3,5,7,9,11,13,15,17,19,21,23")
     public void updatePayloadData() {
-        if (devProfile) return;
+        if (devProfile) {
+            status.refreshCompleted();
+            return;
+        }
+
+        status.refreshStarted();
+
         logger.info("schedule payload data update is started ...");
         findAllBugzillaPayloads(aphrodite, false);
         findAllJiraPayloads(aphrodite, false);
@@ -329,6 +358,7 @@ public class Aider {
         Util.bzPayloadStoresByStream.keySet().stream().forEach(e -> generatePayloadDataForBz(e, Util.bzPayloadStoresByStream.get(e), false));
         logger.info("schedule payload data update is finished ...");
 
+        status.refreshCompleted();
     }
 
     public static Optional<Stream> getCurrentStream(String streamName) {

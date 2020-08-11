@@ -63,7 +63,8 @@ public class PullRequestEvaluator implements Evaluator {
             logger.log(Level.FINE, "Unable to find build result for pull request : " + pullRequest.getURL(), e);
         }
         data.put("pullRequest", new AssociatedPullRequest(pullRequest.getId(), pullRequest.getURL(), pullRequest.getCodebase().getName(),
-                pullRequest.getState().toString(), commitStatus.orElse(CommitStatus.UNKNOWN).toString(), isNoUpstreamRequired));
+                pullRequest.getState().toString(), commitStatus.orElse(CommitStatus.UNKNOWN).toString(),
+                pullRequest.getMergableState() == null?null:pullRequest.getMergableState().name(), isNoUpstreamRequired));
 
     }
 
