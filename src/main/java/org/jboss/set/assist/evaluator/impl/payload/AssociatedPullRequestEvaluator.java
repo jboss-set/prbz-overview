@@ -111,7 +111,9 @@ public class AssociatedPullRequestEvaluator implements PayloadEvaluator {
             }
             try {
                 upstreamPRFromPRDesc = pullRequest.findUpstreamPullRequestURL();
-                upstreamPatchState = PatchHomeService.getPatchState(upstreamPRFromPRDesc).name();
+                if (upstreamPRFromPRDesc != null) {
+                    upstreamPatchState = PatchHomeService.getPatchState(upstreamPRFromPRDesc).name();
+                }
             } catch (MalformedURLException e) {
                 logger.log(Level.WARNING, "Can not form upstream pull reuqest url due to : " + e.getMessage());
             }
