@@ -51,6 +51,7 @@ public class RestIssue {
         restIssue.setURL(issue.getLink());
         restIssue.setType(issue.getType().get());
         restIssue.setAcks(new HashMap<>(issue.getFlags()));
+        restIssue.setStatus(issue.getStatus().toString());
 
         restIssue.setPriority(issue.getPriority());
         restIssue.setIncorporatedIssues(incorporatedIssues);
