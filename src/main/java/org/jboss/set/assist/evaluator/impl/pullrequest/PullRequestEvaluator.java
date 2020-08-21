@@ -22,28 +22,20 @@
 
 package org.jboss.set.assist.evaluator.impl.pullrequest;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Matcher;
-
-import org.jboss.set.aphrodite.Aphrodite;
 import org.jboss.set.aphrodite.domain.CommitStatus;
 import org.jboss.set.aphrodite.domain.PullRequest;
-import org.jboss.set.aphrodite.spi.NotFoundException;
-import org.jboss.set.assist.Constants;
+import org.jboss.set.assist.PatchHomeService;
 import org.jboss.set.assist.data.payload.AssociatedPullRequest;
 import org.jboss.set.assist.evaluator.Evaluator;
 import org.jboss.set.assist.evaluator.EvaluatorContext;
+
+import java.util.Map;
 
 /**
  * @author egonzalez
  *
  */
 public class PullRequestEvaluator implements Evaluator {
-
-    private static final Logger logger = Logger.getLogger(PullRequestEvaluator.class.getCanonicalName());
 
     @Override
     public String name() {
@@ -53,28 +45,10 @@ public class PullRequestEvaluator implements Evaluator {
     @Override
     public void eval(EvaluatorContext context, Map<String, Object> data) {
         PullRequest pullRequest = context.getPullRequest();
-        boolean isNoUpstreamRequired = false;
-        isNoUpstreamRequired = isNoUpstreamRequired(pullRequest);
-        Aphrodite aphrodite = context.getAphrodite();
-        Optional<CommitStatus> commitStatus = Optional.of(CommitStatus.UNKNOWN);
-        try {
-            commitStatus = Optional.of(aphrodite.getCommitStatusFromPullRequest(pullRequest));
-        } catch (NotFoundException e) {
-            logger.log(Level.FINE, "Unable to find build result for pull request : " + pullRequest.getURL(), e);
-        }
+        CommitStatus commitStatus = PatchHomeService.retrieveCommitStatus(pullRequest);
         data.put("pullRequest", new AssociatedPullRequest(pullRequest.getId(), pullRequest.getURL(), pullRequest.getCodebase().getName(),
-                pullRequest.getState().toString(), commitStatus.orElse(CommitStatus.UNKNOWN).toString(),
-                pullRequest.getMergableState() == null?null:pullRequest.getMergableState().name(), isNoUpstreamRequired));
+                pullRequest.getState().toString(), commitStatus.toString(),
+                pullRequest.getMergableState() == null?null:pullRequest.getMergableState().name(), !pullRequest.isUpstreamRequired()));
 
     }
-
-    private boolean isNoUpstreamRequired(PullRequest pullRequest) {
-        Optional<String> pullRequestBoday = Optional.ofNullable(pullRequest.getBody());
-        Matcher matcher = Constants.UPSTREAM_NOT_REQUIRED.matcher(pullRequestBoday.orElse("N/A"));
-        if (matcher.find())
-            return true;
-        else
-            return false;
-    }
-
 }

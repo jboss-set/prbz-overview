@@ -35,6 +35,7 @@ import org.jboss.set.assist.data.payload.AssociatedPullRequest;
 import org.jboss.set.assist.evaluator.PayloadEvaluator;
 import org.jboss.set.assist.evaluator.PayloadEvaluatorContext;
 
+import javax.naming.NameNotFoundException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -43,12 +44,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-
-import javax.naming.NameNotFoundException;
 
 /**
  * @author wangc
@@ -99,8 +97,7 @@ public class AssociatedPullRequestEvaluator implements PayloadEvaluator {
         List<AssociatedPullRequest> unrelatedDataList = new ArrayList<>();
 
         for (PullRequest pullRequest : relatedPullRequests) {
-            boolean isNoUpstreamRequired = PatchHomeService.isNoUpstreamRequired(pullRequest);
-            Optional<CommitStatus> commitStatus = PatchHomeService.retrieveCommitStatus(pullRequest);
+            CommitStatus commitStatus = PatchHomeService.retrieveCommitStatus(pullRequest);
             URL upstreamIssueFromPRDesc = null;
             URL upstreamPRFromPRDesc = null;
             String upstreamPatchState = null;
@@ -119,20 +116,19 @@ public class AssociatedPullRequestEvaluator implements PayloadEvaluator {
             }
             relatedDataList.add(new AssociatedPullRequest(pullRequest.getId(), pullRequest.getURL(),
                     pullRequest.getCodebase().getName(), pullRequest.getState().toString(),
-                    commitStatus.orElse(CommitStatus.UNKNOWN).toString(),
+                    commitStatus.toString(),
                     pullRequest.getMergableState() == null?null:pullRequest.getMergableState().name(),
-                    isNoUpstreamRequired, upstreamIssueFromPRDesc, upstreamPRFromPRDesc, upstreamPatchState));
+                    !pullRequest.isUpstreamRequired(), upstreamIssueFromPRDesc, upstreamPRFromPRDesc, upstreamPatchState));
         }
         data.put(KEY, relatedDataList);
 
         for (PullRequest pullRequest : unrelatedPullRequests) {
-            boolean isNoUpstreamRequired = PatchHomeService.isNoUpstreamRequired(pullRequest);
-            Optional<CommitStatus> commitStatus = PatchHomeService.retrieveCommitStatus(pullRequest);
+            CommitStatus commitStatus = PatchHomeService.retrieveCommitStatus(pullRequest);
             unrelatedDataList.add(new AssociatedPullRequest(pullRequest.getId(), pullRequest.getURL(),
                     pullRequest.getCodebase().getName(), pullRequest.getState().toString(),
-                    commitStatus.orElse(CommitStatus.UNKNOWN).toString(),
+                    commitStatus.toString(),
                     pullRequest.getMergableState() == null?null:pullRequest.getMergableState().name(),
-                    isNoUpstreamRequired));
+                    !pullRequest.isUpstreamRequired()));
         }
         data.put(KEY_UNRELATED, unrelatedDataList);
     }
