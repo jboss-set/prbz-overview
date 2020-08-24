@@ -22,27 +22,21 @@
 
 package org.jboss.set.assist.evaluator.impl.pullrequest;
 
-import static org.jboss.set.assist.Util.convertURLtoURI;
-
 import org.jboss.set.aphrodite.Aphrodite;
 import org.jboss.set.aphrodite.domain.CommitStatus;
 import org.jboss.set.aphrodite.domain.PullRequest;
 import org.jboss.set.aphrodite.domain.Stream;
-import org.jboss.set.aphrodite.spi.NotFoundException;
-import org.jboss.set.assist.Constants;
+import org.jboss.set.assist.PatchHomeService;
 import org.jboss.set.assist.data.PullRequestData;
 import org.jboss.set.assist.evaluator.Evaluator;
 import org.jboss.set.assist.evaluator.EvaluatorContext;
+import static org.jboss.set.assist.Util.convertURLtoURI;
 
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
 /**
@@ -50,8 +44,6 @@ import java.util.stream.Collectors;
  *
  */
 public class PullRequestRelatedEvaluator implements Evaluator {
-
-    private static final Logger logger = Logger.getLogger(PullRequestRelatedEvaluator.class.getCanonicalName());
 
     @Override
     public String name() {
@@ -70,31 +62,13 @@ public class PullRequestRelatedEvaluator implements Evaluator {
                 List<Stream> streams = aphrodite.getStreamsBy(uri, pullRequest.getCodebase());
                 List<String> streamsStr = streams.stream().map(e -> e.getName()).collect(Collectors.toList());
 
-                boolean isNoUpstreamRequired = false;
-                isNoUpstreamRequired = isNoUpstreamRequired(pullRequest);
-                Optional<CommitStatus> commitStatus = Optional.of(CommitStatus.UNKNOWN);
-                try {
-                    commitStatus = Optional.of(aphrodite.getCommitStatusFromPullRequest(pullRequest));
-                } catch (NotFoundException e) {
-                    logger.log(Level.FINE, "Unable to find build result for pull request : " + pullRequest.getURL(), e);
-                }
-
+                CommitStatus commitStatus = PatchHomeService.retrieveCommitStatus(pullRequest);
                 links.add(new PullRequestData(pullRequest.getId(), streamsStr, pullRequest.getURL(),
                         pullRequest.getCodebase().getName(), pullRequest.getState().toString(),
-                        commitStatus.orElse(CommitStatus.UNKNOWN).toString(), isNoUpstreamRequired));
+                        commitStatus.toString(), !pullRequest.isUpstreamRequired()));
             }
         }
 
         data.put("pullRequestsRelated", links);
     }
-
-    private boolean isNoUpstreamRequired(PullRequest pullRequest) {
-        Optional<String> pullRequestBoday = Optional.ofNullable(pullRequest.getBody());
-        Matcher matcher = Constants.UPSTREAM_NOT_REQUIRED.matcher(pullRequestBoday.orElse("N/A"));
-        if (matcher.find())
-            return true;
-        else
-            return false;
-    }
-
 }

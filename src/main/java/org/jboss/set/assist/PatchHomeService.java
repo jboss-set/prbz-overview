@@ -22,22 +22,6 @@
 
 package org.jboss.set.assist;
 
-import static org.jboss.set.assist.Util.convertURLtoURI;
-
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.stream.Collectors;
-
-import javax.naming.NameNotFoundException;
-
 import org.jboss.set.aphrodite.Aphrodite;
 import org.jboss.set.aphrodite.config.TrackerType;
 import org.jboss.set.aphrodite.domain.Codebase;
@@ -53,6 +37,19 @@ import org.jboss.set.aphrodite.domain.spi.PatchHome;
 import org.jboss.set.aphrodite.issue.trackers.jira.JiraIssue;
 import org.jboss.set.aphrodite.simplecontainer.SimpleContainer;
 import org.jboss.set.aphrodite.spi.NotFoundException;
+import static org.jboss.set.assist.Util.convertURLtoURI;
+
+import javax.naming.NameNotFoundException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.stream.Collectors;
 
 /**
  * @author wangc
@@ -145,25 +142,14 @@ public class PatchHomeService implements PatchHome {
         }
     }
 
-    public static boolean isNoUpstreamRequired(PullRequest pullRequest) {
-        Optional<String> pullRequestBoday = Optional.ofNullable(pullRequest.getBody());
-        Matcher matcher = Constants.UPSTREAM_NOT_REQUIRED.matcher(pullRequestBoday.orElse("N/A"));
-        if (matcher.find())
-            return true;
-        else
-            return false;
-    }
-
-    public static Optional<CommitStatus> retrieveCommitStatus(PullRequest pullRequest) {
-        Optional<CommitStatus> commitStatus = Optional.of(CommitStatus.UNKNOWN);
-        if (aphrodite != null) {
-            try {
-                commitStatus = Optional.of(aphrodite.getCommitStatusFromPullRequest(pullRequest));
-            } catch (NotFoundException e) {
-                logger.log(Level.FINE, "Unable to find build result for pull request : " + pullRequest.getURL(), e);
-            }
+    public static CommitStatus retrieveCommitStatus(PullRequest pullRequest) {
+        try {
+            CommitStatus commitStatus = pullRequest.getCommitStatus();
+            return commitStatus;
+        } catch (NameNotFoundException e) {
+            logger.log(Level.WARNING, "Can not retrieve commit status due to : " + e.getMessage());
         }
-        return commitStatus;
+        return CommitStatus.UNKNOWN;
     }
 
     public static PatchState getPatchState(URL url) {

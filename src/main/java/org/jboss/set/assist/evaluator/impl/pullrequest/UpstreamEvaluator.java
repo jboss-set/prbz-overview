@@ -24,7 +24,6 @@ package org.jboss.set.assist.evaluator.impl.pullrequest;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import org.jboss.set.aphrodite.domain.PullRequest;
 import org.jboss.set.assist.evaluator.Evaluator;
@@ -36,8 +35,6 @@ import org.jboss.set.assist.evaluator.EvaluatorContext;
  */
 public class UpstreamEvaluator implements Evaluator {
 
-    private Pattern UPSTREAM_NOT_REQUIRED = Pattern.compile(".*no.*upstream.*required.*", Pattern.CASE_INSENSITIVE);
-
     @Override
     public String name() {
         return "Upstream Evaluator";
@@ -48,7 +45,7 @@ public class UpstreamEvaluator implements Evaluator {
         PullRequest pullRequest = context.getPullRequest();
         Set<PullRequest> related = context.getRelated();
 
-        if (!UPSTREAM_NOT_REQUIRED.matcher(pullRequest.getBody()).find()) {
+        if (pullRequest.isUpstreamRequired()) {
             if (!related.isEmpty()) {
                 data.put("messages", "missing upstream issue link");
             }
