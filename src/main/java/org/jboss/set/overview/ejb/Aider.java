@@ -22,6 +22,7 @@
 
 package org.jboss.set.overview.ejb;
 
+import static org.jboss.set.assist.Constants.EAP73ZSTREAM;
 import static org.jboss.set.overview.Util.filterComponent;
 import static org.jboss.set.overview.Util.findAllBugzillaPayloads;
 import static org.jboss.set.overview.Util.findAllJiraPayloads;
@@ -31,6 +32,7 @@ import static org.jboss.set.assist.Constants.EAP64ZSTREAM;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -58,6 +60,7 @@ import org.jboss.set.aphrodite.domain.RateLimit;
 import org.jboss.set.aphrodite.domain.Repository;
 import org.jboss.set.aphrodite.domain.Stream;
 import org.jboss.set.aphrodite.domain.StreamComponent;
+import org.jboss.set.aphrodite.domain.VersionUpgrade;
 import org.jboss.set.aphrodite.repository.services.common.RepositoryType;
 import org.jboss.set.aphrodite.spi.AphroditeException;
 import org.jboss.set.aphrodite.spi.NotFoundException;
@@ -384,5 +387,32 @@ public class Aider {
             logger.log(Level.WARNING, e.getMessage(), e);
         }
         return null;
+    }
+
+    public static List<VersionUpgrade> getComponentUpgrades(String component, String tag1, String tag2) {
+        try {
+            StreamComponent streamComponent = aphrodite.getStream(EAP73ZSTREAM).getComponent(component);
+            return aphrodite.getRepository(streamComponent.getRepositoryURL().toURL()).getComponentUpgrades(tag1, tag2);
+        } catch (NullPointerException npe) {
+            logger.log(Level.WARNING, "Component " + component + " not found.");
+        } catch (Exception e) {
+            logger.log(Level.WARNING, e.getMessage(), e);
+        }
+        return Collections.EMPTY_LIST;
+    }
+
+    public static List<String> getTagsAndBranches(String component) {
+        try {
+            StreamComponent streamComponent = aphrodite.getStream(EAP73ZSTREAM).getComponent(component);
+            Repository repository = aphrodite.getRepository(streamComponent.getRepositoryURL().toURL());
+            List<String> result = repository.getBranches();
+            result.addAll(repository.getTags());
+            return result;
+        } catch (NullPointerException npe) {
+            logger.log(Level.WARNING, "Component " + component + " not found.");
+        } catch (Exception e) {
+            logger.log(Level.WARNING, e.getMessage(), e);
+        }
+        return Collections.EMPTY_LIST;
     }
 }
