@@ -127,7 +127,7 @@ public class AssociatedPullRequestEvaluator implements PayloadEvaluator {
             unrelatedDataList.add(new AssociatedPullRequest(pullRequest.getId(), pullRequest.getURL(),
                     pullRequest.getCodebase().getName(), pullRequest.getState().toString(),
                     commitStatus.toString(),
-                    pullRequest.getMergableState() == null?null:pullRequest.getMergableState().name(),
+                    pullRequest.getMergableState() == null ? null : pullRequest.getMergableState().name(),
                     !pullRequest.isUpstreamRequired()));
         }
         data.put(KEY_UNRELATED, unrelatedDataList);

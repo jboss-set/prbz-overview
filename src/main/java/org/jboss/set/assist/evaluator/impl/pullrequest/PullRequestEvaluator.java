@@ -48,7 +48,7 @@ public class PullRequestEvaluator implements Evaluator {
         CommitStatus commitStatus = PatchHomeService.retrieveCommitStatus(pullRequest);
         data.put("pullRequest", new AssociatedPullRequest(pullRequest.getId(), pullRequest.getURL(), pullRequest.getCodebase().getName(),
                 pullRequest.getState().toString(), commitStatus.toString(),
-                pullRequest.getMergableState() == null?null:pullRequest.getMergableState().name(), !pullRequest.isUpstreamRequired()));
+                pullRequest.getMergableState() == null ? null : pullRequest.getMergableState().name(), !pullRequest.isUpstreamRequired()));
 
     }
 }
