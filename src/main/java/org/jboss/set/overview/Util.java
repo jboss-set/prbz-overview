@@ -196,9 +196,12 @@ public class Util {
                     // Try to query a new payload on index++
                     String fixVersion = payloadPrefix + index + EAP7PAYLOAD_ALIAS_SUFFIX;
                     List<Issue> issues = testJiraPayloadExistence(aphrodite, fixVersion);
-                    if (!issues.isEmpty()) {
+                    while (!issues.isEmpty()) {
                         payloadStore.put(fixVersion, issues);
                         logger.log(Level.INFO, "Found new Jira Payloads : " + fixVersion);
+                        index++;
+                        fixVersion = payloadPrefix + index + EAP7PAYLOAD_ALIAS_SUFFIX;
+                        issues = testJiraPayloadExistence(aphrodite, fixVersion);
                     }
                 }
             }
