@@ -46,19 +46,10 @@ public class Constants {
     public static final Pattern RELATED_PR_PATTERN = Pattern
             .compile(".*github\\.com.*?/([a-zA-Z_0-9-]*)/([a-zA-Z_0-9-]*)/pull.?/(\\d+)", Pattern.CASE_INSENSITIVE);
 
-    public static final String EAP70ZPAYLOAD_ALIAS_PREFIX = "7.0.";
-    public static final String EAP71ZPAYLOAD_ALIAS_PREFIX = "7.1.";
-    public static final String EAP72ZPAYLOAD_ALIAS_PREFIX = "7.2.";
-    public static final String EAP73ZPAYLOAD_ALIAS_PREFIX = "7.3.";
-    public static final String EAP7PAYLOAD_ALIAS_SUFFIX = ".GA";
     public static final String PATTERN_SUFFIX = "([0-9]*).GA";
 
     public static final Pattern BZ_ID_PARAM_PATTERN = Pattern.compile("id=([^&]+)");
     public static final Pattern EAP64ZPAYLOADPATTERN = Pattern.compile("eap([0-9]*)-payload");
-    public static final Pattern EAP70ZPAYLOADPATTERN = Pattern.compile(EAP70ZPAYLOAD_ALIAS_PREFIX + PATTERN_SUFFIX);
-    public static final Pattern EAP71ZPAYLOADPATTERN = Pattern.compile(EAP71ZPAYLOAD_ALIAS_PREFIX + PATTERN_SUFFIX);
-    public static final Pattern EAP72ZPAYLOADPATTERN = Pattern.compile(EAP72ZPAYLOAD_ALIAS_PREFIX + PATTERN_SUFFIX);
-    public static final Pattern EAP73ZPAYLOADPATTERN = Pattern.compile(EAP73ZPAYLOAD_ALIAS_PREFIX + PATTERN_SUFFIX);
 
     public static final String API_BASE_PATH = "/rest/api/2/";
     public static final String API_ISSUE_PATH = API_BASE_PATH + "issue/";
@@ -77,8 +68,13 @@ public class Constants {
     public static final String EAP71ZSTREAM = "jboss-eap-7.1.z";
     public static final String EAP72ZSTREAM = "jboss-eap-7.2.z";
     public static final String EAP73ZSTREAM = "jboss-eap-7.3.z";
+    public static final String EAP_PREFIX = "jboss-eap-";
+    public static final String EAP_SUFFIX = ".z";
 //    public static final String EAP7Z0STREAM = "jboss-eap-7.z.0";
 
 
     public static final String NOTAPPLICABLE = "N/A";
+
+    public static final String DEV_PROFILE = "prbz-dev";
+    public static final String DEV_STREAM = "7.3";
 }
