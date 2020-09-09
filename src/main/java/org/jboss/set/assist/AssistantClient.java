@@ -31,6 +31,7 @@ import org.jboss.set.aphrodite.domain.spi.IssueHome;
 import org.jboss.set.aphrodite.domain.spi.PatchHome;
 import org.jboss.set.aphrodite.domain.spi.PullRequestHome;
 import org.jboss.set.aphrodite.issue.trackers.jira.JiraIssueHomeImpl;
+import org.jboss.set.aphrodite.issue.trackers.jira.JiraPatchHomeImpl;
 import org.jboss.set.aphrodite.repository.services.github.GithubPullRequestHomeService;
 import org.jboss.set.aphrodite.simplecontainer.SimpleContainer;
 import org.jboss.set.aphrodite.spi.AphroditeException;
@@ -65,6 +66,7 @@ public class AssistantClient {
         simpleContainer.register(IssueHome.class.getSimpleName(), issueHomeService);
         simpleContainer.register(ViolationHome.class.getSimpleName(), violationHomeService);
         simpleContainer.register(PullRequestHome.class.getSimpleName(), GithubPullRequestHomeService);
+        simpleContainer.register(JiraPatchHomeImpl.class.getSimpleName(), new JiraPatchHomeImpl());
     }
 
     public static synchronized Aphrodite getAphrodite() throws AphroditeException {
