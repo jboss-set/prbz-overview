@@ -34,8 +34,10 @@ public class RestIssue {
     private String summary;
     private URL url;
     private String type;
+    private String rawType;
     private Map<String, String> acks = new HashMap<>();
     private String status;
+    private String rawStatus;
     private String priority;
     private List<AssociatedPullRequest> pullRequests;
     private List<URL> linkedIncorporatesIssues;
@@ -50,9 +52,10 @@ public class RestIssue {
         restIssue.setSummary(issue.getSummary());
         restIssue.setURL(issue.getLink());
         restIssue.setType(issue.getType().get());
+        restIssue.setRawType(issue.getRawType());
         restIssue.setAcks(new HashMap<>(issue.getFlags()));
         restIssue.setStatus(issue.getStatus().toString());
-
+        restIssue.setRawStatus(issue.getRawStatus());
         restIssue.setPriority(issue.getPriority());
         restIssue.setIncorporatedIssues(incorporatedIssues);
 
@@ -95,6 +98,14 @@ public class RestIssue {
         return status;
     }
 
+    private void setRawStatus(String rawStatus) {
+        this.rawStatus = rawStatus;
+    }
+
+    public String getRawStatus() {
+        return rawStatus;
+    }
+
     private void setAcks(Map<String, String> acks) {
         this.acks = acks;
     }
@@ -109,6 +120,14 @@ public class RestIssue {
 
     public String getType() {
         return type;
+    }
+
+    private void setRawType(String rawType) {
+        this.rawType = rawType;
+    }
+
+    public String getRawType() {
+        return rawType;
     }
 
     private void setURL(URL url) {

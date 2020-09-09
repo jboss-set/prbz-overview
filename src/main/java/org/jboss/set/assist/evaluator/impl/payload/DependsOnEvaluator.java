@@ -100,7 +100,8 @@ public class DependsOnEvaluator implements PayloadEvaluator {
             upstreamReferences.forEach(issue -> {
                 boolean inPayload = issue.getBlocks().stream().anyMatch(e -> extractId(e).equalsIgnoreCase(payloadTracker.getTrackerId().get())) || checkIsReleased(issue) || checkIssueType(issue) || !matchStream(issue, stream);
                 dependsOnIssues.add(new DependsOnIssue(issue.getURL(), issue.getTrackerId().orElse("N/A"),
-                        issue.getSummary().orElse(Constants.NOTAPPLICABLE), issue.getStatus(), issue.getType(),
+                        issue.getSummary().orElse(Constants.NOTAPPLICABLE), issue.getStatus(),
+                        issue.getRawStatus(), issue.getType(), issue.getRawType(),
                         issue.getStage().getStateMap().entrySet().stream()
                                 .collect(Collectors.toMap(e -> String.valueOf(e.getKey()), e -> String.valueOf(e.getValue()))),
                         issue.getPriority().name(),
@@ -112,7 +113,8 @@ public class DependsOnEvaluator implements PayloadEvaluator {
                 String fixVersion = context.getFixVersion();
                 boolean inPayload = checkFixVersion(issue, fixVersion) || checkIsReleased(issue) || checkIssueType(issue) || !matchStream(issue, stream);
                 dependsOnIssues.add(new DependsOnIssue(issue.getURL(), issue.getTrackerId().orElse("N/A"),
-                        issue.getSummary().orElse(Constants.NOTAPPLICABLE), issue.getStatus(), issue.getType(),
+                        issue.getSummary().orElse(Constants.NOTAPPLICABLE), issue.getStatus(),
+                        issue.getRawStatus(), issue.getType(), issue.getRawType(),
                         issue.getStage().getStateMap().entrySet().stream()
                                 .collect(Collectors.toMap(e -> String.valueOf(e.getKey()), e -> String.valueOf(e.getValue()))),
                         issue.getPriority().name(),

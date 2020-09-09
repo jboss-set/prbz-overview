@@ -42,7 +42,9 @@ public class PayloadIssue {
     private String label;
     private String summary;
     private IssueStatus status;
+    private String rawStatus;
     private IssueType type;
+    private String rawType;
     private Map<String, String> flags;
     private String priority;
     private boolean allAcks;
@@ -50,13 +52,16 @@ public class PayloadIssue {
     private Severity maxSeverity;
 
     public PayloadIssue(URL link, String label, String summary, IssueStatus status,
-                        IssueType type, Map<String, String> flags, String priority,
+                        String rawStatus, IssueType type, String rawType,
+                        Map<String, String> flags, String priority,
                         boolean allAcks, Collection<Violation> violations) {
         this.link = link;
         this.label = label;
         this.summary = summary;
         this.status = status;
+        this.rawStatus = rawStatus;
         this.type = type;
+        this.rawType = rawType;
         this.flags = flags;
         this.priority = priority;
         this.allAcks = allAcks;
@@ -80,8 +85,16 @@ public class PayloadIssue {
         return status;
     }
 
+    public String getRawStatus() {
+        return rawStatus;
+    }
+
     public IssueType getType() {
         return type;
+    }
+
+    public String getRawType() {
+        return rawType;
     }
 
     public Map<String, String> getFlags() {
