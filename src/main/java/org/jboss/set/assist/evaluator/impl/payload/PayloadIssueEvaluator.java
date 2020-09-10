@@ -68,7 +68,7 @@ public class PayloadIssueEvaluator implements PayloadEvaluator {
         data.put(KEY, new PayloadIssue(dependencyIssue.getURL(),
                 dependencyIssue.getTrackerId().orElse(Constants.NOTAPPLICABLE),
                 dependencyIssue.getSummary().orElse(Constants.NOTAPPLICABLE), dependencyIssue.getStatus(),
-                dependencyIssue.getType(),
+                dependencyIssue.getRawStatus(), dependencyIssue.getType(), dependencyIssue.getRawType(),
                 dependencyIssue.getStage().getStateMap().entrySet().stream().collect(Collectors.toMap(e -> String.valueOf(e.getKey()), e -> String.valueOf(e.getValue()))),
                 dependencyIssue.getPriority().name(),
                 Util.isAllAcks(dependencyIssue),
