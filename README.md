@@ -102,7 +102,23 @@ In order to avoid potential Github API rate limitation, the scheduled update tas
 ```
 {"refreshStatus":"Scheduled","lastRefresh":"2020-06-27T16:16:54.507"}
 ```
- - `GET /rest/api/payloads` - returns a map of avilable streams/payloads
+ - `GET /rest/api/payloads` - returns a map of available streams/payloads
 ```
 {"jboss-eap-7.2.z":["7.2.1.GA","7.2.2.GA"],"jboss-eap-7.3.z":["7.3.1.GA","7.3.2.GA"]}
+```
+ - `GET /rest/api/tags/{streamComponent}` - returns a list of GitHub tags and branches
+```
+["7.0.x","7.1.x","7.2.0.Beta"]
+```
+ - `GET /rest/api/upgrades/{streamComponent}/{tag1}/{tag2}` - returns a list of component upgrades between tags/branches
+```
+[{
+    "componentId":"com.fasterxml.jackson",
+    "oldVersion":"2.10.3.redhat-00001",
+    "newVersion":"2.10.4.redhat-00001"
+  },{
+    "componentId":"com.sun.faces",
+    "oldVersion":"2.3.9.SP09-redhat-00001",
+    "newVersion":"2.3.9.SP12-redhat-00001"
+}]
 ```
