@@ -7,6 +7,10 @@
 <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
 <title>JBoss SET EAP Overview Page</title>
 
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script type="text/javascript" src="https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/jquery-i18n-properties/jquery.i18n.properties-min-1.0.9.js"></script>
+<script type="text/javascript" src="js/version-properties.js"></script>
+
 <!-- Bootstrap -->
 <link
 	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
@@ -37,7 +41,7 @@ footer {
 		</div>
 		<div>
 			<h4>
-				<li><a href="rest/streampayload"> EAP Payload List </a></li> </br>
+				<li><a href="rest/streampayload"> EAP Payload List </a></li>
 				<li><a href="rest/streampullrequest"> EAP Github Pull Request List </a></li>
 			</h4>
 		</div>
@@ -45,6 +49,9 @@ footer {
 </body>
 
 <footer>
+<p>
+	Version: <label id="application_version"></label>
+</p>
 <p>
 	<a href="rest/status"> Connection status </a>
 </p>

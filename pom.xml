@@ -33,6 +33,7 @@
 		<version.org.jboss.set.aphrodite>0.7.10.Final</version.org.jboss.set.aphrodite>
 		<version.org.wildfly.checkstyle-config>1.0.4.Final</version.org.wildfly.checkstyle-config>
 		<version.org.wildfly.wildfly.build.config>8.0.0.Final</version.org.wildfly.wildfly.build.config>
+		<version.resources.plugin>2.6</version.resources.plugin>
 		<version.rpm.plugin>2.1.5</version.rpm.plugin>
 		<version.war.plugin>2.1.1</version.war.plugin>
 	</properties>
@@ -43,6 +44,30 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
+			</plugin>
+
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>${version.resources.plugin}</version>
+				<executions>
+					<execution>
+						<id>copy-resources</id>
+						<!-- here the phase you need -->
+						<phase>validate</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${basedir}/target/${project.name}/resources/properties</outputDirectory>
+							<resources>
+								<resource>
+									<directory>src/main/resources/properties</directory>
+									<filtering>true</filtering>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
