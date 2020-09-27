@@ -253,7 +253,7 @@ public class Aider {
         List<Issue> issues = Util.testJiraPayloadExistence(aphrodite, payload);
         if (!issues.isEmpty()) {
             Util.jiraPayloadStoresByStream.get(targetStream).put(payload, issues);
-            logger.log(Level.INFO, "Reload Jira Payload : " + payload);
+            logger.log(Level.INFO, "Reload Jira Payload : " + payload + " with " + issues.size() + " issues.");
         }
         LinkedHashMap<String, List<Issue>> payloads = Util.jiraPayloadStoresByStream.get(targetStream);
 
