@@ -53,6 +53,7 @@ public class Status {
     private static final String JIRA_HOST = "https://issues.redhat.com/";
     private static final String BUGZILLA_HOST = "https://bugzilla.redhat.com/";
     private static final String GITHUB_HOST = "https://github.com/";
+    private static final String GITLAB_HOST = "https://gitlab.cee.redhat.com/";
 
     private static Map<RepositoryType, RateLimit> rateLimits;
 
@@ -65,6 +66,7 @@ public class Status {
             result.append(checkConnection(response, JIRA_HOST, Constants.JIRA)).append(System.getProperty("line.separator"));
             result.append(checkConnection(response, BUGZILLA_HOST, Constants.BUGZILLA)).append(System.getProperty("line.separator"));
             result.append(checkConnection(response, GITHUB_HOST, Constants.GITHUB)).append(System.getProperty("line.separator"));
+            result.append(checkConnection(response, GITLAB_HOST, Constants.GITLAB)).append(System.getProperty("line.separator"));
         } catch (MalformedURLException e) {
             // ignored
         }
@@ -76,10 +78,14 @@ public class Status {
             Set<RepositoryType> keys = rateLimits.keySet();
             for (RepositoryType key : keys) {
                 RateLimit rateLimit = rateLimits.get(key);
-                rate.append(key.toString() + " RequestLimit : " + rateLimit.limit);
-                rate.append(System.getProperty("line.separator"));
-                rate.append(key.toString() + " RemainingRequests : " + rateLimit.remaining);
-                rate.append(System.getProperty("line.separator"));
+                if (rateLimit != null) {
+                    // https://github.com/jboss-set/prbz-overview/issues/62
+                    // since rateLimit is only available on Github, and Gitlab could return null for rate limit
+                    rate.append(key.toString() + " RequestLimit : " + rateLimit.limit);
+                    rate.append(System.getProperty("line.separator"));
+                    rate.append(key.toString() + " RemainingRequests : " + rateLimit.remaining);
+                    rate.append(System.getProperty("line.separator"));
+                }
             }
             result.append(rate).append(System.getProperty("line.separator"));
         }
