@@ -32,6 +32,7 @@ public class Constants {
     public static final String JBOSSAS_JBOSS_EAP = "jbossas-jboss-eap";
 
     public static final String GITHUB = "Github";
+    public static final String GITLAB = "Gitlab";
     public static final String BUGZILLA = "Bugzilla";
     public static final String JIRA = "Jira";
 
