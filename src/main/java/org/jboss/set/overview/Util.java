@@ -169,7 +169,7 @@ public class Util {
                     List<Issue> issues = testJiraPayloadExistence(aphrodite, fixVersion);
                     if (!issues.isEmpty()) {
                         payloadStore.put(fixVersion, issues);
-                        logger.log(Level.INFO, "Found Jira Payload : " + fixVersion);
+                        logger.log(Level.INFO, "Found Jira Payload : " + fixVersion + " with " + issues.size() + " issues.");
 
                     }
                 }
