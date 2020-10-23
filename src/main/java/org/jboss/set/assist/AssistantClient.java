@@ -68,7 +68,7 @@ public class AssistantClient {
         simpleContainer.register(IssueHome.class.getSimpleName(), issueHomeService);
         simpleContainer.register(ViolationHome.class.getSimpleName(), violationHomeService);
         simpleContainer.register(PullRequestHome.class.getSimpleName(), GithubPullRequestHomeService);
-        simpleContainer.register(JiraPatchHomeImpl.class.getSimpleName(), new JiraPatchHomeImpl());
+        simpleContainer.register(JiraPatchHomeImpl.class.getSimpleName(), new JiraIssueHomeService());
         simpleContainer.register(CompareHome.class.getSimpleName(), new GithubCompareHomeService(aphrodite));
 
     }

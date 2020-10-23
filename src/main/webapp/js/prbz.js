@@ -4,7 +4,7 @@ var formatPullRequests = function(pullRequests) {
 
     pullRequests.forEach(
         patch => table +=
-        `<tr>
+        `<tr class="${patch.codebase?'':'failed-to-load'}">
             <td><a href="${patch.link}">#${patch.label}</a></td>
             <td>${patch.codebase}</td>
             <td>${patch.result.join('')}</td>
