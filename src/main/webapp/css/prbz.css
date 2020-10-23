@@ -47,6 +47,10 @@ th.open.switch span::before,
     width: 60px;
 }
 
+.failed-to-load td {
+    background: #f63;
+}
+
 /* override datatables.net styling */
 table.dataTable thead th {
     padding: 10px;

@@ -37,6 +37,7 @@ import org.jboss.set.aphrodite.domain.spi.PatchHome;
 import org.jboss.set.aphrodite.issue.trackers.jira.JiraIssue;
 import org.jboss.set.aphrodite.simplecontainer.SimpleContainer;
 import org.jboss.set.aphrodite.spi.NotFoundException;
+import org.jboss.set.assist.data.payload.FailedPullRequest;
 import static org.jboss.set.assist.Util.convertURLtoURI;
 
 import javax.naming.NameNotFoundException;
@@ -134,6 +135,9 @@ public class PatchHomeService implements PatchHome {
     }
 
     public static boolean filterByStream(PullRequest pullRequest, Stream stream) {
+        if (pullRequest instanceof FailedPullRequest) {
+            return false;
+        }
         Codebase codebase = pullRequest.getCodebase();
         Repository repository = pullRequest.getRepository();
         URI uri = convertURLtoURI(repository.getURL());
