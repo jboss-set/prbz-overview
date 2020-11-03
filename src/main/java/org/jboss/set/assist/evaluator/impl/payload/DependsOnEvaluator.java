@@ -50,6 +50,7 @@ import org.jboss.set.assist.Constants;
 import org.jboss.set.assist.data.payload.DependsOnIssue;
 import org.jboss.set.assist.evaluator.PayloadEvaluator;
 import org.jboss.set.assist.evaluator.PayloadEvaluatorContext;
+import static org.jboss.set.assist.Constants.PATTERN_SUFFIX;
 
 /**
  * @author wangc
@@ -189,9 +190,7 @@ public class DependsOnEvaluator implements PayloadEvaluator {
         List<String> fixVersions = getFixVersions(issue);
         Optional<String> payload = fixVersions.stream()
                 .filter(e -> (e.matches(Constants.EAP64ZPAYLOADPATTERN.toString())
-                        || e.matches(Constants.EAP70ZPAYLOADPATTERN.toString())
-                        || e.matches(Constants.EAP71ZPAYLOADPATTERN.toString())
-                        || e.matches(Constants.EAP72ZPAYLOADPATTERN.toString())))
+                        || e.matches("7\\.[0-9]\\." + PATTERN_SUFFIX)))
                 .findFirst();
         return payload.orElse(Constants.NOTAPPLICABLE);
     }

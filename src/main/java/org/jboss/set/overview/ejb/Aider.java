@@ -23,9 +23,12 @@
 package org.jboss.set.overview.ejb;
 
 import static org.jboss.set.assist.Constants.EAP73ZSTREAM;
+import static org.jboss.set.assist.Constants.DEV_PROFILE;
+import static org.jboss.set.assist.Constants.DEV_STREAM;
 import static org.jboss.set.overview.Util.filterComponent;
 import static org.jboss.set.overview.Util.findAllBugzillaPayloads;
 import static org.jboss.set.overview.Util.findAllJiraPayloads;
+import static org.jboss.set.overview.Util.findAllJiraVersions;
 
 import static org.jboss.set.assist.Constants.EAP64ZSTREAM;
 
@@ -95,7 +98,7 @@ public class Aider {
     private static final Object pullRequestDataLock = new Object();
     private static final Object payloadDataLock = new Object();
 
-    private static final boolean devProfile = System.getProperty("prbz-dev") != null;
+    private static final boolean devProfile = System.getProperty(DEV_PROFILE) != null;
 
     @Inject
     private PrbzStatusSingleton status;
@@ -112,10 +115,12 @@ public class Aider {
                     logger.log(Level.INFO, "New initialisation in Aider init()");
                     status.refreshStarted();
 
-                    findAllJiraPayloads(Aider.aphrodite, true);
-                    findAllBugzillaPayloads(Aider.aphrodite, true);
+                    findAllJiraVersions();
+                    findAllJiraPayloads();
+                    if (!devProfile) findAllBugzillaPayloads(Aider.aphrodite, true);
 
-                    allStreams = aphrodite.getAllStreams().stream().filter(e -> !e.getName().equals(Aider.WILDFLY_STREAM)).collect(Collectors.toList());
+                    allStreams = aphrodite.getAllStreams().stream().filter(e -> !e.getName().equals(Aider.WILDFLY_STREAM))
+                            .filter(e -> !devProfile || e.getName().contains(DEV_STREAM)).collect(Collectors.toList());
 
                     initProcessors();
 
@@ -250,7 +255,7 @@ public class Aider {
         Optional<Stream> stream = getCurrentStream(targetStream);
 
         // update payload list
-        List<Issue> issues = Util.testJiraPayloadExistence(aphrodite, payload);
+        List<Issue> issues = Util.getJiraPayload(payload);
         if (!issues.isEmpty()) {
             Util.jiraPayloadStoresByStream.get(targetStream).put(payload, issues);
             logger.log(Level.INFO, "Reload Jira Payload : " + payload + " with " + issues.size() + " issues.");
@@ -356,7 +361,7 @@ public class Aider {
 
         logger.info("schedule payload data update is started ...");
         findAllBugzillaPayloads(aphrodite, false);
-        findAllJiraPayloads(aphrodite, false);
+        findAllJiraPayloads();
         generatePayloadDataForJira(Util.jiraPayloadStoresByStream, false);
         Util.bzPayloadStoresByStream.keySet().stream().forEach(e -> generatePayloadDataForBz(e, Util.bzPayloadStoresByStream.get(e), false));
         logger.info("schedule payload data update is finished ...");
