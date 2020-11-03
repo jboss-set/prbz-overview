@@ -63,9 +63,9 @@ public class Util {
     public static LinkedHashMap<String, LinkedHashMap<String, List<Issue>>> jiraPayloadStoresByStream = new LinkedHashMap<>();
 
     // some default boundary in first time load.
-    // Bugzilla, default range is from eap6411-payload to eap6420-payload, development mode to eap6415-payload
-    private static int FIRST_64X_PAYLOAD = 6411;
-    private static int DEVMODE_64X_PAYLOAD = 6412;
+    // Bugzilla, default range is from eap6423-payload to eap6425-payload due to inactive EAP 6.4.x series.
+    private static int FIRST_64X_PAYLOAD = 6423;
+    private static int DEVMODE_64X_PAYLOAD = 6424;
     private static int LAST_64X_PAYLOAD = 6425;
 
     // 7.z CP stream jira payload, default range is from 7.1.1 to 7.1.5, development mode to 7.1.2
@@ -182,7 +182,7 @@ public class Util {
                 }
                 List<Issue> issues = new ArrayList<>(release.getIssues());
                 payloadStore.put(version, issues);
-                logger.log(Level.INFO, "Found Jira Payload : " + version);
+                logger.log(Level.INFO, "Found Jira Payload : " + version + " with " + issues.size() + " issues.");
                 if (first && ++i >= max) break;
             }
         } catch (Exception e) {
