@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prbz-overview-config
+  #labels:
+  #application: prbz-overview
+data:
+  aphrodite.config: /etc/secret/aphrodite.properties.json.example
+  prbz-dev: "true"
+  cacheDir: "/home/jboss"
+  cacheName: "github-cache"
+  cacheSize: "50"
