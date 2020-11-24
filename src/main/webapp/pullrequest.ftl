@@ -21,7 +21,7 @@
   </head>
   <body>
       <ul class="nav nav-pills" style="width: 80%; margin: 6px auto">
-          <li style="font-size: 20px"><a href="/prbz-overview/">Home</a></li>
+          <li style="font-size: 20px"><a href="../../../../">Home</a></li>
           <#list streamMap?keys as stream>
               <li role="presentation" class="dropdown">
                 <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
@@ -29,7 +29,7 @@
                 </a>
                 <ul class="dropdown-menu">
                     <#list streamMap[stream] as component>
-                    <li class="<#if component == Request.componentName && stream == Request.streamName>active</#if>"><a href="/prbz-overview/rest/streampullrequest/${stream}/component/${component}">${component}</a></li>
+                    <li class="<#if component == Request.componentName && stream == Request.streamName>active</#if>"><a href="../../${stream}/component/${component}">${component}</a></li>
                     </#list>
                 </ul>
               </li>

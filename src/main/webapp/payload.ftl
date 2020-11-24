@@ -23,7 +23,7 @@
   </head>
   <body>
     <ul class="nav nav-pills" style="width: 80%; margin: 6px auto">
-        <li style="font-size: 20px"><a href="/prbz-overview/">Home</a></li>
+        <li style="font-size: 20px"><a href="../../../../">Home</a></li>
         <#list payloadMap?keys as stream>
         <li role="presentation" class="dropdown">
             <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
@@ -31,7 +31,7 @@
             </a>
             <ul class="dropdown-menu">
                 <#list payloadMap[stream] as payload>
-                <li class="<#if payload == Request.payloadName && stream == Request.streamName>active</#if>"><a href="/prbz-overview/rest/streampayload/${stream}/payload/${payload}">${payload}</a></li>
+                <li class="<#if payload == Request.payloadName && stream == Request.streamName>active</#if>"><a href="../../${stream}/payload/${payload}">${payload}</a></li>
                 </#list>
             </ul>
         </li>
@@ -41,16 +41,14 @@
      <div class="container">
 		<div class="row">
 		  <div class="col-md-12">
-		    <form action="/prbz-overview/rest/streampayload/${Request.streamName}/payload/${Request.payloadName}" method="post">
-		      <h1>EAP Cumulative Patch Releases ${Request.payloadName} Issue List
-		      <input type="image" src="../../../../images/refresh.png" border="0" title="Refresh payload"/>
-		    </form></h1>
+		    <h1>EAP Cumulative Patch Releases ${Request.payloadName} Issue List </h1>
+		    </form>
 		  </div>
 		</div>
 		<div class="row">
 		  <div class="col-md-12">
 		  <h4>
-
+          <form action="../../${Request.streamName}/payload/${Request.payloadName}" method="post">
 		  <#if RequestParameters.selectedStatus??>
 			<#if RequestParameters.missedFlags??>
 				<#assign summary = "found by issue status and CDW flags">
@@ -77,6 +75,8 @@
 			<#else>
 				<img src="../../../../images/green-good.png" alt="good green light" title="good">
 			</#if>
+		    <input type="submit" value="refresh" border="0" title="Refresh payload"/>
+		  </form>
 		  </h4>
 		  <ul>
 				<li><img src="../../../../images/red-blocker.png" alt="red-blocker" title="blocker"> Red status with blocker issue(s), an immediate call to triage.</li>

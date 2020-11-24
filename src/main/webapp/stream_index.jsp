@@ -26,7 +26,7 @@
                 <div class="col-md-12"><h1>EAP Cumulative Patch Releases ${title}</h1></div>
             </div>
             <div class="payload">
-                <a href="/prbz-overview/">Home</a>
+                <a href="../">Home</a>
                 <ul>
                 <c:forEach var="i" items="${streamMap}">
                     <h4>
