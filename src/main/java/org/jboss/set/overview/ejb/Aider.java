@@ -361,6 +361,8 @@ public class Aider {
 
         logger.info("schedule payload data update is started ...");
         findAllBugzillaPayloads(aphrodite, false);
+        // make sure we check for any new created payload.
+        findAllJiraVersions();
         findAllJiraPayloads();
         generatePayloadDataForJira(Util.jiraPayloadStoresByStream, false);
         Util.bzPayloadStoresByStream.keySet().stream().forEach(e -> generatePayloadDataForBz(e, Util.bzPayloadStoresByStream.get(e), false));
