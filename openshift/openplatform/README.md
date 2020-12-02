@@ -20,7 +20,7 @@ Create a secret based on the genereated secret file.
 
     oc create -f your-pull-secret-secret.yaml
     
-## Import the Latest JBoss EAP for OpenShift Imagestreams
+## Import the latest JBoss EAP for OpenShift Imagestreams
 
     oc import-image jboss-eap-7/eap73-openjdk11-openshift-rhel8 --from=registry.redhat.io/jboss-eap-7/eap73-openjdk11-openshift-rhel8 --confirm
     oc import-image jboss-eap-7/eap73-openjdk11-runtime-openshift-rhel8 --from=registry.redhat.io/jboss-eap-7/eap73-openjdk11-runtime-openshift-rhel8 --confirm
@@ -81,8 +81,8 @@ Otherwise, you can create it from the aphrodite-configmap.yaml
 You will reuse **/etc/secret** as the mount volume path later in DeploymentConfig.
 
 ## JBoss EAP 7.3 based application
-Last, you need to create several Openshift resource for the application from template prbz-overview-eap73-basic-s2i.yaml
+Last, you need to create several OpenShift resource for the application from template prbz-overview-eap73-basic-s2i.yaml
 
 * First, replace the **pullSecret** name with new generated pullSecret name.
-* Second, replace the **IMAGE_STREAM_NAMESPACE** default value openshift with current working namespace, usually it's the same name as project name
+* Second, replace the **IMAGE_STREAM_NAMESPACE** default value OpenShift with current working namespace, usually it's the same name as project name
 * Last, from the web console Import YAML/JSON, import the template and create your application.

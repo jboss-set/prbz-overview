@@ -1,17 +1,14 @@
-# prbz-overview on Open Platform
+# prbz-overview on PSI OpenShift
 
-## Login into Open Platform
-* Before accessing the Open Platform, you must accept the Terms of Service and Acceptable Use Policies:
-  Go to https://open.paas.redhat.com, and follow the link to Sign Up.
-  Sign in through your Red Hat google account.
-* Once you have accepted the policies, your account will automatically be provisioned:
-  Log in to the Open Platform at https://open.paas.redhat.com/console/ with your LDAP/Kerberos login.
+## Login into PSI OpenShift
+* Log in to PSI OpenShift at https://console-openshift-console.apps.ocp4.prod.psi.redhat.com/ with your LDAP/Kerberos login.
 * Click the upper right conncer **Copy Login Command** in the broswer to generate a new token, and execute the copied command in a new terminal. E.g.
 
-    oc login https://open.paas.redhat.com --token=your_generated_token.
+    oc login --token=your_generated_token --server=https://api.ocp4.prod.psi.redhat.com:6443
 
-## Create a new project in OpenShift.
-    oc new-project PROJECT_NAME
+## Switch to `jboss-set-psi` project.
+
+    oc project jboss-set-psi
 
 ## Registry Service Account
 You will need a valid OpenShift user pull secret. Copy or download the pull secret from https://access.redhat.com/terms-based-registry/
@@ -20,7 +17,7 @@ Create a secret based on the genereated secret file.
 
     oc create -f your-pull-secret-secret.yaml
     
-## Import the Latest JBoss EAP for OpenShift Imagestreams
+## Import the latest JBoss EAP for OpenShift Imagestreams
 
     oc import-image jboss-eap-7/eap73-openjdk11-openshift-rhel8 --from=registry.redhat.io/jboss-eap-7/eap73-openjdk11-openshift-rhel8 --confirm
     oc import-image jboss-eap-7/eap73-openjdk11-runtime-openshift-rhel8 --from=registry.redhat.io/jboss-eap-7/eap73-openjdk11-runtime-openshift-rhel8 --confirm
@@ -81,8 +78,9 @@ Otherwise, you can create it from the aphrodite-configmap.yaml
 You will reuse **/etc/secret** as the mount volume path later in DeploymentConfig.
 
 ## JBoss EAP 7.3 based application
-Last, you need to create several Openshift resource for the application from template prbz-overview-eap73-basic-s2i.yaml
+Last, you need to create several OpenShift resource for the application from template prbz-overview-eap73-basic-s2i.yaml
 
 * First, replace the **pullSecret** name with new generated pullSecret name.
-* Second, replace the **IMAGE_STREAM_NAMESPACE** default value openshift with current working namespace, usually it's the same name as project name
-* Last, from the web console Import YAML/JSON, import the template and create your application.
+* Second, replace the **IMAGE_STREAM_NAMESPACE** default value OpenShift with current working namespace, usually it's the same name as project name
+* Last, create the application from template.
+    oc new-app -f prbz-overview-eap73-basic-s2i.yaml
