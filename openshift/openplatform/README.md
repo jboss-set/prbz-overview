@@ -72,11 +72,11 @@ Example secrets may also be found here: https://github.com/jboss-openshift/appli
 ## ConfigMaps
 After you created the secret, you also need to define below configuration as system properties.
 
-    oc create configmap aphrodite-configmap --from-literal=aphrodite.config=/etc/secret/aphrodite.properties.json.example --from-literal=prbz_dev=false --from-literal=cacheDir=/home/jboss --from-literal=cacheName=github-cache  --from-literal=cacheSize=50
+    oc create configmap prbz-overview-config --from-literal=aphrodite.config=/etc/secret/aphrodite.properties.json.example --from-literal=released-disabled=true --from-literal=cacheDir=/home/jboss --from-literal=cacheName=github-cache  --from-literal=cacheSize=100
 
 Otherwise, you can create it from the aphrodite-configmap.yaml
 
-    oc create -f aphrodite-configmap.yaml
+    oc create -f prbz-overview-config.yaml
 
 You will reuse **/etc/secret** as the mount volume path later in DeploymentConfig.
 

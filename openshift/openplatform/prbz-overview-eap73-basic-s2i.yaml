@@ -227,6 +227,7 @@ objects:
           destinationDir: "."
     strategy:
       dockerStrategy:
+        # comment out the line below to get ROOT.war from previous artifact build.
         #imageOptimizationPolicy: SkipLayers
         from:
           kind: ImageStreamTag

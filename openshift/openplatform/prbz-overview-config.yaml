@@ -6,7 +6,8 @@ metadata:
   #application: prbz-overview
 data:
   aphrodite.config: /etc/secret/aphrodite.properties.json.example
-  prbz-dev: "true"
+  released-disabled: "true"
   cacheDir: "/home/jboss"
   cacheName: "github-cache"
-  cacheSize: "50"
+  cacheSize: "100"
+  #prbz-dev: "true"
