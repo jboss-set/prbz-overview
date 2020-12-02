@@ -13,3 +13,8 @@
 * Then, copy and customied the standalone-openshift.xml, you can use it on your image by deploying the standalone-openshift.xml under configuration directory, For example:
 
     <YOUR_TOP_SOURCE_DIRECTORY>/configuration/standalone-openshift.xml
+
+* In this case, we only need to adjust `default-timeout` value for the transaction subsystem.
+```
+    <coordinator-environment statistics-enabled="${wildfly.transactions.statistics-enabled:${wildfly.statistics-enabled:false}}" default-timeout="3600"/>
+```
