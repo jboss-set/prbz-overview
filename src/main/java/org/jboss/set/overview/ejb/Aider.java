@@ -98,7 +98,11 @@ public class Aider {
     private static final Object pullRequestDataLock = new Object();
     private static final Object payloadDataLock = new Object();
 
-    private static final boolean devProfile = System.getProperty(DEV_PROFILE) != null;
+    private static final boolean devProfile;
+    static {
+        String devProfileValue = Util.getValueFromPropertyAndEnv(DEV_PROFILE);
+        devProfile =  devProfileValue != null ? Boolean.valueOf(devProfileValue): false;
+    }
 
     @Inject
     private PrbzStatusSingleton status;
