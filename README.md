@@ -47,6 +47,12 @@ For development purposes you can use a dev profile that will retrieve a small po
 
     <property name="prbz-dev" value="true"/>
 
+### Released disabled option
+
+It's possible to configure a system property `released-disabled` to disable retrieving released payloads. To configure it add this system property:
+
+    <property name="released-disabled" value="true"/>
+
 #Deployment
 ------------
 

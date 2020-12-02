@@ -35,6 +35,7 @@ import static org.jboss.set.assist.Constants.EAP64ZPAYLOADPATTERN;
 import static org.jboss.set.assist.Constants.EAP64ZSTREAM;
 import static org.jboss.set.assist.Constants.EAP_PREFIX;
 import static org.jboss.set.assist.Constants.EAP_SUFFIX;
+import static org.jboss.set.assist.Constants.RELEASED_DISABLED;
 
 import javax.naming.NameNotFoundException;
 import java.net.MalformedURLException;
@@ -72,7 +73,14 @@ public class Util {
     private static int DEVMODE_PAYLOAD = 2;
     private static int LAST_PAYLOAD = 5;
 
-    private static final boolean devProfile = System.getProperty(DEV_PROFILE) != null;
+    private static final boolean releasedDisabled;
+    private static final boolean devProfile;
+    static {
+        String devProfileValue = getValueFromPropertyAndEnv(DEV_PROFILE);
+        devProfile =  devProfileValue != null ? Boolean.valueOf(devProfileValue): false;
+        String releasedDisabledValue = getValueFromPropertyAndEnv(RELEASED_DISABLED);
+        releasedDisabled = releasedDisabledValue != null ? Boolean.valueOf(releasedDisabledValue): false;
+    }
 
     // We are only care about following components defined in jboss-streams
     public static boolean filterComponent(StreamComponent component) {
@@ -147,6 +155,7 @@ public class Util {
         try {
             jiraVersions = JiraRelease.findAll().stream()
                     .filter(jiraRelease -> !devProfile || jiraRelease.getVersion().getName().contains(DEV_STREAM))
+                    .filter(jiraRelease -> !(releasedDisabled && jiraRelease.getVersion().isReleased()))
                     .filter(jiraRelease -> !jiraRelease.getVersion().getName().endsWith(".0.GA"))
                     .sorted(Comparator.comparing((JiraRelease jr) -> jr.getVersion().getName()).reversed())
                     .collect(Collectors.groupingBy(jr -> jr.getVersion().getName().substring(0,3)));
@@ -208,5 +217,14 @@ public class Util {
             }
         }
         return result;
+    }
+
+    public static String getValueFromPropertyAndEnv(String key) {
+        // check system properties first, if null check environment variables as well.
+        String value = System.getProperty(key);
+        if (value == null) {
+            return System.getenv(key);
+        }
+        return value;
     }
 }
