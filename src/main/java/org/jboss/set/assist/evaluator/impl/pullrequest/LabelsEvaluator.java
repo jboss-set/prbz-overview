@@ -60,7 +60,7 @@ public class LabelsEvaluator implements Evaluator {
 
         // if there aren't any bug related then we show a message
         if (issues.isEmpty()) {
-            logger.log(Level.WARNING, "No issues found in patch, " + name() + " not applied to " + pullRequest.getURL());
+            logger.log(Level.FINE, "No issues found in patch, " + name() + " not applied to " + pullRequest.getURL());
         }
 
         Map<String, List<LabelData>> labels = new HashMap<>();
