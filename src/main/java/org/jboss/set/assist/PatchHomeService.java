@@ -80,11 +80,12 @@ public class PatchHomeService implements PatchHome {
     }
 
     private java.util.stream.Stream<Patch> mapURLtoPatchStream(List<URL> urls) {
-        return urls.stream().map(e -> {
+        List<Patch> list = urls.stream().map(e -> {
             PatchType patchType = getPatchType(e);
             PatchState patchState = getPatchState(e, patchType);
-            return new Patch(e, getPatchType(e), patchState);
-        });
+            return new Patch(e, patchType, patchState);
+        }).collect(Collectors.toList());
+        return list.stream();
     }
 
     private static PatchType getPatchType(URL url) {
@@ -101,7 +102,9 @@ public class PatchHomeService implements PatchHome {
         if (patchType.equals(PatchType.PULLREQUEST)) {
             try {
                 PullRequest pullRequest = aphrodite.getPullRequest(url);
-                return PatchState.valueOf(pullRequest.getState().toString());
+                if (pullRequest !=null && pullRequest.getState() != null) {
+                    return PatchState.valueOf(pullRequest.getState().toString());
+                }
             } catch (NotFoundException e) {
                 logger.log(Level.WARNING, "Unable to find pull request with url: " + url, e);
             }
