@@ -40,10 +40,11 @@ public class AssociatedPullRequest {
     private URL upstreamIssueFromPRDesc;
     private URL upstreamPullRequestFromPRDesc;
     private String upstreamPatchState;
+    private boolean mergedInFuture;
 
     public AssociatedPullRequest(String label, URL link, String codebase, String patchState, String commitStatus,
                                  String mergeStatus, boolean noUpstreamRequired, URL upstreamIssueFromPRDesc,
-                                 URL upstreamPullRequestFromPRDesc, String upstreamPatchState) {
+                                 URL upstreamPullRequestFromPRDesc, String upstreamPatchState, boolean mergedInFuture) {
         this.label = label;
         this.link = link;
         this.codebase = codebase;
@@ -54,11 +55,12 @@ public class AssociatedPullRequest {
         this.upstreamIssueFromPRDesc = upstreamIssueFromPRDesc;
         this.upstreamPullRequestFromPRDesc = upstreamPullRequestFromPRDesc;
         this.upstreamPatchState = upstreamPatchState;
+        this.mergedInFuture = mergedInFuture;
     }
 
     public AssociatedPullRequest(String label, URL link, String codebase, String patchState, String commitStatus,
                                  String mergeStatus, boolean noUpstreamRequired) {
-        this(label, link, codebase, patchState, commitStatus, mergeStatus, noUpstreamRequired, null, null, null);
+        this(label, link, codebase, patchState, commitStatus, mergeStatus, noUpstreamRequired, null, null, null, false);
     }
 
     public String getLabel() {
@@ -99,5 +101,9 @@ public class AssociatedPullRequest {
 
     public String getUpstreamPatchState() {
         return upstreamPatchState;
+    }
+
+    public boolean isMergedInFuture() {
+        return mergedInFuture;
     }
 }

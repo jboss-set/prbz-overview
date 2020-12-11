@@ -29,6 +29,7 @@ import org.jboss.set.aphrodite.domain.Patch;
 import org.jboss.set.aphrodite.domain.PatchType;
 import org.jboss.set.aphrodite.domain.PullRequest;
 import org.jboss.set.aphrodite.domain.Stream;
+import org.jboss.set.assist.CommitHomeService;
 import org.jboss.set.assist.GitUtil;
 import org.jboss.set.assist.PatchHomeService;
 import org.jboss.set.assist.data.payload.AssociatedPullRequest;
@@ -90,6 +91,7 @@ public class AssociatedPullRequestEvaluator implements PayloadEvaluator {
 
         for (PullRequest pullRequest : relatedPullRequests) {
             CommitStatus commitStatus = PatchHomeService.retrieveCommitStatus(pullRequest);
+            boolean mergedInFuture = CommitHomeService.isMergedInFutureBranch(pullRequest);
             URL upstreamIssueFromPRDesc = null;
             URL upstreamPRFromPRDesc = null;
             String upstreamPatchState = null;
@@ -110,7 +112,7 @@ public class AssociatedPullRequestEvaluator implements PayloadEvaluator {
                     pullRequest.getCodebase().getName(), pullRequest.getState().toString(),
                     commitStatus.toString(),
                     pullRequest.getMergableState() == null?null:pullRequest.getMergableState().name(),
-                    !pullRequest.isUpstreamRequired(), upstreamIssueFromPRDesc, upstreamPRFromPRDesc, upstreamPatchState));
+                    !pullRequest.isUpstreamRequired(), upstreamIssueFromPRDesc, upstreamPRFromPRDesc, upstreamPatchState, mergedInFuture));
         }
         data.put(KEY, relatedDataList);
 
