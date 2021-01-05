@@ -42,7 +42,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
@@ -153,24 +152,25 @@ public class StreamPayload {
         }
     }
 
-    @POST
-    @Path("/{streamName}/payload/{payloadName}")
-    public void refreshPayload(@Context UriInfo info, @Context ServletContext context, @Context HttpServletRequest request,
-            @Context HttpServletResponse response, @PathParam("streamName") String streamName,
-            @PathParam("payloadName") String payloadName)
-            throws ServletException, IOException {
-        CustomRequest customRequest = new CustomRequest(request);
-        CustomResponse customResponse = new CustomResponse(response);
-
-        if (payloadName != null && streamName != null) {
-            Aider.generatedSinglePayloadData(streamName, payloadName);
-            getPayload(info, context, streamName, payloadName, customRequest, customResponse);
-            context.getRequestDispatcher("/" + streamName + "/payload/" + payloadName).forward(customRequest, customResponse);
-        } else {
-            logger.log(Level.WARNING,
-                    "streamName " + streamName + " or " + "payloadName " + payloadName + " is not specified in request");
-        }
-    }
+// Replaced by ApiResource @Path("/refresh/{streamName}/{payloadName}")
+//    @POST
+//    @Path("/{streamName}/payload/{payloadName}")
+//    public void refreshPayload(@Context UriInfo info, @Context ServletContext context, @Context HttpServletRequest request,
+//            @Context HttpServletResponse response, @PathParam("streamName") String streamName,
+//            @PathParam("payloadName") String payloadName)
+//            throws ServletException, IOException {
+//        CustomRequest customRequest = new CustomRequest(request);
+//        CustomResponse customResponse = new CustomResponse(response);
+//
+//        if (payloadName != null && streamName != null) {
+//            Aider.generatedSinglePayloadData(streamName, payloadName);
+//            getPayload(info, context, streamName, payloadName, customRequest, customResponse);
+//            context.getRequestDispatcher("/" + streamName + "/payload/" + payloadName).forward(customRequest, customResponse);
+//        } else {
+//            logger.log(Level.WARNING,
+//                    "streamName " + streamName + " or " + "payloadName " + payloadName + " is not specified in request");
+//        }
+//    }
 
     private Map<String, List<String>> getStreamMap() {
         return new TreeMap<>(

@@ -48,7 +48,7 @@
 		<div class="row">
 		  <div class="col-md-12">
 		  <h4>
-          <form action="../../${Request.streamName}/payload/${Request.payloadName}" method="post">
+          <form action="../../../api/refresh/${Request.streamName}/${Request.payloadName}" method="post">
 		  <#if RequestParameters.selectedStatus??>
 			<#if RequestParameters.missedFlags??>
 				<#assign summary = "found by issue status and CDW flags">

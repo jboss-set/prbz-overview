@@ -10,7 +10,7 @@
 ```
     $ cat /opt/eap/standalone/configuration/standalone-openshift.xml
 ```
-* Then, copy and customied the standalone-openshift.xml, you can use it on your image by deploying the standalone-openshift.xml under configuration directory, For example:
+* Then, copy and customize the standalone-openshift.xml, you can use it on your image by deploying the standalone-openshift.xml under configuration directory, For example:
 
     <YOUR_TOP_SOURCE_DIRECTORY>/configuration/standalone-openshift.xml
 

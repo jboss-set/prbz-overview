@@ -1,6 +1,6 @@
 {
     "maxThreadCount": 10,
-    "streamServiceUpdateRate": 15,
+    "streamServiceUpdateRate": 0,
     "initialDelay": 10,
     "issueTrackerConfigs": [
         {
