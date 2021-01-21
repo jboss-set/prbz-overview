@@ -22,6 +22,8 @@
 
 package org.jboss.set.assist;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.regex.Pattern;
 
 public class Constants {
@@ -29,6 +31,7 @@ public class Constants {
     public static final String WILDFLY_WILDFLY = "wildfly-wildfly";
     public static final String WILDFLY_WILDFLY_CORE = "wildfly-wildfly-core";
     public static final String JBOSSAS_WILDFLY_CORE_EAP = "jbossas-wildfly-core-eap";
+    public static final String JBOSSAS_JBOSS_EAP7 = "jbossas-jboss-eap7";
     public static final String JBOSSAS_JBOSS_EAP = "jbossas-jboss-eap";
 
     public static final String GITHUB = "Github";
@@ -63,11 +66,14 @@ public class Constants {
 //    public static final String EAP7_STREAM_TARGET_RELEASE_710GA = "7.1.0.GA";
 //    public static final String EAP7_STREAM_TARGET_RELEASE_720GA = "7.2.0.GA";
 
+    public static final String EAP63ZSTREAM = "jboss-eap-6.3.z";
     public static final String EAP64ZSTREAM = "jboss-eap-6.4.z";
     public static final String EAP70ZSTREAM = "jboss-eap-7.0.z";
     public static final String EAP71ZSTREAM = "jboss-eap-7.1.z";
     public static final String EAP72ZSTREAM = "jboss-eap-7.2.z";
     public static final String EAP73ZSTREAM = "jboss-eap-7.3.z";
+    public static final ArrayList<String> EOLSTREAMS = new ArrayList<>(Arrays.asList(EAP63ZSTREAM, EAP70ZSTREAM, EAP71ZSTREAM));
+    public static final String WILDFLYSTREAM = "wildfly"; // ignored upstream in streams view
     public static final String EAP_PREFIX = "jboss-eap-";
     public static final String EAP_SUFFIX = ".z";
 //    public static final String EAP7Z0STREAM = "jboss-eap-7.z.0";

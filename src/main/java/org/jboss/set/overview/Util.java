@@ -88,6 +88,7 @@ public class Util {
         return name.equalsIgnoreCase(Constants.WILDFLY_WILDFLY)
                 || name.equalsIgnoreCase(Constants.WILDFLY_WILDFLY_CORE)
                 || name.equalsIgnoreCase(Constants.JBOSSAS_WILDFLY_CORE_EAP)
+                || name.equalsIgnoreCase(Constants.JBOSSAS_JBOSS_EAP7)
                 || name.equalsIgnoreCase(Constants.JBOSSAS_JBOSS_EAP);
     }
 

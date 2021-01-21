@@ -201,6 +201,10 @@ public class PullRequestOverviewProcessor implements PullRequestProcessor {
     }
 
     private boolean checkPullRequestBranch(PullRequest pullRequest, Stream stream) {
+        if (pullRequest == null) {
+            // hack before Aphrodite 0.7.13.Final upgrade see https://github.com/jboss-set/prbz-overview/issues/71
+            return false;
+        }
         Codebase codeBase = pullRequest.getCodebase();
         URL pullRequestURL = pullRequest.getRepository().getURL();
         return stream.getAllComponents().stream().filter(

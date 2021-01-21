@@ -64,7 +64,7 @@ public class StreamPullRequest {
         CustomRequest customRequest = new CustomRequest(request);
         CustomResponse customResponse = new CustomResponse(response);
 
-        List<Stream> streams = Aider.getAllStreams();
+        List<Stream> streams = Aider.getSubStreams();
         if (streams == null) {
             context.getRequestDispatcher("/error-wait.html").forward(customRequest, customResponse);
         } else {
@@ -106,7 +106,7 @@ public class StreamPullRequest {
 
     private Map<String, List<String>> getStreamMap () {
         return new TreeMap<>(
-                Aider.getAllStreams().stream().collect(
+                Aider.getSubStreams().stream().collect(
                         Collectors.toMap(e -> e.getName(),
                                 e -> e.getAllComponents().stream()
                                         .filter(f -> filterComponent(f)).map(g -> g.getName())
