@@ -68,6 +68,7 @@ import org.jboss.set.aphrodite.repository.services.common.RepositoryType;
 import org.jboss.set.aphrodite.spi.AphroditeException;
 import org.jboss.set.aphrodite.spi.NotFoundException;
 import org.jboss.set.assist.AssistantClient;
+import org.jboss.set.assist.Constants;
 import org.jboss.set.assist.data.ProcessorData;
 import org.jboss.set.assist.processor.PayloadProcessor;
 import org.jboss.set.assist.processor.ProcessorException;
@@ -83,12 +84,12 @@ import org.jboss.set.overview.Util;
 @Startup
 public class Aider {
     private static Logger logger = Logger.getLogger(Aider.class.getCanonicalName());
-    private static final String WILDFLY_STREAM = "wildfly"; // ignored upstream in streams view
 
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     public static Aphrodite aphrodite;
-    public static List<Stream> allStreams = new ArrayList<>();
+    public static List<Stream> allStreams = new ArrayList<>(); // all streams defined in jboss-streams streams.json file
+    public static List<Stream> subStreams = new ArrayList<>(); // sub streams with end of life streams excluded.
     private static Map<String, List<ProcessorData>> pullRequestData = new HashMap<>();
     private static Map<String, List<ProcessorData>> payloadData = new HashMap<>();
     private static Map<String, Map<String, List<ProcessorData>>> payloadsDataByStreams = new HashMap<>();
@@ -119,12 +120,14 @@ public class Aider {
                     logger.log(Level.INFO, "New initialisation in Aider init()");
                     status.refreshStarted();
 
+                    allStreams = aphrodite.getAllStreams().stream().filter(e -> !devProfile || e.getName().contains(DEV_STREAM)).collect(Collectors.toList());
+                    // Avoid displaying pull requests of repositories for upstream wildfly and other end of life streams.
+                    subStreams = aphrodite.getAllStreams().stream().filter(e -> !(Constants.EOLSTREAMS.contains(e.getName()) || e.getName().equals(Constants.WILDFLYSTREAM)))
+                            .filter(e -> !devProfile || e.getName().contains(DEV_STREAM)).collect(Collectors.toList());
+
                     findAllJiraVersions();
                     findAllJiraPayloads();
                     if (!devProfile) findAllBugzillaPayloads(Aider.aphrodite, true);
-
-                    allStreams = aphrodite.getAllStreams().stream().filter(e -> !e.getName().equals(Aider.WILDFLY_STREAM))
-                            .filter(e -> !devProfile || e.getName().contains(DEV_STREAM)).collect(Collectors.toList());
 
                     initProcessors();
 
@@ -158,7 +161,7 @@ public class Aider {
         } catch (InterruptedException e1) {
             // ignored
         }
-        for (Stream s : allStreams) {
+        for (Stream s : subStreams) {
             String streamName = s.getName();
             s.getAllComponents().stream().filter(e -> filterComponent(e))
                     .forEach(e -> generatePullRequestData(streamName, e.getName()));
@@ -214,6 +217,7 @@ public class Aider {
         }
         if (!dataList.isEmpty()) {
             synchronized (pullRequestDataLock) {
+                logger.info("Add " + dataList.size() + " pull request data in " + streamName + componentName);
                 pullRequestData.put(streamName + componentName, dataList);
             }
         }
@@ -345,7 +349,7 @@ public class Aider {
         if (devProfile) return;
         logger.info("schedule pull request data update is started ...");
         // TOOD load new streams, although it's not often.
-        for (Stream s : allStreams) {
+        for (Stream s : subStreams) {
             String streamName = s.getName();
             s.getAllComponents().stream().filter(e -> filterComponent(e))
                     .forEach(e -> generatePullRequestData(streamName, e.getName()));
@@ -381,6 +385,10 @@ public class Aider {
 
     public static List<Stream> getAllStreams() {
         return allStreams;
+    }
+
+    public static List<Stream> getSubStreams() {
+        return subStreams;
     }
 
     public static LinkedHashMap<String, LinkedHashMap<String, Issue>> getBzPayloadStoresByStream() {
