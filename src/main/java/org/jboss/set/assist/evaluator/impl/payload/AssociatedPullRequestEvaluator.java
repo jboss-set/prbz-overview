@@ -29,7 +29,7 @@ import org.jboss.set.aphrodite.domain.Patch;
 import org.jboss.set.aphrodite.domain.PatchType;
 import org.jboss.set.aphrodite.domain.PullRequest;
 import org.jboss.set.aphrodite.domain.Stream;
-import org.jboss.set.aphrodite.spi.NotFoundException;
+import org.jboss.set.assist.GitUtil;
 import org.jboss.set.assist.PatchHomeService;
 import org.jboss.set.assist.data.payload.AssociatedPullRequest;
 import org.jboss.set.assist.evaluator.PayloadEvaluator;
@@ -43,7 +43,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -76,15 +75,8 @@ public class AssociatedPullRequestEvaluator implements PayloadEvaluator {
 
         Aphrodite aphrodite = context.getAphrodite();
 
-        allPullRequests = allPatches.filter(e -> e.getPatchType().equals(PatchType.PULLREQUEST)).map(e -> {
-            URL url = e.getUrl();
-            try {
-                return aphrodite.getPullRequest(url);
-            } catch (NotFoundException ex) {
-                logger.log(Level.WARNING, "Can not get pull request from url : " + url + " due to : " + ex);
-            }
-            return null;
-        }).filter(Objects::nonNull).collect(Collectors.toList());
+        allPullRequests = allPatches.filter(e -> e.getPatchType().equals(PatchType.PULLREQUEST))
+                .map(e -> GitUtil.getPullRequest(aphrodite, e.getUrl())).collect(Collectors.toList());
 
         Stream stream = context.getStream();
 
