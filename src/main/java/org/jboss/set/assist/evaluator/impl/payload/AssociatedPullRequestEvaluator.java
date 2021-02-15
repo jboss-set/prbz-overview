@@ -33,6 +33,7 @@ import org.jboss.set.assist.CommitHomeService;
 import org.jboss.set.assist.GitUtil;
 import org.jboss.set.assist.PatchHomeService;
 import org.jboss.set.assist.data.payload.AssociatedPullRequest;
+import org.jboss.set.assist.data.payload.MergedStatus;
 import org.jboss.set.assist.evaluator.PayloadEvaluator;
 import org.jboss.set.assist.evaluator.PayloadEvaluatorContext;
 
@@ -91,7 +92,13 @@ public class AssociatedPullRequestEvaluator implements PayloadEvaluator {
 
         for (PullRequest pullRequest : relatedPullRequests) {
             CommitStatus commitStatus = PatchHomeService.retrieveCommitStatus(pullRequest);
-            boolean mergedInFuture = CommitHomeService.isMergedInFutureBranch(pullRequest);
+            MergedStatus merged = pullRequest.isMerged() ? MergedStatus.MERGED : MergedStatus.UNMERGED;
+            if (merged == MergedStatus.UNMERGED) {
+                boolean mergedInWork = CommitHomeService.isMergedInWorkBranch(pullRequest);
+                if (mergedInWork) {
+                    merged = MergedStatus.WORK_BRANCH;
+                }
+            }
             URL upstreamIssueFromPRDesc = null;
             URL upstreamPRFromPRDesc = null;
             String upstreamPatchState = null;
@@ -112,17 +119,18 @@ public class AssociatedPullRequestEvaluator implements PayloadEvaluator {
                     pullRequest.getCodebase().getName(), pullRequest.getState().toString(),
                     commitStatus.toString(),
                     pullRequest.getMergableState() == null?null:pullRequest.getMergableState().name(),
-                    !pullRequest.isUpstreamRequired(), upstreamIssueFromPRDesc, upstreamPRFromPRDesc, upstreamPatchState, mergedInFuture));
+                    !pullRequest.isUpstreamRequired(), upstreamIssueFromPRDesc, upstreamPRFromPRDesc, upstreamPatchState, merged));
         }
         data.put(KEY, relatedDataList);
 
         for (PullRequest pullRequest : unrelatedPullRequests) {
             CommitStatus commitStatus = PatchHomeService.retrieveCommitStatus(pullRequest);
+            MergedStatus merged = pullRequest.isMerged() ? MergedStatus.MERGED : MergedStatus.UNMERGED;
             unrelatedDataList.add(new AssociatedPullRequest(pullRequest.getId(), pullRequest.getURL(),
                     pullRequest.getCodebase().getName(), pullRequest.getState().toString(),
                     commitStatus.toString(),
                     pullRequest.getMergableState() == null ? null : pullRequest.getMergableState().name(),
-                    !pullRequest.isUpstreamRequired()));
+                    !pullRequest.isUpstreamRequired(), merged));
         }
         data.put(KEY_UNRELATED, unrelatedDataList);
     }

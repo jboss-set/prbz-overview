@@ -26,6 +26,7 @@ import org.jboss.set.aphrodite.domain.CommitStatus;
 import org.jboss.set.aphrodite.domain.PullRequest;
 import org.jboss.set.assist.PatchHomeService;
 import org.jboss.set.assist.data.payload.AssociatedPullRequest;
+import org.jboss.set.assist.data.payload.MergedStatus;
 import org.jboss.set.assist.evaluator.Evaluator;
 import org.jboss.set.assist.evaluator.EvaluatorContext;
 
@@ -46,9 +47,10 @@ public class PullRequestEvaluator implements Evaluator {
     public void eval(EvaluatorContext context, Map<String, Object> data) {
         PullRequest pullRequest = context.getPullRequest();
         CommitStatus commitStatus = PatchHomeService.retrieveCommitStatus(pullRequest);
+        MergedStatus merged = pullRequest.isMerged() ? MergedStatus.MERGED : MergedStatus.UNMERGED;
         data.put("pullRequest", new AssociatedPullRequest(pullRequest.getId(), pullRequest.getURL(), pullRequest.getCodebase().getName(),
                 pullRequest.getState().toString(), commitStatus.toString(),
-                pullRequest.getMergableState() == null ? null : pullRequest.getMergableState().name(), !pullRequest.isUpstreamRequired()));
+                pullRequest.getMergableState() == null ? null : pullRequest.getMergableState().name(), !pullRequest.isUpstreamRequired(), merged));
 
     }
 }
