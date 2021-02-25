@@ -33,8 +33,9 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalTime;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -44,6 +45,7 @@ public class CommitHomeService {
     private static Store store;
 
     private static final String FUTURE = "-future";
+    private static final String PROPOSED = "-proposed";
     private static final String EAP_REPO = "jbossas/jboss-eap7";
 
     private static final long MONTH_MILLI = 2629800000L; // milliseconds in a month
@@ -63,44 +65,45 @@ public class CommitHomeService {
         return store;
     }
 
-    private static List<Commit> getLastCommits(PullRequest pullRequest) {
+    private static Set<Commit> getLastCommits(PullRequest pullRequest) {
         if (!isEAP7PR(pullRequest)) {
             return null;
         }
 
-        String branch = pullRequest.getCodebase().getName() + FUTURE;
-        if (store().getCommits(branch) == null || store().isStale()) {
+        String codebase = pullRequest.getCodebase().getName();
+        if (store().getCommits(codebase) == null || store().isStale()) {
             try {
                 long since = Instant.now().toEpochMilli() - 5 * MONTH_MILLI; // 5 months in the past
-                List<Commit> list = aphrodite.getCommitsSince(pullRequest.getRepository().getURL(), branch, since);
-                store().putCommits(branch, list);
+                Set<Commit> commits = new TreeSet<>();
+                commits.addAll(aphrodite.getCommitsSince(pullRequest.getRepository().getURL(), codebase + FUTURE, since));
+                commits.addAll(aphrodite.getCommitsSince(pullRequest.getRepository().getURL(), codebase + PROPOSED, since));
+                store().putCommits(codebase, commits);
                 store().update();
             } catch (NotFoundException nfe) {
                 logger.warning("Could not retrieve commits from " + pullRequest.getRepository().getURL());
             }
         }
 
-        return store().getCommits(branch);
+        return store().getCommits(codebase);
     }
-
 
     private static boolean isEAP7PR(PullRequest pr) {
         return pr.getURL().toString().contains(EAP_REPO) && pr.getCodebase().getName().startsWith("7.");
     }
 
     /**
-     * Checks all commits (SHA or message) of the given PR against last commits from a future branch
+     * Checks all commits (SHA or message) of the given PR against last commits from a work branch
      * (only considers PRs submitted to a 7.<y>.x branch)
      *
      * @param pullRequest
-     * @return false if PR is not submitted to 7.x or if one or more commits are missing in the future branch, true otherwise
+     * @return false if PR is not submitted to 7.x or if one or more commits are missing in the work branches, true otherwise
      */
-    public static boolean isMergedInFutureBranch(PullRequest pullRequest) {
+    public static boolean isMergedInWorkBranch(PullRequest pullRequest) {
         if (!isEAP7PR(pullRequest)) {
             return false;
         }
 
-        List<Commit> lastCommits = getLastCommits(pullRequest);
+        Set<Commit> lastCommits = getLastCommits(pullRequest);
         for (Commit prCommit : pullRequest.getCommits()) {
             boolean found = lastCommits.stream()
                     .anyMatch(commit -> prCommit.getSha().equals(commit.getSha()) || pullRequest.getTitle().equals(commit.getMessage()));
@@ -113,14 +116,14 @@ public class CommitHomeService {
     }
 
     private static class Store {
-        private Map<String, List<Commit>> commitMap = new HashMap<>();
+        private Map<String, Set<Commit>> commitMap = new HashMap<>();
         private LocalTime lastUpdate = LocalTime.now();
 
-        public List<Commit> getCommits(String branch) {
+        public Set<Commit> getCommits(String branch) {
             return commitMap.get(branch);
         }
 
-        public void putCommits(String branch, List<Commit> commits) {
+        public void putCommits(String branch, Set<Commit> commits) {
             commitMap.put(branch, commits);
         }
 
