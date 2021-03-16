@@ -32,6 +32,7 @@ import javax.naming.NameNotFoundException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalTime;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -74,7 +75,22 @@ public class CommitHomeService {
         if (store().getCommits(codebase) == null || store().isStale()) {
             try {
                 long since = Instant.now().toEpochMilli() - 5 * MONTH_MILLI; // 5 months in the past
-                Set<Commit> commits = new TreeSet<>();
+                Set<Commit> commits = new TreeSet<>(new Comparator<Commit>() {
+
+                    @Override
+                    public int compare(Commit o1, Commit o2) {
+                        if (o1.getSha() == null) {
+                            return -1;
+                        }
+                        if (o2.getSha() == null) {
+                            return 1;
+                        }
+                        if (o1.getSha().equals(o2.getSha())) {
+                            return 0;
+                        }
+                        return o1.getSha().compareTo(o2.getSha());
+                    }
+                });
                 commits.addAll(aphrodite.getCommitsSince(pullRequest.getRepository().getURL(), codebase + FUTURE, since));
                 commits.addAll(aphrodite.getCommitsSince(pullRequest.getRepository().getURL(), codebase + PROPOSED, since));
                 store().putCommits(codebase, commits);
