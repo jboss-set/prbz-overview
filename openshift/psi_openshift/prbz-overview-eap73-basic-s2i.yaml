@@ -78,22 +78,6 @@ parameters:
   name: MAVEN_ARGS_APPEND
   value: "-Dcom.redhat.xpaas.repo.jbossorg -Dnorpm"
   required: true
-- description: Container cpu limit
-  name: CPU_LIMIT
-  value: "1"
-  required: false
-- description: Container cpu request
-  name: CPU_REQUEST
-  value: "1"
-  required: false
-- description: Container memory limit
-  name: MEMORY_LIMIT
-  value: "1Gi"
-  required: false
-- description: Container memory request
-  name: MEMORY_REQUEST
-  value: "512Mi"
-  required: false
 objects:
 - kind: Service
   apiVersion: v1
@@ -165,6 +149,14 @@ objects:
       git:
         uri: "${SOURCE_REPOSITORY_URL}"
         ref: "${SOURCE_REPOSITORY_REF}"
+    containers:
+      - resources:
+          limits:
+            cpu: "2"
+            memory: "2Gi"
+          requests:
+            cpu: "1"
+            memory: "1Gi"
     strategy:
       type: Source
       sourceStrategy:
@@ -204,6 +196,14 @@ objects:
       application: "${APPLICATION_NAME}"
     name: "${APPLICATION_NAME}"
   spec:
+    containers:
+      - resources:
+          limits:
+            cpu: "2"
+            memory: "1Gi"
+          requests:
+            cpu: "1"
+            memory: "512Mi"
     output:
       to:
         kind: ImageStreamTag
@@ -288,11 +288,11 @@ objects:
             mountPath: "/home/jboss/github-cache"
           resources:
             limits:
-              memory: "${MEMORY_LIMIT}"
-              cpu: "${CPU_LIMIT}"
+              cpu: "2"
+              memory: "1Gi"
             requests:
-              memory: "${MEMORY_REQUEST}"
-              cpu: "${CPU_REQUEST}"
+              cpu: "1"
+              memory: "512Mi"
           livenessProbe:
             exec:
               command:
