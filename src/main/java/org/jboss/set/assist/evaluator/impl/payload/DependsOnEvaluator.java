@@ -44,6 +44,7 @@ import org.jboss.set.aphrodite.domain.IssueStatus;
 import org.jboss.set.aphrodite.domain.IssueType;
 import org.jboss.set.aphrodite.domain.Release;
 import org.jboss.set.aphrodite.domain.Stream;
+import org.jboss.set.aphrodite.domain.User;
 import org.jboss.set.aphrodite.issue.trackers.jira.JiraIssue;
 import org.jboss.set.aphrodite.spi.NotFoundException;
 import org.jboss.set.assist.Constants;
@@ -105,7 +106,7 @@ public class DependsOnEvaluator implements PayloadEvaluator {
                         issue.getRawStatus(), issue.getType(), issue.getRawType(),
                         issue.getStage().getStateMap().entrySet().stream()
                                 .collect(Collectors.toMap(e -> String.valueOf(e.getKey()), e -> String.valueOf(e.getValue()))),
-                        issue.getPriority().name(),
+                        issue.getPriority().name(), issue.getAssignee().flatMap(User::getName).orElse("unassigned"),
                         Collections.emptyList(), inPayload, getFixVersions(issue), getPayload(issue),
                         issue.getStreamStatus()));
             });
@@ -118,7 +119,7 @@ public class DependsOnEvaluator implements PayloadEvaluator {
                         issue.getRawStatus(), issue.getType(), issue.getRawType(),
                         issue.getStage().getStateMap().entrySet().stream()
                                 .collect(Collectors.toMap(e -> String.valueOf(e.getKey()), e -> String.valueOf(e.getValue()))),
-                        issue.getPriority().name(),
+                        issue.getPriority().name(), issue.getAssignee().flatMap(User::getName).orElse("unassigned"),
                         Collections.emptyList(), inPayload, getFixVersions(issue), getPayload(issue),
                         issue.getStreamStatus()));
             });

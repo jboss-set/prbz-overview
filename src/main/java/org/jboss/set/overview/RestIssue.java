@@ -39,6 +39,7 @@ public class RestIssue {
     private String status;
     private String rawStatus;
     private String priority;
+    private String assignee;
     private List<AssociatedPullRequest> pullRequests;
     private List<URL> linkedIncorporatesIssues;
 
@@ -57,6 +58,7 @@ public class RestIssue {
         restIssue.setStatus(issue.getStatus().toString());
         restIssue.setRawStatus(issue.getRawStatus());
         restIssue.setPriority(issue.getPriority());
+        restIssue.setAssignee(issue.getAssignee());
         restIssue.setIncorporatedIssues(incorporatedIssues);
 
         if (associatedPullRequest != null) {
@@ -144,5 +146,13 @@ public class RestIssue {
 
     public void setSummary(String summary) {
         this.summary = summary;
+    }
+
+    public String getAssignee() {
+        return assignee;
+    }
+
+    public void setAssignee(String assignee) {
+        this.assignee = assignee;
     }
 }
