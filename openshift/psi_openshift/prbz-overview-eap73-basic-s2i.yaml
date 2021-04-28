@@ -125,6 +125,24 @@ objects:
     tls:
       insecureEdgeTerminationPolicy: Redirect
       termination: edge
+- kind: Route
+  apiVersion: v1
+  metadata:
+    name: "${APPLICATION_NAME}-alias"
+    labels:
+      application: "${APPLICATION_NAME}"
+    annotations:
+      description: Alias route for application's https service.
+  spec:
+    host: "prbz.corp.redhat.com"
+    to:
+      kind: Service
+      name: "${APPLICATION_NAME}"
+      weight: 100
+    tls:
+      insecureEdgeTerminationPolicy: Redirect
+      termination: edge
+    wildcardPolicy: None
 - kind: ImageStream
   apiVersion: v1
   metadata:
