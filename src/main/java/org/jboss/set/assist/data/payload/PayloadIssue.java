@@ -47,13 +47,14 @@ public class PayloadIssue {
     private String rawType;
     private Map<String, String> flags;
     private String priority;
+    private String assignee;
     private boolean allAcks;
     private Collection<Violation> violations;
     private Severity maxSeverity;
 
     public PayloadIssue(URL link, String label, String summary, IssueStatus status,
                         String rawStatus, IssueType type, String rawType,
-                        Map<String, String> flags, String priority,
+                        Map<String, String> flags, String priority, String assignee,
                         boolean allAcks, Collection<Violation> violations) {
         this.link = link;
         this.label = label;
@@ -64,6 +65,7 @@ public class PayloadIssue {
         this.rawType = rawType;
         this.flags = flags;
         this.priority = priority;
+        this.assignee = assignee;
         this.allAcks = allAcks;
         this.violations = violations;
         this.maxSeverity = violations.stream().map(violation -> violation.getLevel()).reduce((severity1, severity2) -> maxSeverity(severity1, severity2)).orElse(null);
@@ -115,5 +117,9 @@ public class PayloadIssue {
 
     public Severity getMaxSeverity() {
         return maxSeverity;
+    }
+
+    public String getAssignee() {
+        return assignee;
     }
 }
