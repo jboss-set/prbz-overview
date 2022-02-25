@@ -86,5 +86,5 @@ public class Constants {
 
     public static final String DEV_PROFILE = "prbz-dev";
     public static final String RELEASED_DISABLED = "released-disabled";
-    public static final String DEV_STREAM = "7.3";
+    public static final String DEV_STREAM = "7.4";
 }
