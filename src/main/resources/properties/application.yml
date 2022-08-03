@@ -1,0 +1,4 @@
+# application.yml
+application:
+ version: ${project.version}
+ name: ${project.name}
