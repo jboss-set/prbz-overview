@@ -20,10 +20,13 @@ package org.jboss.set.overview;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jboss.jbossset.bugclerk.Violation;
+import org.jboss.set.aphrodite.domain.FlagStatus;
 import org.jboss.set.assist.data.ProcessorData;
 import org.jboss.set.assist.data.payload.AssociatedPullRequest;
 import org.jboss.set.assist.data.payload.PayloadIssue;
@@ -42,6 +45,8 @@ public class RestIssue {
     private String assignee;
     private List<AssociatedPullRequest> pullRequests;
     private List<URL> linkedIncorporatesIssues;
+    private Map<String, FlagStatus> streamStatus;
+    private Collection<Violation> violations;
 
     public static RestIssue from(ProcessorData d) {
         PayloadIssue issue = (PayloadIssue) d.getData().get("payloadDependency");
@@ -60,6 +65,8 @@ public class RestIssue {
         restIssue.setPriority(issue.getPriority());
         restIssue.setAssignee(issue.getAssignee());
         restIssue.setIncorporatedIssues(incorporatedIssues);
+        restIssue.setStreamStatus(issue.getStreamStatus());
+        restIssue.setViolations(issue.getViolations());
 
         if (associatedPullRequest != null) {
             restIssue.setPullRequest(associatedPullRequest);
@@ -154,5 +161,21 @@ public class RestIssue {
 
     public void setAssignee(String assignee) {
         this.assignee = assignee;
+    }
+
+    public Map<String, FlagStatus> getStreamStatus() {
+        return streamStatus;
+    }
+
+    public void setStreamStatus(Map<String, FlagStatus> streamStatus) {
+        this.streamStatus = streamStatus;
+    }
+
+    public Collection<Violation> getViolations() {
+        return violations;
+    }
+
+    public void setViolations(Collection<Violation> violations) {
+        this.violations = violations;
     }
 }

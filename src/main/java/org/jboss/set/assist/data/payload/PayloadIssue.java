@@ -30,6 +30,7 @@ import java.util.Map;
 
 import org.jboss.jbossset.bugclerk.Severity;
 import org.jboss.jbossset.bugclerk.Violation;
+import org.jboss.set.aphrodite.domain.FlagStatus;
 import org.jboss.set.aphrodite.domain.IssueStatus;
 import org.jboss.set.aphrodite.domain.IssueType;
 
@@ -51,11 +52,12 @@ public class PayloadIssue {
     private boolean allAcks;
     private Collection<Violation> violations;
     private Severity maxSeverity;
+    private Map<String, FlagStatus> streamStatus;
 
     public PayloadIssue(URL link, String label, String summary, IssueStatus status,
                         String rawStatus, IssueType type, String rawType,
                         Map<String, String> flags, String priority, String assignee,
-                        boolean allAcks, Collection<Violation> violations) {
+                        boolean allAcks, Collection<Violation> violations, Map<String, FlagStatus> streamStatus) {
         this.link = link;
         this.label = label;
         this.summary = summary;
@@ -69,6 +71,7 @@ public class PayloadIssue {
         this.allAcks = allAcks;
         this.violations = violations;
         this.maxSeverity = violations.stream().map(violation -> violation.getLevel()).reduce((severity1, severity2) -> maxSeverity(severity1, severity2)).orElse(null);
+        this.streamStatus = streamStatus;
     }
 
     public URL getLink() {
@@ -121,5 +124,9 @@ public class PayloadIssue {
 
     public String getAssignee() {
         return assignee;
+    }
+
+    public Map<String, FlagStatus> getStreamStatus() {
+        return streamStatus;
     }
 }

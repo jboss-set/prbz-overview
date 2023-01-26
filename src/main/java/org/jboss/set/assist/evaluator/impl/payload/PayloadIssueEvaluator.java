@@ -73,7 +73,7 @@ public class PayloadIssueEvaluator implements PayloadEvaluator {
                 dependencyIssue.getStage().getStateMap().entrySet().stream().collect(Collectors.toMap(e -> String.valueOf(e.getKey()), e -> String.valueOf(e.getValue()))),
                 dependencyIssue.getPriority().name(), dependencyIssue.getAssignee().flatMap(User::getName).orElse("unassigned"),
                 Util.isAllAcks(dependencyIssue),
-                violations));
+                violations, dependencyIssue.getStreamStatus()));
 
         if (dependencyIssue instanceof JiraIssue) {
             data.put("incorporatedIssues", ((JiraIssue) dependencyIssue).getLinkedIncorporatesIssues());

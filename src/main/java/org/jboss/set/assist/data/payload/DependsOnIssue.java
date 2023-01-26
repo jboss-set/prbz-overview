@@ -40,14 +40,12 @@ public class DependsOnIssue extends PayloadIssue {
     private boolean inPayload;
     private List<String> fixVersions;
     private String payload;
-    private Map<String, FlagStatus> streamStatus;
 
     public DependsOnIssue(URL link, String label, String summary, IssueStatus status, String rawStatus, IssueType type, String rawType, Map<String, String> flags, String priority, String assignee, Collection<Violation> violations, boolean inPayload, List<String> fixVersions, String payload, Map<String, FlagStatus> streamStatus) {
-        super(link, label, summary, status, rawStatus, type, rawType, flags, priority, assignee, false, violations); // for an upstream issue, set allAcks default to false.
+        super(link, label, summary, status, rawStatus, type, rawType, flags, priority, assignee, false, violations, streamStatus); // for an upstream issue, set allAcks default to false.
         this.inPayload = inPayload;
         this.fixVersions = fixVersions;
         this.payload = payload;
-        this.streamStatus = streamStatus;
     }
 
     public boolean isInPayload() {
@@ -60,9 +58,5 @@ public class DependsOnIssue extends PayloadIssue {
 
     public String getPayload() {
         return payload;
-    }
-
-    public Map<String, FlagStatus> getStreamStatus() {
-        return streamStatus;
     }
 }
