@@ -434,4 +434,8 @@ public class Aider {
         }
         return Collections.EMPTY_LIST;
     }
+
+    public static List<String> getNewIssuesSince(String version, String since) {
+        return Util.getNewIssuesInPayload(version, since);
+    }
 }

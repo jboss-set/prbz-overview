@@ -40,7 +40,9 @@ import static org.jboss.set.assist.Constants.RELEASED_DISABLED;
 import javax.naming.NameNotFoundException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -218,6 +220,23 @@ public class Util {
             }
         }
         return result;
+    }
+
+    public static List<String> getNewIssuesInPayload(String fixVersion, String since) {
+        try {
+            String shortStreamName = fixVersion.substring(0,3);
+            for (JiraRelease release : jiraVersions.get(shortStreamName)) {
+                if (release.getVersion().getName().equals(fixVersion)) {
+                    LocalDate sinceDate = LocalDate.parse(since);
+                    return release.getNewIssues(sinceDate, null).stream()
+                            .map(issue -> issue.getURL().toString()).collect(Collectors.toList());
+                }
+            }
+        } catch (NameNotFoundException e) {
+            logger.log(Level.WARNING, e.getMessage(), e);
+        }
+
+        return Collections.EMPTY_LIST;
     }
 
     public static String getValueFromPropertyAndEnv(String key) {

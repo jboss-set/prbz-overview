@@ -115,4 +115,11 @@ public class ApiResource {
     public List<String> getTags(@PathParam("comp") String comp) {
         return aider.getTagsAndBranches(comp);
     }
+
+    @GET
+    @Path("/new-issues/{payload}/{since}")
+    @Produces("application/json")
+    public List<String> getNewIssues(@PathParam("payload") String payload, @PathParam("since") String since) {
+        return aider.getNewIssuesSince(payload, since);
+    }
 }
