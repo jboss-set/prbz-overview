@@ -128,3 +128,10 @@ In order to avoid potential Github API rate limitation, the scheduled update tas
     "newVersion":"2.3.9.SP12-redhat-00001"
 }]
 ```
+- `GET /rest/api/new-issues/{payload}/{since}` - returns a list of issue urls that have been added to a payload since a given date
+```
+[
+    "https://issues.redhat.com/browse/JBEAP-14221",
+    "https://issues.redhat.com/browse/JBEAP-14193"
+]
+```
