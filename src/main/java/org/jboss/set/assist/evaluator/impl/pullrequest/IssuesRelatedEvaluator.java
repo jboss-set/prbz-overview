@@ -152,8 +152,8 @@ public class IssuesRelatedEvaluator implements Evaluator {
             return targetRelease.equals(Constants.EAP7_STREAM_TARGET_RELEASE_73ZGA);
         } else if (currentStreamName.equals(Constants.EAP74ZSTREAM)) {
             return targetRelease.equals(Constants.EAP7_STREAM_TARGET_RELEASE_74ZGA);
-//        } else if (currentStreamName.equals(Constants.EAP7Z0STREAM)) {
-//            return targetRelease.equals(Constants.EAP7_STREAM_TARGET_RELEASE_710GA);
+        } else if (currentStreamName.equals(Constants.EAP80ZSTREAM)) {
+            return targetRelease.equals(Constants.EAP8_STREAM_TARGET_RELEASE_80ZGA);
         } else {
             return false;
         }

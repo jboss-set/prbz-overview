@@ -32,6 +32,8 @@ public class Constants {
     public static final String WILDFLY_WILDFLY_CORE = "wildfly-wildfly-core";
     public static final String JBOSSAS_WILDFLY_CORE_EAP = "jbossas-wildfly-core-eap";
     public static final String JBOSSAS_JBOSS_EAP7 = "jbossas-jboss-eap7";
+    public static final String JBOSSAS_JBOSS_EAP8 = "jbossas-jboss-eap8";
+
     public static final String JBOSSAS_JBOSS_EAP = "jbossas-jboss-eap";
 
     public static final String GITHUB = "Github";
@@ -63,6 +65,7 @@ public class Constants {
     public static final String EAP7_STREAM_TARGET_RELEASE_72ZGA = "7.2.z.GA";
     public static final String EAP7_STREAM_TARGET_RELEASE_73ZGA = "7.3.z.GA";
     public static final String EAP7_STREAM_TARGET_RELEASE_74ZGA = "7.4.z.GA";
+    public static final String EAP8_STREAM_TARGET_RELEASE_80ZGA = "8.0.z.GA";
     public static final String EAP7_STREAM_TARGET_RELEASE_7BACKLOGGA = "7.backlog.GA";
 //    public static final String EAP7_STREAM_TARGET_RELEASE_710GA = "7.1.0.GA";
 //    public static final String EAP7_STREAM_TARGET_RELEASE_720GA = "7.2.0.GA";
@@ -74,6 +77,7 @@ public class Constants {
     public static final String EAP72ZSTREAM = "jboss-eap-7.2.z";
     public static final String EAP73ZSTREAM = "jboss-eap-7.3.z";
     public static final String EAP74ZSTREAM = "jboss-eap-7.4.z";
+    public static final String EAP80ZSTREAM = "jboss-eap-8.0.z";
 
     public static final ArrayList<String> EOLSTREAMS = new ArrayList<>(Arrays.asList(EAP63ZSTREAM, EAP70ZSTREAM, EAP71ZSTREAM));
     public static final String WILDFLYSTREAM = "wildfly"; // ignored upstream in streams view

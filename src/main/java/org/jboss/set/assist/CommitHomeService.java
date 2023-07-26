@@ -47,7 +47,8 @@ public class CommitHomeService {
 
     private static final String FUTURE = "-future";
     private static final String PROPOSED = "-proposed";
-    private static final String EAP_REPO = "jbossas/jboss-eap7";
+    private static final String EAP7_REPO = "jbossas/jboss-eap7";
+    private static final String EAP8_REPO = "jbossas/jboss-eap8";
 
     private static final long MONTH_MILLI = 2629800000L; // milliseconds in a month
 
@@ -104,18 +105,23 @@ public class CommitHomeService {
     }
 
     private static boolean isEAP7PR(PullRequest pr) {
-        return pr.getURL().toString().contains(EAP_REPO) && pr.getCodebase().getName().startsWith("7.");
+        return pr.getURL().toString().contains(EAP7_REPO) && pr.getCodebase().getName().startsWith("7.");
     }
+
+    private static boolean isEAP8PR(PullRequest pr) {
+        return pr.getURL().toString().contains(EAP8_REPO) && pr.getCodebase().getName().startsWith("8.");
+    }
+
 
     /**
      * Checks all commits (SHA or message) of the given PR against last commits from a work branch
-     * (only considers PRs submitted to a 7.<y>.x branch)
+     * (only considers PRs submitted to 7.<y>.x and 8.<y>.x branch)
      *
      * @param pullRequest
-     * @return false if PR is not submitted to 7.x or if one or more commits are missing in the work branches, true otherwise
+     * @return false if PR is not submitted to 7.x or 8.x or if one or more commits are missing in the work branches, true otherwise
      */
     public static boolean isMergedInWorkBranch(PullRequest pullRequest) {
-        if (!isEAP7PR(pullRequest)) {
+        if (!(isEAP7PR(pullRequest) || isEAP8PR(pullRequest))) {
             return false;
         }
 
