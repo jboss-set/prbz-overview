@@ -260,7 +260,7 @@ objects:
           name: "${EAP_RUNTIME_IMAGE_NAME}"
           namespace: "${IMAGE_STREAM_NAMESPACE}"
         pullSecret:
-          name: a-new-pull-secret-pull-secret
+          name: 6340056-chaowan-pull-secret-pull-secret
       type: Docker
     triggers:
     - type: ImageChange
