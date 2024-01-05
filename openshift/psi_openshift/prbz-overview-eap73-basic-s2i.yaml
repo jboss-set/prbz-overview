@@ -7,6 +7,7 @@ metadata:
   name: prbz-eap73-basic-s2i
 labels:
   template: prbz-eap73-basic-s2i
+  paas.redhat.com/appcode: SET-002
 parameters:
 - displayName: Application Name
   description: The name for the application.
@@ -91,6 +92,7 @@ objects:
     name: "${APPLICATION_NAME}"
     labels:
       application: "${APPLICATION_NAME}"
+      paas.redhat.com/appcode: SET-002
     annotations:
       description: The web server's http port.
 - kind: Service
@@ -107,6 +109,7 @@ objects:
     name: "${APPLICATION_NAME}-ping"
     labels:
       application: "${APPLICATION_NAME}"
+      paas.redhat.com/appcode: SET-002
     annotations:
       service.alpha.kubernetes.io/tolerate-unready-endpoints: 'true'
       description: The JGroups ping port for clustering.
@@ -117,6 +120,7 @@ objects:
     name: "${APPLICATION_NAME}"
     labels:
       application: "${APPLICATION_NAME}"
+      paas.redhat.com/appcode: SET-002
     annotations:
       description: Route for application's https service.
   spec:
@@ -131,6 +135,7 @@ objects:
     name: "${APPLICATION_NAME}-alias"
     labels:
       application: "${APPLICATION_NAME}"
+      paas.redhat.com/appcode: SET-002
     annotations:
       description: Alias route for application's https service.
   spec:
@@ -149,18 +154,21 @@ objects:
     name: "${APPLICATION_NAME}"
     labels:
       application: "${APPLICATION_NAME}"
+      paas.redhat.com/appcode: SET-002
 - kind: ImageStream
   apiVersion: v1
   metadata:
     name: "${APPLICATION_NAME}-build-artifacts"
     labels:
       application: "${APPLICATION_NAME}"
+      paas.redhat.com/appcode: SET-002
 - kind: BuildConfig
   apiVersion: v1
   metadata:
     name: "${APPLICATION_NAME}-build-artifacts"
     labels:
       application: "${APPLICATION_NAME}"
+      paas.redhat.com/appcode: SET-002
   spec:
     source:
       type: Git
@@ -212,6 +220,7 @@ objects:
   metadata:
     labels:
       application: "${APPLICATION_NAME}"
+      paas.redhat.com/appcode: SET-002
     name: "${APPLICATION_NAME}"
   spec:
     containers:
@@ -266,6 +275,7 @@ objects:
     name: "${APPLICATION_NAME}"
     labels:
       application: "${APPLICATION_NAME}"
+      paas.redhat.com/appcode: SET-002
   spec:
     strategy:
       type: Recreate
@@ -288,6 +298,7 @@ objects:
         labels:
           deploymentConfig: "${APPLICATION_NAME}"
           application: "${APPLICATION_NAME}"
+          paas.redhat.com/appcode: SET-002
       spec:
         terminationGracePeriodSeconds: 75
         containers:

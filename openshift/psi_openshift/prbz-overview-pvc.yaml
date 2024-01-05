@@ -9,6 +9,8 @@ metadata:
   labels:
     # remove the -pvc suffix later
     application: prbz-overview-pvc
+    paas.redhat.com/appcode: SET-002
+
 spec:
   accessModes:
     - ReadWriteOnce
