@@ -3,8 +3,8 @@ kind: ConfigMap
 metadata:
   name: prbz-overview-config
   labels:
-  application: prbz-overview-config
-  paas.redhat.com/appcode: SET-002
+    application: prbz-overview-config
+    paas.redhat.com/appcode: SET-002
 data:
   aphrodite.config: /etc/secret/aphrodite.properties.json.example
   released-disabled: "true"
