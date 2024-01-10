@@ -32,6 +32,7 @@ import javax.naming.NameNotFoundException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalTime;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
@@ -68,8 +69,8 @@ public class CommitHomeService {
     }
 
     private static Set<Commit> getLastCommits(PullRequest pullRequest) {
-        if (!isEAP7PR(pullRequest)) {
-            return null;
+        if (!(isEAP7PR(pullRequest) || isEAP8PR(pullRequest))) {
+            return Collections.emptySet();
         }
 
         String codebase = pullRequest.getCodebase().getName();
