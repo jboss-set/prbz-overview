@@ -19,8 +19,8 @@ Create a secret based on the genereated secret file.
     
 ## Import the latest JBoss EAP for OpenShift Imagestreams
 
-    oc import-image jboss-eap-7/eap73-openjdk11-openshift-rhel8 --from=registry.redhat.io/jboss-eap-7/eap73-openjdk11-openshift-rhel8 --confirm
-    oc import-image jboss-eap-7/eap73-openjdk11-runtime-openshift-rhel8 --from=registry.redhat.io/jboss-eap-7/eap73-openjdk11-runtime-openshift-rhel8 --confirm
+    oc import-image jboss-eap-7/eap74-openjdk11-openshift-rhel8 --from=registry.redhat.io/jboss-eap-7/eap74-openjdk11-openshift-rhel8 --confirm
+    oc import-image jboss-eap-7/eap74-openjdk11-runtime-openshift-rhel8 --from=registry.redhat.io/jboss-eap-7/eap74-openjdk11-runtime-openshift-rhel8 --confirm
 
 ## PersistentVolumeClaim
 
@@ -77,10 +77,10 @@ Otherwise, you can create it from the aphrodite-configmap.yaml
 
 You will reuse **/etc/secret** as the mount volume path later in DeploymentConfig.
 
-## JBoss EAP 7.3 based application
-Last, you need to create several OpenShift resource for the application from template prbz-overview-eap73-basic-s2i.yaml
+## JBoss EAP 7.4 based application
+Last, you need to create several OpenShift resource for the application from template prbz-overview-eap74-basic-s2i.yaml
 
 * First, replace the **pullSecret** name with new generated pullSecret name.
 * Second, replace the **IMAGE_STREAM_NAMESPACE** default value OpenShift with current working namespace, usually it's the same name as project name
 * Last, create the application from template.
-    oc new-app -f prbz-overview-eap73-basic-s2i.yaml
+    oc new-app -f prbz-overview-eap74-basic-s2i.yaml

@@ -4,7 +4,7 @@
 ```
     $ podman login -u username -p password registry.redhat.io
 
-    $ podman run -it --rm registry.redhat.io/jboss-eap-7/eap73-openjdk11-openshift-rhel8 /bin/bash
+    $ podman run -it --rm registry.redhat.io/jboss-eap-7/eap74-openjdk11-openshift-rhel8 /bin/bash
 ```
 * This will open a prompt. Then run:
 ```
