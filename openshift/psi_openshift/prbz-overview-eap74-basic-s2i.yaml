@@ -352,12 +352,6 @@ objects:
             value: '8888'
           - name: MQ_CLUSTER_PASSWORD
             value: "${MQ_CLUSTER_PASSWORD}"
-          - name: MQ_QUEUES
-            value: "${MQ_QUEUES}"
-          - name: MQ_TOPICS
-            value: "${MQ_TOPICS}"
-          - name: JGROUPS_CLUSTER_PASSWORD
-            value: "${JGROUPS_CLUSTER_PASSWORD}"
           - name: AUTO_DEPLOY_EXPLODED
             value: "${AUTO_DEPLOY_EXPLODED}"
           - name: ENABLE_GENERATE_DEFAULT_DATASOURCE
