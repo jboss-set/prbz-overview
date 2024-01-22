@@ -4,8 +4,7 @@
 * Log in to your Openshift instance.
 * Click the upper right corner `Copy Login Command` in the browser to generate a new token, and execute the copied command in a new terminal.
 
-
-    oc login --token=your_generated_token --server=--server=https://api.gpc.xxx.com:6443
+      oc login --token=your_generated_token --server=--server=https://api.gpc.xxx.com:6443
 
 ## Switch to your Openshift project.
 
@@ -75,23 +74,22 @@ Create a secret from the previously created keystore and its secret using the fo
  - Log in the cluster and find the generated secret, copy and save generated certificate and key stored in `tls.crt` and `tls.key` files to local filesystem.
  - Create an empty keystore.
 
+       keytool -genkey -keyalg RSA -alias eap-servicesigned -keystore tls-keystore.jks -validity 360 -keysize 2048 -dname "CN=Developer, OU=Department O=Company, L=City, ST=State, C=CA"
+       keytool -delete -alias eap-servicesigned -storepass your_keystore_password -keystore tls-keystore.jks
+       keytool -list -keystore tls-keystore.jks
 
-    keytool -genkey -keyalg RSA -alias eap-servicesigned -keystore tls-keystore.jks -validity 360 -keysize 2048 -dname "CN=Developer, OU=Department O=Company, L=City, ST=State, C=CA"
-    keytool -delete -alias eap-servicesigned -storepass your_keystore_password -keystore tls-keystore.jks
-    keytool -list -keystore tls-keystore.jks
 - Convert the x.509 cert and key to a pkcs12 file
 
+      openssl pkcs12 -export -in tls.crt -inkey tls.key  -out server.p12 -name myalias -CAfile ca.crt -caname root
 
-    openssl pkcs12 -export -in tls.crt -inkey tls.key  -out server.p12 -name myalias -CAfile ca.crt -caname root
 - Convert the pkcs12 file to the Java keystore
 
+      keytool -importkeystore -deststorepass your_dest_keystore_password -destkeypass your_key_password -destkeystore tls-keystore.jks -srckeystore server.p12 -srcstoretype PKCS12 -srcstorepass your_src_keystore_password -alias myalias
+      keytool -list -keystore tls-keystore.jks
 
-    keytool -importkeystore -deststorepass your_dest_keystore_password -destkeypass your_key_password -destkeystore tls-keystore.jks -srckeystore server.p12 -srcstoretype PKCS12 -srcstorepass your_src_keystore_password -alias myalias
-    keytool -list -keystore tls-keystore.jks
 - Finally, create the secret
 
-
-    oc create secret generic tls-app-secret --from-file=tls-keystore.jks --from-literal=keystore-password=your_keystore_password
+      oc create secret generic tls-app-secret --from-file=tls-keystore.jks --from-literal=keystore-password=your_keystore_password
 
 ## ConfigMaps
 After you created the secret, you also need to define the below configuration as system properties.
@@ -111,5 +109,4 @@ Last, you need to create several OpenShift resource for the application from tem
 * Second, replace the `IMAGE_STREAM_NAMESPACE` default value OpenShift with current working namespace, usually it's the same name as project name
 * Last, create the application from the template.
 
-
-    oc new-app -f prbz-overview-eap74-https-s2i.yaml --env HTTPS_PASSWORD=your_keystore_password IMAGE_STREAM_NAMESPACE=your_openshift_namespace HOSTNAME_HTTPS=your_expected_hostname
+      oc new-app -f prbz-overview-eap74-https-s2i.yaml --env HTTPS_PASSWORD=your_keystore_password IMAGE_STREAM_NAMESPACE=your_openshift_namespace HOSTNAME_HTTPS=your_expected_hostname
