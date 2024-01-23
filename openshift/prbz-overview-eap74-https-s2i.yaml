@@ -18,392 +18,388 @@ labels:
   xpaas: 7.4.0
 message: "A new JBoss EAP based application with SSL support has been created in your project. Please be sure to create the following secrets: \"${HTTPS_SECRET}\" containing the ${HTTPS_KEYSTORE} file used for serving secure content; \"${JGROUPS_ENCRYPT_SECRET}\" containing the ${JGROUPS_ENCRYPT_KEYSTORE} file used for securing JGroups communications."
 parameters:
-- displayName: Application Name
-  description: The name for the application.
-  name: APPLICATION_NAME
-  value: prbz-overview
-  required: true
-- displayName: EAP Image Name
-  description: 'Name of the EAP image to use, example: eap74-openjdk11-openshift-rhel8'
-  name: EAP_IMAGE_NAME
-  value: eap74-openjdk11-openshift-rhel8:latest
-  required: true
-- displayName: EAP Runtime Image Name
-  description: 'Name of the EAP image to use, example: eap74-openjdk11-runtime-openshift-rhel8'
-  name: EAP_RUNTIME_IMAGE_NAME
-  value: eap74-openjdk11-runtime-openshift-rhel8:latest
-  required: true
-- displayName: Custom https Route Hostname
-  description: 'Custom hostname for https service route.  Leave blank for default hostname, e.g.: secure-<application-name>-<project>.<default-domain-suffix>'
-  name: HOSTNAME_HTTPS
-  value: jboss-set-prbz-overview.apps.int.gpc.ocp-hub.prod.psi.redhat.com
-  required: true
-- displayName: Git Repository URL
-  description: Git source URI for application
-  name: SOURCE_REPOSITORY_URL
-  value: https://github.com/jboss-set/prbz-overview.git
-  required: true
-- displayName: Git Reference
-  description: Git branch/tag reference
-  name: SOURCE_REPOSITORY_REF
-  value: master
-  required: false
-- displayName: Server Keystore Secret Name
-  description: The name of the secret containing the keystore file
-  name: HTTPS_SECRET
-  value: tls-app-secret
-  required: false
-- displayName: Server Keystore Filename
-  description: The name of the keystore file within the secret
-  name: HTTPS_KEYSTORE
-  value: tls-keystore.jks
-  required: false
-- displayName: Server Keystore Password
-  description: The password for the keystore and certificate
-  name: HTTPS_PASSWORD
-  value: ""
-  required: false
-- displayName: ImageStream Namespace
-  name: IMAGE_STREAM_NAMESPACE
-  value: jboss-set--chao-test-tenant-namespace
-  required: true
-- displayName: Deploy Exploded Archives
-  description: Controls whether exploded deployment content should be automatically
-    deployed
-  name: AUTO_DEPLOY_EXPLODED
-  value: 'false'
-  required: false
-- displayName: Maven Additional Arguments
-  description: Maven additional arguments to use for S2I builds
-  name: MAVEN_ARGS_APPEND
-  value: "-Dcom.redhat.xpaas.repo.jbossorg -Dnorpm"
-  required: true
-- description: Container cpu limit
-  name: CPU_LIMIT
-  value: "2"
-  required: false
-- description: Container memory limit
-  name: MEMORY_LIMIT
-  value: "6Gi"
-  required: false
-- description: Container cpu requests
-  name: CPU_REQUESTS
-  value: "1"
-  required: false
-- description: Container memory requests
-  name: MEMORY_REQUESTS
-  value: "2Gi"
-  required: false
+  - displayName: Application Name
+    description: The name for the application.
+    name: APPLICATION_NAME
+    value: prbz-overview
+    required: true
+  - displayName: EAP Image Name
+    description: 'Name of the EAP image to use, example: eap74-openjdk11-openshift-rhel8'
+    name: EAP_IMAGE_NAME
+    value: eap74-openjdk11-openshift-rhel8:latest
+    required: true
+  - displayName: EAP Runtime Image Name
+    description: 'Name of the EAP image to use, example: eap74-openjdk11-runtime-openshift-rhel8'
+    name: EAP_RUNTIME_IMAGE_NAME
+    value: eap74-openjdk11-runtime-openshift-rhel8:latest
+    required: true
+  - displayName: Custom https Route Hostname
+    description: 'Custom hostname for https service route.  Leave blank for default hostname, e.g.: secure-<application-name>-<project>.<default-domain-suffix>'
+    name: HOSTNAME_HTTPS
+    value: jboss-set-prbz-overview.apps.int.gpc.ocp-hub.prod.psi.redhat.com
+    required: true
+  - displayName: Git Repository URL
+    description: Git source URI for application
+    name: SOURCE_REPOSITORY_URL
+    value: https://github.com/jboss-set/prbz-overview.git
+    required: true
+  - displayName: Git Reference
+    description: Git branch/tag reference
+    name: SOURCE_REPOSITORY_REF
+    value: master
+    required: false
+  - displayName: Server Keystore Secret Name
+    description: The name of the secret containing the keystore file
+    name: HTTPS_SECRET
+    value: tls-app-secret
+    required: false
+  - displayName: Server Keystore Filename
+    description: The name of the keystore file within the secret
+    name: HTTPS_KEYSTORE
+    value: tls-keystore.jks
+    required: false
+  - displayName: Server Keystore Password
+    description: The password for the keystore and certificate
+    name: HTTPS_PASSWORD
+    value: ""
+    required: false
+  - displayName: ImageStream Namespace
+    name: IMAGE_STREAM_NAMESPACE
+    value: jboss-set--chao-test-tenant-namespace
+    required: true
+  - displayName: Deploy Exploded Archives
+    description: Controls whether exploded deployment content should be automatically
+      deployed
+    name: AUTO_DEPLOY_EXPLODED
+    value: 'false'
+    required: false
+  - displayName: Maven Additional Arguments
+    description: Maven additional arguments to use for S2I builds
+    name: MAVEN_ARGS_APPEND
+    value: "-Dcom.redhat.xpaas.repo.jbossorg -Dnorpm"
+    required: true
+  - description: Container cpu limit
+    name: CPU_LIMIT
+    value: "2"
+    required: false
+  - description: Container memory limit
+    name: MEMORY_LIMIT
+    value: "2Gi"
+    required: false
+  - description: Container cpu requests
+    name: CPU_REQUESTS
+    value: "1"
+    required: false
+  - description: Container memory requests
+    name: MEMORY_REQUESTS
+    value: "1Gi"
+    required: false
 objects:
-- kind: Service
-  apiVersion: v1
-  spec:
-    ports:
-    - name: https
-      port: 8443
-      targetPort: 8443
-    selector:
-      deploymentConfig: "${APPLICATION_NAME}"
-  metadata:
-    name: "${APPLICATION_NAME}"
-    labels:
-      application: "${APPLICATION_NAME}"
-      paas.redhat.com/appcode: SET-002
-    annotations:
-      description: The web server's https port.
-- kind: Service
-  apiVersion: v1
-  spec:
-    publishNotReadyAddresses: true
-    clusterIP: None
-    ports:
-    - name: ping
-      port: 8888
-    selector:
-      deploymentConfig: "${APPLICATION_NAME}"
-  metadata:
-    name: "${APPLICATION_NAME}-ping"
-    labels:
-      application: "${APPLICATION_NAME}"
-      paas.redhat.com/appcode: SET-002
-    annotations:
-      service.alpha.kubernetes.io/tolerate-unready-endpoints: 'true'
-      description: The JGroups ping port for clustering.
-- kind: Route
-  apiVersion: route.openshift.io/v1
-  id: "${APPLICATION_NAME}-https"
-  metadata:
-    name: "${APPLICATION_NAME}"
-    labels:
-      application: "${APPLICATION_NAME}"
-      paas.redhat.com/appcode: SET-002
-      shard: internal
-    annotations:
-      description: Route for application's https service.
-  spec:
-    host: "${HOSTNAME_HTTPS}"
-    to:
-      kind: Service
+  - kind: Service
+    apiVersion: v1
+    spec:
+      ports:
+        - name: https
+          port: 8443
+          targetPort: 8443
+      selector:
+        deploymentConfig: "${APPLICATION_NAME}"
+    metadata:
       name: "${APPLICATION_NAME}"
-    tls:
-      insecureEdgeTerminationPolicy: Redirect
-      termination: reencrypt
-- kind: Route
-  apiVersion: v1
-  metadata:
-    name: "${APPLICATION_NAME}-alias"
-    labels:
-      application: "${APPLICATION_NAME}"
-      paas.redhat.com/appcode: SET-002
-    annotations:
-      description: Alias route for application's https service.
-  spec:
-    host: "prbz.corp.redhat.com"
-    to:
-      kind: Service
+      labels:
+        application: "${APPLICATION_NAME}"
+        paas.redhat.com/appcode: SET-002
+      annotations:
+        description: The web server's https port.
+  - kind: Service
+    apiVersion: v1
+    spec:
+      publishNotReadyAddresses: true
+      clusterIP: None
+      ports:
+        - name: ping
+          port: 8888
+      selector:
+        deploymentConfig: "${APPLICATION_NAME}"
+    metadata:
+      name: "${APPLICATION_NAME}-ping"
+      labels:
+        application: "${APPLICATION_NAME}"
+        paas.redhat.com/appcode: SET-002
+      annotations:
+        service.alpha.kubernetes.io/tolerate-unready-endpoints: 'true'
+        description: The JGroups ping port for clustering.
+  - kind: Route
+    apiVersion: route.openshift.io/v1
+    id: "${APPLICATION_NAME}-https"
+    metadata:
       name: "${APPLICATION_NAME}"
-      weight: 100
-    tls:
-      insecureEdgeTerminationPolicy: Redirect
-      termination: reencrypt
-    wildcardPolicy: None
-- kind: ImageStream
-  apiVersion: v1
-  metadata:
-    name: "${APPLICATION_NAME}"
-    labels:
-      application: "${APPLICATION_NAME}"
-      paas.redhat.com/appcode: SET-002
-- kind: ImageStream
-  apiVersion: v1
-  metadata:
-    name: "${APPLICATION_NAME}-build-artifacts"
-    labels:
-      application: "${APPLICATION_NAME}"
-      paas.redhat.com/appcode: SET-002
-- kind: BuildConfig
-  apiVersion: v1
-  metadata:
-    name: "${APPLICATION_NAME}-build-artifacts"
-    labels:
-      application: "${APPLICATION_NAME}"
-      paas.redhat.com/appcode: SET-002
-  spec:
-    source:
-      type: Git
-      git:
-        uri: "${SOURCE_REPOSITORY_URL}"
-        ref: "${SOURCE_REPOSITORY_REF}"
-    resources:
-      limits:
-        cpu: "${CPU_LIMIT}"
-        memory: "${MEMORY_LIMIT}"
-      requests:
-        cpu: "${CPU_REQUESTS}"
-        memory: "${MEMORY_REQUESTS}"
-    strategy:
-      type: Source
-      sourceStrategy:
-        env:
-        - name: MAVEN_ARGS_APPEND
-          value: "${MAVEN_ARGS_APPEND}"
-        - name: GALLEON_PROVISION_DEFAULT_FAT_SERVER
-          value: 'true'
-        forcePull: true
-        incremental: true
-        from:
-          kind: ImageStreamTag
-          namespace: "${IMAGE_STREAM_NAMESPACE}"
-          name: "${EAP_IMAGE_NAME}"
-        pullSecret:
-          name: 6340056-chaowan-pull-secret-pull-secret
-    output:
+      labels:
+        application: "${APPLICATION_NAME}"
+        paas.redhat.com/appcode: SET-002
+        shard: internal
+      annotations:
+        description: Route for application's https service.
+    spec:
+      host: "${HOSTNAME_HTTPS}"
       to:
-        kind: ImageStreamTag
-        name: "${APPLICATION_NAME}-build-artifacts:latest"
-    triggers:
-    - type: GitHub
-      github:
-        secret: "${GITHUB_WEBHOOK_SECRET}"
-    - type: Generic
-      generic:
-        secret: "${GENERIC_WEBHOOK_SECRET}"
-    - type: ImageChange
-      imageChange: {}
-    - type: ConfigChange
-- apiVersion: v1
-  kind: BuildConfig
-  metadata:
-    labels:
-      application: "${APPLICATION_NAME}"
-      paas.redhat.com/appcode: SET-002
-    name: "${APPLICATION_NAME}"
-  spec:
-    resources:
-      limits:
-        cpu: "${CPU_LIMIT}"
-        memory: "${MEMORY_LIMIT}"
-      requests:
-        cpu: "${CPU_REQUESTS}"
-        memory: "${MEMORY_REQUESTS}"
-    output:
+        kind: Service
+        name: "${APPLICATION_NAME}"
+      tls:
+        insecureEdgeTerminationPolicy: Redirect
+        termination: reencrypt
+  - kind: Route
+    apiVersion: v1
+    metadata:
+      name: "${APPLICATION_NAME}-alias"
+      labels:
+        application: "${APPLICATION_NAME}"
+        paas.redhat.com/appcode: SET-002
+      annotations:
+        description: Alias route for application's https service.
+    spec:
+      host: "prbz.corp.redhat.com"
       to:
-        kind: ImageStreamTag
-        name: "${APPLICATION_NAME}:latest"
-    source:
-      dockerfile: |-
-        FROM ${EAP_RUNTIME_IMAGE_NAME}
-        COPY /server $JBOSS_HOME
-        USER root
-        ADD https://certs.corp.redhat.com/certs/2015-IT-Root-CA.pem /etc/pki/ca-trust/source/anchors/RH-IT-Root-CA.crt
-        RUN update-ca-trust
-        RUN chown -R jboss:root $JBOSS_HOME && chmod -R ug+rwX $JBOSS_HOME
-        USER jboss
-        CMD $JBOSS_HOME/bin/openshift-launch.sh
-      images:
-      - from:
+        kind: Service
+        name: "${APPLICATION_NAME}"
+        weight: 100
+      tls:
+        insecureEdgeTerminationPolicy: Redirect
+        termination: reencrypt
+      wildcardPolicy: None
+  - kind: ImageStream
+    apiVersion: v1
+    metadata:
+      name: "${APPLICATION_NAME}"
+      labels:
+        application: "${APPLICATION_NAME}"
+        paas.redhat.com/appcode: SET-002
+  - kind: ImageStream
+    apiVersion: v1
+    metadata:
+      name: "${APPLICATION_NAME}-build-artifacts"
+      labels:
+        application: "${APPLICATION_NAME}"
+        paas.redhat.com/appcode: SET-002
+  - kind: BuildConfig
+    apiVersion: v1
+    metadata:
+      name: "${APPLICATION_NAME}-build-artifacts"
+      labels:
+        application: "${APPLICATION_NAME}"
+        paas.redhat.com/appcode: SET-002
+    spec:
+      source:
+        type: Git
+        git:
+          uri: "${SOURCE_REPOSITORY_URL}"
+          ref: "${SOURCE_REPOSITORY_REF}"
+      resources:
+        limits:
+          cpu: "${CPU_LIMIT}"
+          memory: "${MEMORY_LIMIT}"
+        requests:
+          cpu: "${CPU_REQUESTS}"
+          memory: "${MEMORY_REQUESTS}"
+      strategy:
+        type: Source
+        sourceStrategy:
+          env:
+            - name: MAVEN_ARGS_APPEND
+              value: "${MAVEN_ARGS_APPEND}"
+            - name: GALLEON_PROVISION_DEFAULT_FAT_SERVER
+              value: 'true'
+          forcePull: true
+          incremental: true
+          from:
+            kind: ImageStreamTag
+            namespace: "${IMAGE_STREAM_NAMESPACE}"
+            name: "${EAP_IMAGE_NAME}"
+          pullSecret:
+            name: 6340056-chaowan-pull-secret-pull-secret
+      output:
+        to:
           kind: ImageStreamTag
           name: "${APPLICATION_NAME}-build-artifacts:latest"
-        paths:
-        - sourcePath: "/s2i-output/server/"
-          destinationDir: "."
-    strategy:
-      dockerStrategy:
-        imageOptimizationPolicy: SkipLayers
-        from:
-          kind: ImageStreamTag
-          name: "${EAP_RUNTIME_IMAGE_NAME}"
-          namespace: "${IMAGE_STREAM_NAMESPACE}"
-        pullSecret:
-          name: 6340056-chaowan-pull-secret-pull-secret
-      type: Docker
-    triggers:
-    - type: ImageChange
-      imageChange:
-        from:
-          kind: ImageStreamTag
-          name: "${APPLICATION_NAME}-build-artifacts:latest"
-    - type: ConfigChange
-- kind: DeploymentConfig
-  apiVersion: v1
-  metadata:
-    name: "${APPLICATION_NAME}"
-    labels:
-      application: "${APPLICATION_NAME}"
-      paas.redhat.com/appcode: SET-002
-  spec:
-    strategy:
-      type: Recreate
-    triggers:
-    - type: ImageChange
-      imageChangeParams:
-        automatic: true
-        containerNames:
-        - "${APPLICATION_NAME}"
-        from:
+      triggers:
+        - type: GitHub
+          github:
+            secret: "${GITHUB_WEBHOOK_SECRET}"
+        - type: Generic
+          generic:
+            secret: "${GENERIC_WEBHOOK_SECRET}"
+        - type: ImageChange
+          imageChange: { }
+        - type: ConfigChange
+  - apiVersion: v1
+    kind: BuildConfig
+    metadata:
+      labels:
+        application: "${APPLICATION_NAME}"
+        paas.redhat.com/appcode: SET-002
+      name: "${APPLICATION_NAME}"
+    spec:
+      resources:
+        limits:
+          cpu: "${CPU_LIMIT}"
+          memory: "${MEMORY_LIMIT}"
+        requests:
+          cpu: "${CPU_REQUESTS}"
+          memory: "${MEMORY_REQUESTS}"
+      output:
+        to:
           kind: ImageStreamTag
           name: "${APPLICATION_NAME}:latest"
-    - type: ConfigChange
-    replicas: 1
-    selector:
-      deploymentConfig: "${APPLICATION_NAME}"
-    template:
-      metadata:
-        name: "${APPLICATION_NAME}"
-        labels:
-          deploymentConfig: "${APPLICATION_NAME}"
-          application: "${APPLICATION_NAME}"
-          com.company: Red_Hat
-          com.redhat.product-name: Red_Hat_Runtimes
-          com.redhat.product-version: 2021-Q2
-          com.redhat.component-name: EAP
-          com.redhat.component-version: '7.4'
-          com.redhat.component-type: application
-          paas.redhat.com/appcode: SET-002
-      spec:
-        terminationGracePeriodSeconds: 75
-        containers:
-        - name: "${APPLICATION_NAME}"
-          image: "${APPLICATION_NAME}"
-          imagePullPolicy: Always
-          envFrom:
-          - configMapRef:
-              name: "prbz-overview-config"
-          volumeMounts:
-          - name: "config-volume"
-            mountPath: "/etc/config"
-          - name: "secret-volume"
-            mountPath: "/etc/secret"
-          - name: "tls-app-secret-volume"
-            mountPath: "/etc/eap-secret-volume"
-          - name: "pvol"
-            mountPath: "/home/jboss/github-cache"
-          resources:
-            limits:
-              cpu: "${CPU_LIMIT}"
-              memory: "${MEMORY_LIMIT}"
-            requests:
-              cpu: "${CPU_REQUESTS}"
-              memory: "${MEMORY_REQUESTS}"
-          livenessProbe:
-            exec:
-              command:
-              - "/bin/bash"
-              - "-c"
-              - "/opt/eap/bin/livenessProbe.sh"
-            initialDelaySeconds: 60
-          readinessProbe:
-            exec:
-              command:
-              - "/bin/bash"
-              - "-c"
-              - "/opt/eap/bin/readinessProbe.sh"
-            initialDelaySeconds: 10
-          ports:
-          - name: jolokia
-            containerPort: 8778
-            protocol: TCP
-          - name: http
-            containerPort: 8080
-            protocol: TCP
-          - name: https
-            containerPort: 8443
-            protocol: TCP
-          - name: ping
-            containerPort: 8888
-            protocol: TCP
-          env:
-          - name: JGROUPS_PING_PROTOCOL
-            value: dns.DNS_PING
-          - name: OPENSHIFT_DNS_PING_SERVICE_NAME
-            value: "${APPLICATION_NAME}-ping"
-          - name: OPENSHIFT_DNS_PING_SERVICE_PORT
-            value: '8888'
-          - name: HTTPS_KEYSTORE
-            value: "${HTTPS_KEYSTORE}"
-          - name: HTTPS_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: "${HTTPS_SECRET}"
-                key: keystore-password
-          - name: HTTPS_KEYSTORE_DIR
-            value: /etc/eap-secret-volume
-          - name: MQ_CLUSTER_PASSWORD
-            value: "${MQ_CLUSTER_PASSWORD}"
-          - name: AUTO_DEPLOY_EXPLODED
-            value: "${AUTO_DEPLOY_EXPLODED}"
-          - name: ENABLE_GENERATE_DEFAULT_DATASOURCE
-            value: "${ENABLE_GENERATE_DEFAULT_DATASOURCE}"
-        volumes:
-        - name: config-volume
-          configMap:
-            name: "prbz-overview-config"
-        - name: secret-volume
-          secret:
-            secretName: "aphrodite-secret"
-        - name: tls-app-secret-volume
-          secret:
-            secretName: "${HTTPS_SECRET}"
-        - name: pvol
-          persistentVolumeClaim:
-            claimName: "prbz-overview-pvc"
+      source:
+        dockerfile: |-
+          FROM ${EAP_RUNTIME_IMAGE_NAME}
+          COPY /server $JBOSS_HOME
+          USER root
+          ADD https://certs.corp.redhat.com/certs/2015-IT-Root-CA.pem /etc/pki/ca-trust/source/anchors/RH-IT-Root-CA.crt
+          RUN update-ca-trust
+          RUN chown -R jboss:root $JBOSS_HOME && chmod -R ug+rwX $JBOSS_HOME
+          USER jboss
+          CMD $JBOSS_HOME/bin/openshift-launch.sh
+        images:
+          - from:
+              kind: ImageStreamTag
+              name: "${APPLICATION_NAME}-build-artifacts:latest"
+            paths:
+              - sourcePath: "/s2i-output/server/"
+                destinationDir: "."
+      strategy:
+        dockerStrategy:
+          imageOptimizationPolicy: SkipLayers
+          from:
+            kind: ImageStreamTag
+            name: "${EAP_RUNTIME_IMAGE_NAME}"
+            namespace: "${IMAGE_STREAM_NAMESPACE}"
+          pullSecret:
+            name: 6340056-chaowan-pull-secret-pull-secret
+        type: Docker
+      triggers:
+        - type: ImageChange
+          imageChange:
+            from:
+              kind: ImageStreamTag
+              name: "${APPLICATION_NAME}-build-artifacts:latest"
+        - type: ConfigChange
+  - kind: DeploymentConfig
+    apiVersion: v1
+    metadata:
+      name: "${APPLICATION_NAME}"
+      labels:
+        application: "${APPLICATION_NAME}"
+        paas.redhat.com/appcode: SET-002
+    spec:
+      strategy:
+        type: Recreate
+      triggers:
+        - type: ImageChange
+          imageChangeParams:
+            automatic: true
+            containerNames:
+              - "${APPLICATION_NAME}"
+            from:
+              kind: ImageStreamTag
+              name: "${APPLICATION_NAME}:latest"
+        - type: ConfigChange
+      replicas: 1
+      selector:
+        deploymentConfig: "${APPLICATION_NAME}"
+      template:
+        metadata:
+          name: "${APPLICATION_NAME}"
+          labels:
+            deploymentConfig: "${APPLICATION_NAME}"
+            application: "${APPLICATION_NAME}"
+            com.company: Red_Hat
+            com.redhat.product-name: Red_Hat_Runtimes
+            com.redhat.product-version: 2021-Q2
+            com.redhat.component-name: EAP
+            com.redhat.component-version: '7.4'
+            com.redhat.component-type: application
+            paas.redhat.com/appcode: SET-002
+        spec:
+          terminationGracePeriodSeconds: 75
+          containers:
+            - name: "${APPLICATION_NAME}"
+              image: "${APPLICATION_NAME}"
+              imagePullPolicy: Always
+              envFrom:
+                - configMapRef:
+                    name: "prbz-overview-config"
+              volumeMounts:
+                - name: "config-volume"
+                  mountPath: "/etc/config"
+                - name: "secret-volume"
+                  mountPath: "/etc/secret"
+                - name: "tls-app-secret-volume"
+                  mountPath: "/etc/eap-secret-volume"
+                - name: "pvol"
+                  mountPath: "/home/jboss/github-cache"
+              resources:
+                limits:
+                  cpu: "${CPU_LIMIT}"
+                  memory: "${MEMORY_LIMIT}"
+                requests:
+                  cpu: "${CPU_REQUESTS}"
+                  memory: "${MEMORY_REQUESTS}"
+              livenessProbe:
+                exec:
+                  command:
+                    - "/bin/bash"
+                    - "-c"
+                    - "/opt/eap/bin/livenessProbe.sh"
+                initialDelaySeconds: 60
+              readinessProbe:
+                exec:
+                  command:
+                    - "/bin/bash"
+                    - "-c"
+                    - "/opt/eap/bin/readinessProbe.sh"
+                initialDelaySeconds: 10
+              ports:
+                - name: jolokia
+                  containerPort: 8778
+                  protocol: TCP
+                - name: http
+                  containerPort: 8080
+                  protocol: TCP
+                - name: https
+                  containerPort: 8443
+                  protocol: TCP
+                - name: ping
+                  containerPort: 8888
+                  protocol: TCP
+              env:
+                - name: JGROUPS_PING_PROTOCOL
+                  value: dns.DNS_PING
+                - name: OPENSHIFT_DNS_PING_SERVICE_NAME
+                  value: "${APPLICATION_NAME}-ping"
+                - name: OPENSHIFT_DNS_PING_SERVICE_PORT
+                  value: '8888'
+                - name: HTTPS_KEYSTORE
+                  value: "${HTTPS_KEYSTORE}"
+                - name: HTTPS_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: "${HTTPS_SECRET}"
+                      key: keystore-password
+                - name: HTTPS_KEYSTORE_DIR
+                  value: /etc/eap-secret-volume
+                - name: AUTO_DEPLOY_EXPLODED
+                  value: "${AUTO_DEPLOY_EXPLODED}"
+          volumes:
+            - name: config-volume
+              configMap:
+                name: "prbz-overview-config"
+            - name: secret-volume
+              secret:
+                secretName: "aphrodite-secret"
+            - name: tls-app-secret-volume
+              secret:
+                secretName: "${HTTPS_SECRET}"
+            - name: pvol
+              persistentVolumeClaim:
+                claimName: "prbz-overview-pvc"
