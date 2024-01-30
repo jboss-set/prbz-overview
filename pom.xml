@@ -35,7 +35,7 @@
 		<version.org.wildfly.wildfly.build.config>8.0.0.Final</version.org.wildfly.wildfly.build.config>
 		<version.resources.plugin>2.6</version.resources.plugin>
 		<version.rpm.plugin>2.1.5</version.rpm.plugin>
-		<version.war.plugin>2.1.1</version.war.plugin>
+		<version.war.plugin>3.3.1</version.war.plugin>
 	</properties>
 
 	<build>
