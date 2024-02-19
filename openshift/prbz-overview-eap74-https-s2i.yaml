@@ -65,7 +65,7 @@ parameters:
     required: false
   - displayName: ImageStream Namespace
     name: IMAGE_STREAM_NAMESPACE
-    value: jboss-set--chao-test-tenant-namespace
+    value: jboss-set--runtime-int
     required: true
   - displayName: Deploy Exploded Archives
     description: Controls whether exploded deployment content should be automatically
